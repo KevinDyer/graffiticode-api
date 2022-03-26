@@ -10,3 +10,8 @@ function.zip
 
 # nyc (coverage)
 .nyc_output
+
+# Firebase
+firestore-debug.log
+ui-debug.log
+

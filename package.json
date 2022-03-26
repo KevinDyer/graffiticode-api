@@ -10,13 +10,14 @@
   },
   "main": "src/app.js",
   "dependencies": {
-    "@firebase/app": "^0.7.20",
-    "@firebase/firestore": "^3.4.7",
+    "@firebase/app": "^0.7.24",
+    "@firebase/firestore": "^3.4.9",
     "bent": "^7.3.12",
     "child_process": "^1.0.2",
     "errorhandler": "^1.5.1",
-    "express": "^4.17.3",
-    "firebase-tools": "^10.5.0",
+    "express": "^4.18.1",
+    "firebase-admin": "^10.2.0",
+    "firebase-tools": "^11.0.0",
     "graceful-fs": "^4.2.9",
     "hashids": "^2.2.10",
     "jest": "^27.5.1",
@@ -32,5 +33,8 @@
     "test": "firebase emulators:exec --ui jest",
     "dev": "nodemon --exec \"npm test && npm start\"",
     "coverage": "nyc npm run test"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^2.0.2"
   }
 }

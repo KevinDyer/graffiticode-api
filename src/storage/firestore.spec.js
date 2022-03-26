@@ -1,39 +1,42 @@
-const { initializeApp } = require('@firebase/app');
+const fs = require('fs');
 const {
-  connectFirestoreEmulator,
   doc,
-  getDoc,
-  getFirestore,
-  increment,
-  runTransaction,
-  updateDoc,
   setDoc,
 } = require('@firebase/firestore');
+const { initializeTestEnvironment } = require('@firebase/rules-unit-testing');
+const admin = require('firebase-admin');
 const { buildFirestoreTaskDao } = require('./firestore');
 const { TASK1, TASK_ID1, TASK2 } = require('../testing/fixture');
 
+admin.initializeApp({ projectId: 'graffiticode' });
 
 describe('storage/firestore', () => {
-  beforeAll(() => {
-    const options = {
-      apiKey: "AIzaSyAoVuUNi8ElnS7cn6wc3D8XExML-URLw0I",
-      authDomain: "graffiticode.firebaseapp.com",
-      databaseURL: "https://graffiticode.firebaseio.com",
-      projectId: "graffiticode",
-      storageBucket: "graffiticode.appspot.com",
-      messagingSenderId: "656973052505",
-      appId: "1:656973052505:web:3da573b30bd907829c8f48",
-      measurementId: "G-G4GH7JL7GM",
-    };
-    const app = initializeApp(options);
-    const db = getFirestore(app);
-    connectFirestoreEmulator(db, 'localhost', 8080);
-    setDoc(doc(db, 'counters', 'tasks'), { nextCodeId: 0 });
+  let testEnv = null;
+  let taskDao = null;
+  beforeEach(async () => {
+    testEnv = await initializeTestEnvironment({
+      projectId: 'graffiticode',
+      firestore: {
+        host: 'localhost',
+        port: 8080,
+        rules: fs.readFileSync('firestore.rules', 'utf8'),
+      },
+    });
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'counters', 'tasks'), { nextCodeId: 0 });
+    });
   });
 
-  let taskDao;
+  afterEach(async () => {
+    if (testEnv) {
+      await testEnv.cleanup();
+      testEnv = null;
+    }
+  });
+
   beforeEach(() => {
-    taskDao = buildFirestoreTaskDao({ dev: true });
+    const db = admin.firestore();
+    taskDao = buildFirestoreTaskDao({ db });
   });
 
   it('should throw NotFoundError if task is not created', async () => {

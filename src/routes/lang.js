@@ -32,7 +32,10 @@ const buildLangRouter = ({ newRouter, pingLang, getAsset, isNonEmptyString }) =>
         res.sendStatus(404);
       } else if (isNonEmptyString(path)) {
         const asset = await getAsset(lang, `/${path}`);
-        res.status(200).send(asset);
+        if (path.indexOf('.svg') > 0) {
+          res.setHeader('Content-Type', 'image/svg+xml');
+        }
+        res.send(asset);
       } else {
         res.sendStatus(200);
       }

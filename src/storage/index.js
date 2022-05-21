@@ -6,8 +6,9 @@ const buildCreate = ({ cache }) => ({ type = 'memory' } = {}) => {
       const { buildMemoryTaskDao } = require('./memory');
       taskDao = buildMemoryTaskDao();
     } else if (type === 'firestore') {
-      const { buildFirestoreTaskDao } = require('./firestore');
-      taskDao = buildFirestoreTaskDao({});
+      const { buildFirestoreTaskDao, createFirestoreDb } = require('./firestore');
+      const db = createFirestoreDb({});
+      taskDao = buildFirestoreTaskDao({ db });
     } else {
       throw new Error(`no TaskDao with type ${type}`);
     }

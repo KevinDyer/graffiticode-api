@@ -39,21 +39,35 @@ describe('storage/firestore', () => {
     taskDao = buildFirestoreTaskDao({ db });
   });
 
+  const callCreate = async task =>
+    testEnv.withSecurityRulesDisabled(context => {
+      const db = context.firestore();
+      const taskDao = buildFirestoreTaskDao({ db });
+      return taskDao.create(task);
+    });
+
+  const callFindById = async id =>
+    testEnv.withSecurityRulesDisabled(context => {
+      const db = context.firestore();
+      const taskDao = buildFirestoreTaskDao({ db });
+      return taskDao.findById(id);
+    });
+
   it('should throw NotFoundError if task is not created', async () => {
-    await expect(taskDao.findById(TASK_ID1)).rejects.toThrow();
+    await expect(callFindById(TASK_ID1)).rejects.toThrow();
   });
 
   it('should create task', async () => {
-    const id = await taskDao.create(TASK1);
+    const id = await callCreate(TASK1);
 
-    await expect(taskDao.findById(id)).resolves.toStrictEqual(TASK1);
+    await expect(callFindById(id)).resolves.toStrictEqual(TASK1);
   });
 
   it('should create tasks', async () => {
-    const id1 = await taskDao.create(TASK1);
-    const id2 = await taskDao.create(TASK2);
+    const id1 = await callCreate(TASK1);
+    const id2 = await callCreate(TASK2);
 
-    await expect(taskDao.findById(id1)).resolves.toStrictEqual(TASK1);
-    await expect(taskDao.findById(id2)).resolves.toStrictEqual(TASK2);
+    await expect(callFindById(id1)).resolves.toStrictEqual(TASK1);
+    await expect(callFindById(id2)).resolves.toStrictEqual(TASK2);
   });
 });

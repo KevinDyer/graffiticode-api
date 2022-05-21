@@ -54,7 +54,7 @@ function decodeID(id) {
 }
 
 function encodeID(ids) {
-  console.log('[1] encodeID() >> ' + JSON.stringify(ids));
+  // console.log('[1] encodeID() >> ' + JSON.stringify(ids));
   let length = ids.length;
   if (length >= 3 &&
     // [0,0,0] --> '0'
@@ -73,7 +73,7 @@ function encodeID(ids) {
     ids = [0, +ids[0], 113, +ids[1], 0];
   }
   let id = hashids.encode(ids);
-  console.log('[2] encodeID() << ' + id);
+  // console.log('[2] encodeID() << ' + id);
   return id;
 }
 

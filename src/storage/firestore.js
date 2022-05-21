@@ -1,8 +1,9 @@
 const { createHash } = require('crypto');
 const admin = require('firebase-admin');
-const { encodeID, decodeID } = require('../id');
 const { NotFoundError } = require('./errors');
 const {
+  addDoc,
+  collection,
   doc,
   getDoc,
   increment,
@@ -15,31 +16,55 @@ const createCodeHash = code =>
     .update(JSON.stringify(code))
     .digest('hex');
 
-const buildTaskCreate = ({ db }) => async (task) => {
-  const { lang, code } = task;
-  const codeHash = createCodeHash(code);
-  const langId = Number.parseInt(lang);
+const encodeFirestoreId = ({ langId, taskId }) =>
+  Buffer.from(JSON.stringify({ typ: 'firestore', lid: langId, cid: taskId }), 'utf8').toString('base64url');
+exports.encodeFirestoreId = encodeFirestoreId;
 
-  const taskRef = doc(db, `tasks/${codeHash}`);
-  const taskDoc = await getDoc(taskRef);
-
-  if (taskDoc.exists()) {
-    await updateDoc(taskRef, { count: increment(1) })
-  } else {
-    await setDoc(taskRef, { lang, code, codeHash, count: 1 });
+const decodeFirestoreId = id => {
+  try {
+    const { lid: langId, cid: taskId } = JSON.parse(Buffer.from(id, 'base64url').toString('utf8'));
+    return { ok: true, langId, taskId };
+  } catch (err) {
+    return { ok: false };
   }
-
-  return encodeID([langId, codeHash, 0]);
 };
 
-const buildTaskFindById = ({ db }) => async (id) => {
-  const [langId, codeId] = decodeID(id);
-  const taskRef = doc(db, `tasks/${codeId.toString()}`);
+const buildTaskCreate = ({ db }) => async task => {
+  const { lang, code } = task;
+  const langId = Number.parseInt(lang);
+  const codeHash = createCodeHash(code);
+
+  const codeHashRef = doc(db, 'code-hashes', codeHash);
+  const codeHashDoc = await getDoc(codeHashRef);
+
+  let taskId;
+  let taskRef;
+  if (codeHashDoc.exists()) {
+    taskId = codeHashDoc.get('taskId');
+    taskRef = doc(db, 'tasks', taskId)
+    await updateDoc(taskRef, { count: increment(1) })
+  } else {
+    const tasksCol = collection(db, 'tasks');
+    const task = { lang, code, codeHash, count: 1 };
+    const taskRef = await addDoc(tasksCol, task);
+    taskId = taskRef.id;
+    await setDoc(codeHashRef, { taskId });
+  }
+  return encodeFirestoreId({ langId, taskId });
+};
+
+const buildTaskFindById = ({ db }) => async id => {
+  const { ok, taskId } = decodeFirestoreId(id);
+  if (!ok) {
+    throw new NotFoundError('failed to parse id');
+  }
+
+  const taskRef = doc(db, 'tasks', taskId);
   const taskDoc = await getDoc(taskRef);
   if (!taskDoc.exists()) {
-    console.log(`missing tasks/${codeId.toString()}`);
-    throw new NotFoundError();
+    throw new NotFoundError('taskId does not exist');
   }
+
   const lang = taskDoc.get('lang');
   const code = taskDoc.get('code');
   return { lang, code };

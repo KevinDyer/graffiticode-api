@@ -1,18 +1,10 @@
 const fs = require('fs');
-const {
-  doc,
-  setDoc,
-} = require('@firebase/firestore');
 const { initializeTestEnvironment } = require('@firebase/rules-unit-testing');
-const admin = require('firebase-admin');
-const { buildFirestoreTaskDao } = require('./firestore');
-const { TASK1, TASK_ID1, TASK2 } = require('../testing/fixture');
-
-admin.initializeApp({ projectId: 'graffiticode' });
+const { buildFirestoreTaskDao, encodeFirestoreId } = require('./firestore');
+const { TASK1, TASK2 } = require('../testing/fixture');
 
 describe('storage/firestore', () => {
   let testEnv = null;
-  let taskDao = null;
   beforeEach(async () => {
     testEnv = await initializeTestEnvironment({
       projectId: 'graffiticode',
@@ -21,9 +13,6 @@ describe('storage/firestore', () => {
         port: 8080,
         rules: fs.readFileSync('firestore.rules', 'utf8'),
       },
-    });
-    await testEnv.withSecurityRulesDisabled(async (context) => {
-      await setDoc(doc(context.firestore(), 'counters', 'tasks'), { nextCodeId: 0 });
     });
   });
 
@@ -34,27 +23,30 @@ describe('storage/firestore', () => {
     }
   });
 
-  beforeEach(() => {
-    const db = admin.firestore();
-    taskDao = buildFirestoreTaskDao({ db });
-  });
-
-  const callCreate = async task =>
-    testEnv.withSecurityRulesDisabled(context => {
+  const callCreate = async task => {
+    let id;
+    await testEnv.withSecurityRulesDisabled(async context => {
       const db = context.firestore();
       const taskDao = buildFirestoreTaskDao({ db });
-      return taskDao.create(task);
+      id = await taskDao.create(task);
     });
+    return id
+  };
 
-  const callFindById = async id =>
-    testEnv.withSecurityRulesDisabled(context => {
+  const callFindById = async id => {
+    let task;
+    await testEnv.withSecurityRulesDisabled(async context => {
       const db = context.firestore();
       const taskDao = buildFirestoreTaskDao({ db });
-      return taskDao.findById(id);
+      task = await taskDao.findById(id);
     });
+    return task;
+  };
 
   it('should throw NotFoundError if task is not created', async () => {
-    await expect(callFindById(TASK_ID1)).rejects.toThrow();
+    const id = encodeFirestoreId({ langId: 0, taskId: 'foo' });
+
+    await expect(callFindById(id)).rejects.toThrow();
   });
 
   it('should create task', async () => {

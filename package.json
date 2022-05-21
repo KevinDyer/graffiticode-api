@@ -29,7 +29,7 @@
     "supertest": "^6.2.2"
   },
   "scripts": {
-    "start": "node src/app.js",
+    "start": "firebase emulators:exec --ui  \"node src/app.js\"",
     "test": "firebase emulators:exec --ui jest",
     "dev": "nodemon --exec \"npm test && npm start\"",
     "coverage": "nyc npm run test"

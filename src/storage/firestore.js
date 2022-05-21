@@ -10,40 +10,21 @@ const createCodeHash = code =>
     .digest('hex');
 
 const buildTaskCreate = ({ db }) => async (task) => {
-  const db = admin.firestore();
+  // const db = admin.firestore(app);
   const { lang, code } = task;
-  const codeHash = createCodeHash(task.code);
+  const codeHash = createCodeHash(code);
+  const langId = Number.parseInt(lang);
 
-  const langId = Number.parseInt(task.lang);
-  const { codeId } = await db.runTransaction(async (t) => {
+  const taskRef = db.doc(`tasks/${codeHash}`);
+  const taskDoc = await taskRef.get();
 
-    const taskIdRef = db.doc(`task-ids/${codeHash}`);
-    const taskIdDoc = await t.get(taskIdRef);
-    if (taskIdDoc.exists) {
-      const codeId = taskIdDoc.get('codeId');
-      return { codeId, exists: true };
-    }
+  if (taskDoc.exists) {
+    await taskRef.update({ count: FieldValue.increment(1) })
+  } else {
+    await taskRef.create({ lang, code, codeHash, count: 1 });
+  }
 
-    const tasksCountersRef = db.doc('counters/tasks');
-    const tasksCountersDoc = await t.get(tasksCountersRef);
-    if (!tasksCountersDoc.exists) {
-      throw new Error(`tasks counters do not exist, does the db need to be initialized?`);
-    }
-    const codeId = tasksCountersDoc.get('nextCodeId');
-
-    t.update(tasksCountersRef, { nextCodeId: FieldValue.increment(1) });
-    t.set(taskIdRef, { codeId, count: 0 });
-
-    const taskRef = db.doc(`tasks/${codeId.toString()}`);
-    t.set(taskRef, { lang, code, codeHash });
-
-    return { codeId, exists: false }
-  });
-
-  const taskRef = db.doc(`tasks/${codeId.toString()}`);
-  await taskRef.update({ count: FieldValue.increment(1) });
-
-  return encodeID([langId, codeId, 0]);
+  return encodeID([langId, codeHash, 0]);
 };
 
 const buildTaskFindById = ({ db }) => async (id) => {
@@ -58,7 +39,19 @@ const buildTaskFindById = ({ db }) => async (id) => {
   return { lang, code };
 };
 
-const buildFirestoreTaskDao = ({ db }) => {
+const buildFirestoreTaskDao = () => {
+  const firebaseConfig = {
+    apiKey: 'AIzaSyAoVuUNi8ElnS7cn6wc3D8XExML-URLw0I',
+    authDomain: 'graffiticode.firebaseapp.com',
+    databaseURL: 'https://graffiticode.firebaseio.com',
+    projectId: 'graffiticode',
+    storageBucket: 'graffiticode.appspot.com',
+    messagingSenderId: '656973052505',
+    appId: '1:656973052505:web:f3f3cc6397a844599c8f48',
+    measurementId: 'G-KRPK1CDB19',
+  };
+  const app = admin.initializeApp(firebaseConfig);
+  const db = admin.firestore(app);
   const create = buildTaskCreate({ db });
   const findById = buildTaskFindById({ db });
   return { create, findById };

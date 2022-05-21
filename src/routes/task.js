@@ -32,7 +32,8 @@ const buildGetTaskHandler = ({ taskDaoFactory }) => buildHttpHandler(async (req,
 });
 
 const buildPostTaskHandler = ({ taskDaoFactory }) => buildHttpHandler(async (req, res) => {
-  const taskDao = taskDaoFactory.create({});
+  const type = req.get('x-graffiticode-storage-type');
+  const taskDao = taskDaoFactory.create({ type });
   const tasks = getTasksFromTask(req.body.task);
   if (tasks.length < 1) {
     res.status(400).json(createErrorResponse('must provide at least one task'));

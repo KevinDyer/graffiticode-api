@@ -43,7 +43,7 @@ const createApp = () => {
     }
   });
 
-  if (env === 'development') {
+  if (['development', 'test'].includes(env)) {
     app.use(morgan('dev'));
     app.use(errorHandler({ dumpExceptions: true, showStack: true }));
   } else {

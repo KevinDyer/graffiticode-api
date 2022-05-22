@@ -1,5 +1,5 @@
 const { decodeID, encodeID } = require('../id');
-const { NotFoundError } = require('./errors');
+const { NotFoundError } = require("../errors/http");
 
 
 const buildObjectToId = ({ idsByObject, objectsById }) => obj => {

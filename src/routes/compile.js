@@ -1,43 +1,31 @@
-const { Router } = require('express');
-
-const { } = require('../comp');
-const { error, messageFromErrors, setMetadataBuilds } = require('../util');
-const build = require('../../build.json');
+const { Router } = require("express");
 const {
   buildHttpHandler,
   createSuccessResponse,
   parseAuthFromRequest,
   optionsHandler,
-} = require('./utils');
-const { decodeID, encodeID } = require('../id');
+} = require("./utils");
+const { isNonNullObject } = require("../util");
+const { InvalidArgumentError } = require("../errors/http");
 
-const getObjFromData = (data) => {
-  return data.length === 1 && data[0] || data;
-}
-
-
-const buildPostCompileHandler = ({ taskDaoFactory, dataApi }) => buildHttpHandler(async (req, res) => {
+const buildPostCompileHandler = ({ compile }) => buildHttpHandler(async (req, res) => {
   const auth = parseAuthFromRequest(req);
-  const item = req.body.item || {};
-  const { lang, code, data, options } = item instanceof Array && item[0] || item;
-  const taskDao = taskDaoFactory.create();
-  let taskId = await taskDao.create({ lang, code });
-  let dataTaskId;
-  if (data) {
-    dataTaskId = await taskDao.create({ lang: '113', code: data });
-    const [langId, codeId] = decodeID(taskId);
-    const dataIds = decodeID(dataTaskId);
-    taskId = encodeID([langId, codeId, ...dataIds]);
+
+  const item = req.body.item;
+  if (!isNonNullObject(item)) {
+    throw new InvalidArgumentError("item must be a non-null object");
   }
-  let [obj] = await dataApi.get(auth, [taskId]);
-  obj = getObjFromData(obj);
+
+  const { lang, code, data, options } = item;
+  const obj = await compile({ lang, code, data, auth, options });
+
   res.set("Access-Control-Allow-Origin", "*");
   res.status(200).json(createSuccessResponse(obj));
 });
 
-module.exports = ({ taskDaoFactory, dataApi }) => {
+module.exports = ({ compile }) => {
   const router = new Router();
-  router.post('/', buildPostCompileHandler({ taskDaoFactory, dataApi }));
-  router.options('/', optionsHandler);
+  router.post("/", buildPostCompileHandler({ compile }));
+  router.options("/", optionsHandler);
   return router;
 };

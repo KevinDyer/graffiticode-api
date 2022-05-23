@@ -1,33 +1,40 @@
 const { Router } = require('express');
 const {
+  buildGetTaskDaoForRequest,
   buildHttpHandler,
-  createErrorResponse,
   createSuccessResponse,
   parseIdsFromRequest,
   parseAuthFromRequest,
   optionsHandler,
 } = require('./utils');
 
-const getDataFromData = (data) => {
-  // If there is just one object in data, then return it.
-  return data.length === 1 && data[0] || data;
-}
+const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
+  const getTaskDaoForRequest = buildGetTaskDaoForRequest(taskDaoFactory);
+  return buildHttpHandler(async (req, res) => {
+    const auth = parseAuthFromRequest(req);
+    const ids = parseIdsFromRequest(req);
+    if (ids.length < 1) {
+      throw new InvalidArgumentError("must provide at least one id");
+    }
 
-const buildGetDataHandler = ({ dataApi }) => buildHttpHandler(async (req, res) => {
-  const auth = parseAuthFromRequest(req);
-  const ids = parseIdsFromRequest(req);
-  if (ids.length < 1) {
-    res.status(400).json(createErrorResponse('must provide at least one id'));
-    return;
-  }
-  const data = getDataFromData(await dataApi.get(auth, ids));
-  res.set("Access-Control-Allow-Origin", "*");
-  res.status(200).json(createSuccessResponse(data));
-});
+    const taskDao = getTaskDaoForRequest(req);
+    const objs = await Promise.all(ids.map(id => dataApi.get({ taskDao, id, auth })));
 
-module.exports = ({ dataApi }) => {
+    let data;
+    if (objs.length > 1) {
+      data = objs;
+    } else {
+      data = objs[0];
+    }
+
+    res.set("Access-Control-Allow-Origin", "*");
+    res.status(200).json(createSuccessResponse(data));
+  });
+};
+
+module.exports = ({ taskDaoFactory, dataApi }) => {
   const router = new Router();
-  router.get('/', buildGetDataHandler({ dataApi }));
+  router.get('/', buildGetDataHandler({ taskDaoFactory, dataApi }));
   router.options('/', optionsHandler);
   return router;
 };

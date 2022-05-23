@@ -1,9 +1,10 @@
-const { isNonEmptyString } = require('../util');
+const { isNonEmptyString } = require("../util");
+const { HttpError } = require("./../errors/http");
 
 exports.parseIdsFromRequest = req => {
   const id = req.query.id;
   if (isNonEmptyString(id)) {
-    return id.split(',');
+    return id.split(",");
   }
   return [];
 };
@@ -20,29 +21,39 @@ exports.parseAuthFromRequest = req => {
   return null;
 };
 
-const buildHttpHandler = handler => async (req, res, next) => {
-  try {
-    await handler(req, res, next);
-  } catch (err) {
+const handleError = (err, res, next) => {
+  if (err instanceof HttpError) {
+    res
+      .status(err.statusCode)
+      .json(createErrorResponse(createError(err.code, err.message)));
+  } else {
     next(err);
   }
 };
 
+const buildHttpHandler = handler => async (req, res, next) => {
+  try {
+    await handler(req, res, next);
+  } catch (err) {
+    handleError(err, res, next);
+  }
+};
 exports.buildHttpHandler = buildHttpHandler;
 
 const createError = (code, message) => ({ code, message });
+exports.createError = createError;
 
-exports.createErrorResponse = error => ({
-  status: 'error',
-  error: createError(1, error),
-  data: null,
-});
+const createErrorResponse = error => ({ status: "error", error, data: null });
+exports.createErrorResponse = createErrorResponse;
 
-exports.createSuccessResponse = data => ({
-  status: 'success',
-  error: null,
-  data,
-});
+const createSuccessResponse = data => ({ status: "success", error: null, data });
+exports.createSuccessResponse = createSuccessResponse;
+
+const getStorageTypeForRequest = req => req.get("x-graffiticode-storage-type");
+exports.getStorageTypeForRequest = getStorageTypeForRequest;
+
+exports.buildGetTaskDaoForRequest = taskDaoFactory => req =>
+  taskDaoFactory.create({ type: getStorageTypeForRequest(req) });
 
 exports.optionsHandler = buildHttpHandler(async (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");

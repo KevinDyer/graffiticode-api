@@ -4,7 +4,7 @@ const methodOverride = require('method-override');
 const morgan = require('morgan');
 
 const { buildLocalCache } = require('./cache');
-const { buildCompileId } = require('./comp');
+const { buildCompile } = require('./comp');
 const { buildDataApi } = require('./data');
 const { compile: langCompile } = require('./lang');
 const routes = require('./routes');
@@ -24,10 +24,10 @@ global.config = require(process.env.CONFIG || './../config/config.json');
 global.config.useLocalCompiles = process.env.LOCAL_COMPILES === 'true';
 
 const createApp = () => {
-  const taskDaoFactory = buildTaskDaoFactory();
+  const compile = buildCompile({ langCompile });
+  const taskDaoFactory = buildTaskDaoFactory({});
   const cache = buildLocalCache({});
-  const compileId = buildCompileId({ taskDaoFactory, cache, langCompile });
-  const dataApi = buildDataApi({ compileId });
+  const dataApi = buildDataApi({ compile });
 
   const app = express();
   app.all('*', (req, res, next) => {
@@ -43,7 +43,7 @@ const createApp = () => {
     }
   });
 
-  if (env === 'development') {
+  if (['development', 'test'].includes(env)) {
     app.use(morgan('dev'));
     app.use(errorHandler({ dumpExceptions: true, showStack: true }));
   } else {
@@ -56,9 +56,9 @@ const createApp = () => {
 
   // Routes
   app.use('/', routes.root());
-  app.use('/compile', routes.compile({ taskDaoFactory, dataApi }));
-  app.use('/data', routes.data({ dataApi }));
+  app.use('/compile', routes.compile({ compile }));
   app.use('/task', routes.task({ taskDaoFactory }));
+  app.use('/data', routes.data({ taskDaoFactory, dataApi }));
   app.use('/lang', routes.langRouter);
   app.use('/config', routes.configHandler);
   app.use('/L*', routes.langRouter);

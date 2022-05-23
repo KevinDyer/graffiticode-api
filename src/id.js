@@ -1,6 +1,7 @@
 const assert = require('assert');
 const Hashids = require('hashids');
 
+
 const hashids = new Hashids('Art Compiler LLC');  // This string shall never change!
 
 function decodeID(id) {

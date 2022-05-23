@@ -1,56 +1,84 @@
-const { initializeApp } = require('@firebase/app');
-const {
-  connectFirestoreEmulator,
-  doc,
-  getDoc,
-  getFirestore,
-  increment,
-  runTransaction,
-  updateDoc,
-  setDoc,
-} = require('@firebase/firestore');
-const { buildFirestoreTaskDao } = require('./firestore');
-const { TASK1, TASK_ID1, TASK2 } = require('../testing/fixture');
-
+const fs = require('fs');
+const { initializeTestEnvironment } = require('@firebase/rules-unit-testing');
+const { buildFirestoreTaskDao, encodeId } = require('./firestore');
+const { TASK1, TASK2 } = require('../testing/fixture');
 
 describe('storage/firestore', () => {
-  beforeAll(() => {
-    const options = {
-      apiKey: "AIzaSyAoVuUNi8ElnS7cn6wc3D8XExML-URLw0I",
-      authDomain: "graffiticode.firebaseapp.com",
-      databaseURL: "https://graffiticode.firebaseio.com",
-      projectId: "graffiticode",
-      storageBucket: "graffiticode.appspot.com",
-      messagingSenderId: "656973052505",
-      appId: "1:656973052505:web:3da573b30bd907829c8f48",
-      measurementId: "G-G4GH7JL7GM",
-    };
-    const app = initializeApp(options);
-    const db = getFirestore(app);
-    connectFirestoreEmulator(db, 'localhost', 8080);
-    setDoc(doc(db, 'counters', 'tasks'), { nextCodeId: 0 });
+  let testEnv = null;
+  beforeEach(async () => {
+    testEnv = await initializeTestEnvironment({
+      projectId: 'graffiticode',
+      firestore: {
+        host: 'localhost',
+        port: 8080,
+        rules: fs.readFileSync('firestore.rules', 'utf8'),
+      },
+    });
   });
 
-  let taskDao;
-  beforeEach(() => {
-    taskDao = buildFirestoreTaskDao({ dev: true });
+  afterEach(async () => {
+    if (testEnv) {
+      // await testEnv.clearFirestore();
+      await testEnv.cleanup();
+      testEnv = null;
+    }
   });
+
+  const callCreate = async task => {
+    let id;
+    await testEnv.withSecurityRulesDisabled(async context => {
+      const db = context.firestore();
+      const taskDao = buildFirestoreTaskDao({ db });
+      id = await taskDao.create(task);
+    });
+    return id
+  };
+
+  const callGet = async id => {
+    let task;
+    await testEnv.withSecurityRulesDisabled(async context => {
+      const db = context.firestore();
+      const taskDao = buildFirestoreTaskDao({ db });
+      task = await taskDao.get(id);
+    });
+    return task;
+  };
+
+  const callAppendIds = async (id, ...otherIds) => {
+    let newId;
+    await testEnv.withSecurityRulesDisabled(async context => {
+      const db = context.firestore();
+      const taskDao = buildFirestoreTaskDao({ db });
+      newId = await taskDao.appendIds(id, ...otherIds);
+    });
+    return newId;
+  };
 
   it('should throw NotFoundError if task is not created', async () => {
-    await expect(taskDao.findById(TASK_ID1)).rejects.toThrow();
+    const id = encodeId({ taskIds: ['foo'] });
+
+    await expect(callGet(id)).rejects.toThrow();
   });
 
   it('should create task', async () => {
-    const id = await taskDao.create(TASK1);
+    const id = await callCreate(TASK1);
 
-    await expect(taskDao.findById(id)).resolves.toStrictEqual(TASK1);
+    await expect(callGet(id)).resolves.toStrictEqual([TASK1]);
   });
 
   it('should create tasks', async () => {
-    const id1 = await taskDao.create(TASK1);
-    const id2 = await taskDao.create(TASK2);
+    const id1 = await callCreate(TASK1);
+    const id2 = await callCreate(TASK2);
 
-    await expect(taskDao.findById(id1)).resolves.toStrictEqual(TASK1);
-    await expect(taskDao.findById(id2)).resolves.toStrictEqual(TASK2);
+    await expect(callGet(id1)).resolves.toStrictEqual([TASK1]);
+    await expect(callGet(id2)).resolves.toStrictEqual([TASK2]);
+  });
+
+  it('should get multi task id', async () => {
+    const id1 = await callCreate(TASK1);
+    const id2 = await callCreate(TASK2);
+    const multiId = await callAppendIds(id1, id2);
+
+    await expect(callGet(multiId)).resolves.toStrictEqual([TASK1, TASK2]);
   });
 });

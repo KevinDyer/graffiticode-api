@@ -1,6 +1,19 @@
-const buildGetData =
-      ({ compileId }) => (auth, ids, options) => Promise.all(ids.map((id) => compileId(auth, id, options)));
+const buildGetData = ({ compile }) =>
+  async ({ taskDao, id, auth, options }) => {
+    const tasks = await taskDao.get(id);
+    const obj = await tasks.reduceRight(
+      async (dataPromise, task) => {
+        const data = await dataPromise;
+        const { lang, code } = task;
+        const obj = await compile({ lang, code, data, auth, options });
+        return obj;
+      },
+      Promise.resolve({}),
+    );
+    return obj;
+  };
 
-exports.buildDataApi = ({ compileId }) => {
-  return { get: buildGetData({ compileId }) };
+
+exports.buildDataApi = ({ compile }) => {
+  return { get: buildGetData({ compile }) };
 };

@@ -1,86 +1,124 @@
-const { createHash } = require('crypto');
-const { initializeApp } = require('@firebase/app');
+const { createHash } = require("crypto");
+const { NotFoundError } = require("../errors/http");
+const { initializeApp } = require("@firebase/app");
 const {
+  addDoc,
+  collection,
   connectFirestoreEmulator,
   doc,
   getDoc,
   getFirestore,
   increment,
-  runTransaction,
+  setDoc,
   updateDoc,
-} = require('@firebase/firestore');
-const { encodeID, decodeID } = require('../id');
-const { NotFoundError } = require('./errors');
-
-const options = {
-  apiKey: "AIzaSyAoVuUNi8ElnS7cn6wc3D8XExML-URLw0I",
-  authDomain: "graffiticode.firebaseapp.com",
-  databaseURL: "https://graffiticode.firebaseio.com",
-  projectId: "graffiticode",
-  storageBucket: "graffiticode.appspot.com",
-  messagingSenderId: "656973052505",
-  appId: "1:656973052505:web:3da573b30bd907829c8f48",
-  measurementId: "G-G4GH7JL7GM",
-};
+} = require("@firebase/firestore");
 
 const createCodeHash = code =>
-  createHash('sha256')
+  createHash("sha256")
     .update(JSON.stringify(code))
-    .digest('hex');
+    .digest("hex");
 
-const buildTaskCreate = ({ db }) => async (task) => {
-  const { lang, code } = task;
-  const codeHash = createCodeHash(task.code);
+const encodeId = ({ taskIds }) => {
+  const idObj = { type: "firestore", taskIds };
+  return Buffer.from(JSON.stringify(idObj), "utf8").toString("base64url");
+}
+exports.encodeId = encodeId;
 
-  const langId = Number.parseInt(task.lang);
-  const { codeId } = await runTransaction(db, async (t) => {
-    const taskIdRef = doc(db, 'task-ids', codeHash);
-    const taskIdDoc = await t.get(taskIdRef);
-    if (taskIdDoc.exists()) {
-      const codeId = taskIdDoc.get('codeId');
-      return { codeId, exists: true };
+const decodeId = id => {
+  try {
+    const { taskIds } = JSON.parse(Buffer.from(id, "base64url").toString("utf8"));
+    if (!Array.isArray(taskIds) || taskIds.length < 1) {
+      console.warn(`firestore id ${id} contains no taskIds`);
+      return { ok: false };
     }
-
-    const tasksCountersRef = doc(db, 'counters', 'tasks');
-    const tasksCountersDoc = await t.get(tasksCountersRef);
-    if (!tasksCountersDoc.exists()) {
-      throw new Error(`tasks counters do not exist, does the db need to be initialized?`);
-    }
-    const codeId = tasksCountersDoc.get('nextCodeId');
-
-    t.update(tasksCountersRef, { nextCodeId: increment(1) });
-    t.set(taskIdRef, { codeId, count: 0 });
-
-    const taskRef = doc(db, 'tasks', codeId.toString());
-    t.set(taskRef, { lang, code, codeHash });
-
-    return { codeId, exists: false }
-  });
-
-  const taskRef = doc(db, 'tasks', codeId.toString());
-  await updateDoc(taskRef, { count: increment(1) });
-
-  return encodeID([langId, codeId, 0]);
-};
-
-const buildTaskFindById = ({ db }) => async (id) => {
-  const [langId, codeId] = decodeID(id);
-  const taskRef = doc(db, 'tasks', codeId.toString());
-  const taskDoc = await getDoc(taskRef);
-  if (!taskDoc.exists()) {
-    throw new NotFoundError();
+    return { ok: true, taskIds };
+  } catch (err) {
+    console.warn(`failed to decode firestore id ${id}`);
+    return { ok: false };
   }
-  const lang = taskDoc.get('lang');
-  const code = taskDoc.get('code');
-  return { lang, code };
 };
 
-const buildFirestoreTaskDao = ({ dev = false }) => {
-  const app = initializeApp(options);
-  const db = getFirestore(app);
+const appendIds = (id, ...otherIds) => {
+  const { ok, taskIds } = decodeId(id);
+  if (!ok) {
+    throw new DecodeIdError(`failed to decode id ${id}`);
+  }
+  otherIds.forEach(otherId => {
+    const { ok, taskIds: otherTaskIds } = decodeId(otherId);
+    if (!ok) {
+      throw new DecodeIdError(`failed to decode otherId ${otherId}`);
+    }
+    taskIds.push(...otherTaskIds);
+  });
+  return encodeId({ taskIds });
+}
 
+const buildTaskCreate = ({ db }) => async task => {
+  const { lang, code } = task;
+  const codeHash = createCodeHash(code);
+
+  const codeHashRef = doc(db, "code-hashes", codeHash);
+  const codeHashDoc = await getDoc(codeHashRef);
+
+  let taskId;
+  let taskRef;
+  if (codeHashDoc.exists()) {
+    taskId = codeHashDoc.get("taskId");
+    taskRef = doc(db, "tasks", taskId)
+    await updateDoc(taskRef, { count: increment(1) })
+  } else {
+    const tasksCol = collection(db, "tasks");
+    const task = { lang, code, codeHash, count: 1 };
+    const taskRef = await addDoc(tasksCol, task);
+    taskId = taskRef.id;
+    await setDoc(codeHashRef, { taskId });
+  }
+  return encodeId({ taskIds: [taskId] });
+};
+
+const buildTaskGet = ({ db }) => async id => {
+  const { ok, taskIds } = decodeId(id);
+  if (!ok) {
+    throw new DecodeIdError(`failed to decode id ${id}`);
+  }
+  const tasks = await Promise.all(
+    taskIds.map(async taskId => {
+      const taskRef = doc(db, "tasks", taskId);
+      const taskDoc = await getDoc(taskRef);
+      if (!taskDoc.exists()) {
+        throw new NotFoundError("taskId does not exist");
+      }
+      const lang = taskDoc.get("lang");
+      const code = taskDoc.get("code");
+      return { lang, code };
+    })
+  );
+  return tasks;
+};
+
+const buildFirestoreTaskDao = ({ db }) => {
   const create = buildTaskCreate({ db });
-  const findById = buildTaskFindById({ db });
-  return { create, findById };
+  const get = buildTaskGet({ db });
+  return { create, get, appendIds };
 };
 exports.buildFirestoreTaskDao = buildFirestoreTaskDao;
+
+const createFirestoreDb = ({ }) => {
+  const firebaseConfig = {
+    apiKey: "AIzaSyAoVuUNi8ElnS7cn6wc3D8XExML-URLw0I",
+    authDomain: "graffiticode.firebaseapp.com",
+    databaseURL: "https://graffiticode.firebaseio.com",
+    projectId: "graffiticode",
+    storageBucket: "graffiticode.appspot.com",
+    messagingSenderId: "656973052505",
+    appId: "1:656973052505:web:f3f3cc6397a844599c8f48",
+    measurementId: "G-KRPK1CDB19",
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  if (process.env.NODE_ENV !== "production") {
+    connectFirestoreEmulator(db, "localhost", 8080);
+  }
+  return db;
+};
+exports.createFirestoreDb = createFirestoreDb;

@@ -1,28 +1,22 @@
-const { buildLocalCache } = require('./cache');
-const { buildCompileId } = require('./comp');
-const { buildTaskDaoFactory } = require('./storage');
-const { TASK_ID1, DATA1, TASK1 } = require('./testing/fixture');
+const { buildCompile } = require("./comp");
+const { buildTaskDaoFactory } = require("./storage");
+const { TASK_ID1, DATA1, TASK1 } = require("./testing/fixture");
 
-describe('comp', () => {
-  describe('compileId', () => {
-    let taskDaoFactory;
+describe("comp", () => {
+  describe("compile", () => {
     let langCompile;
-    let compileId;
+    let compile;
     beforeEach(() => {
-      taskDaoFactory = buildTaskDaoFactory();
-      const cache = buildLocalCache({});
       langCompile = jest.fn();
-      compileId = buildCompileId({ taskDaoFactory, cache, langCompile });
+      compile = buildCompile({ langCompile });
     });
 
-    it('should compile single ID', async () => {
-      const taskDao = taskDaoFactory.create();
-      await taskDao.create(TASK1);
+    it("should call langCompile", async () => {
       langCompile.mockResolvedValue(DATA1);
 
-      await expect(compileId(null, TASK_ID1, null)).resolves.toBe(DATA1);
+      await expect(compile({ ...TASK1 })).resolves.toBe(DATA1);
 
-      expect(langCompile).toHaveBeenCalledWith('L0', { auth: null, code: TASK1.code, data: {}, options: null });
+      expect(langCompile).toHaveBeenCalledWith(`L${TASK1.lang}`, { code: TASK1.code, data: {}, auth: null, options: {} });
     });
   });
 });

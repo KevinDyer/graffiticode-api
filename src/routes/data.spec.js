@@ -1,26 +1,86 @@
-const request = require('supertest');
-const { createApp } = require('../app');
-const { TASK1, TASK_ID1, DATA1, DATA2, TASK_ID2, TASK2 } = require('../testing/fixture');
-const { createSuccessResponse } = require('./utils');
+const fs = require('fs');
+const { initializeTestEnvironment } = require('@firebase/rules-unit-testing');
+const request = require("supertest");
+const { createApp } = require("../app");
+const { TASK1, DATA1, DATA2, TASK2 } = require("../testing/fixture");
+const { createSuccessResponse } = require("./utils");
 
-describe('/data endpoint', () => {
+describe("/data endpoint", () => {
   let app;
-  beforeEach(() => {
+  beforeAll(() => {
     app = createApp();
   });
 
-  it('get single data', async () => {
-    await request(app).post('/task').send({ task: TASK1 });
-    await request(app)
-      .get(`/data?id=${[TASK_ID1].join(',')}`)
+  let testEnv = null;
+  beforeEach(async () => {
+    testEnv = await initializeTestEnvironment({
+      projectId: 'graffiticode',
+      firestore: {
+        host: 'localhost',
+        port: 8080,
+        rules: fs.readFileSync('firestore.rules', 'utf8'),
+      },
+    });
+  });
+
+  afterEach(async () => {
+    if (testEnv) {
+      // await testEnv.clearFirestore();
+      await testEnv.cleanup();
+      testEnv = null;
+    }
+  });
+
+  it("get single data", async () => {
+    const res = await request(app).post("/task").send({ task: TASK1 });
+    expect(res).toHaveProperty("body.status", "success");
+    const id = res.body.data.id;
+
+    await request(app).get(`/data`).query({ id })
       .expect(200, createSuccessResponse(DATA1));
   });
 
-  it('get multiple datas', async () => {
-    await request(app).post('/task').send({ task: TASK1 });
-    await request(app).post('/task').send({ task: TASK2 });
+  it("get multiple datas", async () => {
+    const res1 = await request(app).post("/task").send({ task: TASK1 });
+    expect(res1).toHaveProperty("body.status", "success");
+    const id1 = res1.body.data.id;
+    const res2 = await request(app).post("/task").send({ task: TASK2 });
+    expect(res2).toHaveProperty("body.status", "success");
+    const id2 = res2.body.data.id;
+
     await request(app)
-      .get(`/data?id=${[TASK_ID1, TASK_ID2].join(',')}`)
+      .get(`/data`)
+      .query({ id: [id1, id2].join(",") })
       .expect(200, createSuccessResponse([DATA1, DATA2]));
+  });
+
+  it("get data from same storage type", async () => {
+    const createResponse = await request(app)
+      .post("/task")
+      .set("x-graffiticode-storage-type", "firestore")
+      .send({ task: TASK1 });
+    expect(createResponse).toHaveProperty("body.status", "success");
+    const id = createResponse.body.data.id;
+
+    await request(app)
+      .get(`/data`)
+      .set("x-graffiticode-storage-type", "firestore")
+      .query({ id })
+      .expect(200, createSuccessResponse(DATA1));
+  });
+
+  it("get data for different storage type", async () => {
+    const createResponse = await request(app)
+      .post("/task")
+      .set("x-graffiticode-storage-type", "firestore")
+      .send({ task: TASK1 });
+    expect(createResponse).toHaveProperty("body.status", "success");
+    const id = createResponse.body.data.id;
+
+    await request(app)
+      .get(`/data`)
+      .set("x-graffiticode-storage-type", "memory")
+      .query({ id })
+      .expect(404);
   });
 });

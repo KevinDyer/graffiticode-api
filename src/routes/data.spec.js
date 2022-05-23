@@ -25,7 +25,7 @@ describe("/data endpoint", () => {
 
   afterEach(async () => {
     if (testEnv) {
-      await testEnv.clearFirestore();
+      // await testEnv.clearFirestore();
       await testEnv.cleanup();
       testEnv = null;
     }

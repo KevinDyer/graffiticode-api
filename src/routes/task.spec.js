@@ -1,35 +1,57 @@
+const fs = require('fs');
+const { initializeTestEnvironment } = require('@firebase/rules-unit-testing');
 const request = require("supertest");
 const { createApp } = require("../app");
 const { TASK1, TASK2, TASK_ID1, TASK_ID2 } = require("../testing/fixture");
 const { createError, createErrorResponse, createSuccessResponse } = require("./utils");
 
-describe("/task endpoint", () => {
+describe("routes/task", () => {
   let app;
   beforeAll(() => {
     app = createApp();
   });
 
-  it("POST /task", async () => {
+  let testEnv = null;
+  beforeEach(async () => {
+    testEnv = await initializeTestEnvironment({
+      projectId: 'graffiticode',
+      firestore: {
+        host: 'localhost',
+        port: 8080,
+        rules: fs.readFileSync('firestore.rules', 'utf8'),
+      },
+    });
+  });
+
+  afterEach(async () => {
+    if (testEnv) {
+      await testEnv.clearFirestore();
+      await testEnv.cleanup();
+      testEnv = null;
+    }
+  });
+
+  it("should create a task", async () => {
     await request(app)
       .post("/task")
       .send({ task: TASK1 })
       .expect(200, createSuccessResponse({ id: TASK_ID1 }));
   });
 
-  it("POST /task {task:[]}", async () => {
+  it("should create multiple tasks", async () => {
     await request(app)
       .post("/task")
       .send({ task: [TASK1, TASK2] })
       .expect(200, createSuccessResponse({ id: [TASK_ID1, TASK_ID2] }));
   });
 
-  it("GET /task no ids", async () => {
+  it("should handle no task ids", async () => {
     await request(app)
       .get(`/task`)
       .expect(400, createErrorResponse(createError(400, "must provide at least one id")));
   });
 
-  it("GET /task", async () => {
+  it("should get a task that has been created", async () => {
     await request(app).post("/task").send({ task: TASK1 });
 
     await request(app)
@@ -37,7 +59,7 @@ describe("/task endpoint", () => {
       .expect(200, createSuccessResponse([TASK1]));
   });
 
-  it("GET /task?id=[]", async () => {
+  it("should get multiple tasks that have been created", async () => {
     await request(app).post("/task").send({ task: TASK1 });
     await request(app).post("/task").send({ task: TASK2 });
 

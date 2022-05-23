@@ -20,7 +20,8 @@ describe('storage/memory', () => {
   it('should return multi task id', async () => {
     const id1 = await taskDao.create(TASK1);
     const id2 = await taskDao.create(TASK2);
+    const id = taskDao.appendIds(id1, id2);
 
-    await expect(taskDao.get(`${id1}+${id2}`)).resolves.toStrictEqual([TASK1, TASK2]);
+    await expect(taskDao.get(id)).resolves.toStrictEqual([TASK1, TASK2]);
   });
 });

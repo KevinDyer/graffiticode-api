@@ -10,6 +10,7 @@ describe("/data endpoint", () => {
   beforeAll(() => {
     app = createApp();
   });
+
   let testEnv = null;
   beforeEach(async () => {
     testEnv = await initializeTestEnvironment({

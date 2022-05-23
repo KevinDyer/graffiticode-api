@@ -49,6 +49,12 @@ exports.createErrorResponse = createErrorResponse;
 const createSuccessResponse = data => ({ status: "success", error: null, data });
 exports.createSuccessResponse = createSuccessResponse;
 
+const getStorageTypeForRequest = req => req.get("x-graffiticode-storage-type");
+exports.getStorageTypeForRequest = getStorageTypeForRequest;
+
+exports.buildGetTaskDaoForRequest = taskDaoFactory => req =>
+  taskDaoFactory.create({ type: getStorageTypeForRequest(req) });
+
 exports.optionsHandler = buildHttpHandler(async (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");
   res.set("Access-Control-Request-Methods", "POST, GET, OPTIONS");

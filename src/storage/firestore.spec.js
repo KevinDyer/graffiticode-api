@@ -1,6 +1,6 @@
 const fs = require('fs');
 const { initializeTestEnvironment } = require('@firebase/rules-unit-testing');
-const { buildFirestoreTaskDao, encodeFirestoreId } = require('./firestore');
+const { buildFirestoreTaskDao, encodeId } = require('./firestore');
 const { TASK1, TASK2 } = require('../testing/fixture');
 
 describe('storage/firestore', () => {
@@ -18,6 +18,7 @@ describe('storage/firestore', () => {
 
   afterEach(async () => {
     if (testEnv) {
+      await testEnv.clearFirestore();
       await testEnv.cleanup();
       testEnv = null;
     }
@@ -33,33 +34,51 @@ describe('storage/firestore', () => {
     return id
   };
 
-  const callFindById = async id => {
+  const callGet = async id => {
     let task;
     await testEnv.withSecurityRulesDisabled(async context => {
       const db = context.firestore();
       const taskDao = buildFirestoreTaskDao({ db });
-      task = await taskDao.findById(id);
+      task = await taskDao.get(id);
     });
     return task;
   };
 
-  it('should throw NotFoundError if task is not created', async () => {
-    const id = encodeFirestoreId({ langId: 0, taskId: 'foo' });
+  const callAppendIds = async (id, ...otherIds) => {
+    let newId;
+    await testEnv.withSecurityRulesDisabled(async context => {
+      const db = context.firestore();
+      const taskDao = buildFirestoreTaskDao({ db });
+      newId = await taskDao.appendIds(id, ...otherIds);
+    });
+    return newId;
+  };
 
-    await expect(callFindById(id)).rejects.toThrow();
+  it('should throw NotFoundError if task is not created', async () => {
+    const id = encodeId({ taskIds: ['foo'] });
+
+    await expect(callGet(id)).rejects.toThrow();
   });
 
   it('should create task', async () => {
     const id = await callCreate(TASK1);
 
-    await expect(callFindById(id)).resolves.toStrictEqual(TASK1);
+    await expect(callGet(id)).resolves.toStrictEqual([TASK1]);
   });
 
   it('should create tasks', async () => {
     const id1 = await callCreate(TASK1);
     const id2 = await callCreate(TASK2);
 
-    await expect(callFindById(id1)).resolves.toStrictEqual(TASK1);
-    await expect(callFindById(id2)).resolves.toStrictEqual(TASK2);
+    await expect(callGet(id1)).resolves.toStrictEqual([TASK1]);
+    await expect(callGet(id2)).resolves.toStrictEqual([TASK2]);
+  });
+
+  it('should get multi task id', async () => {
+    const id1 = await callCreate(TASK1);
+    const id2 = await callCreate(TASK2);
+    const multiId = await callAppendIds(id1, id2);
+
+    await expect(callGet(multiId)).resolves.toStrictEqual([TASK1, TASK2]);
   });
 });

@@ -1,38 +1,59 @@
 const { buildDataApi } = require('./data');
-const { TASK_ID1, DATA1, TASK_ID2, DATA2 } = require('./testing/fixture');
+const { buildTaskDaoFactory } = require('./storage');
+const { DATA1, DATA2, TASK1, TASK2 } = require('./testing/fixture');
 
 describe('data', () => {
-  let compileId;
+  let taskDao;
+  let compile;
   let dataApi;
   beforeEach(() => {
-    compileId = jest.fn();
-    dataApi = buildDataApi({ compileId });
+    taskDao = buildTaskDaoFactory({}).create({ type: 'memory' });
+    compile = jest.fn();
+    dataApi = buildDataApi({ compile });
   });
 
-  const mockCompileIdData = data =>
-    compileId.mockResolvedValueOnce(data);
+  const mockCompileData = data =>
+    compile.mockResolvedValueOnce(data);
 
   it('should compile a created task', async () => {
-    const auth = 'abc';
-    mockCompileIdData(DATA1);
-    const options = null;
+    const id = await taskDao.create(TASK1);
+    mockCompileData(DATA1);
 
-    await expect(dataApi.get(auth, [TASK_ID1], options)).resolves.toStrictEqual([DATA1]);
+    await expect(dataApi.get({ taskDao, id })).resolves.toStrictEqual(DATA1);
 
-    expect(compileId).toHaveBeenCalledTimes(1);
-    expect(compileId).toHaveBeenNthCalledWith(1, auth, TASK_ID1, null);
+    expect(compile).toHaveBeenCalledTimes(1);
+    expect(compile).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        lang: TASK1.lang,
+        code: TASK1.code,
+      }),
+    );
   });
 
   it('should compile created tasks', async () => {
-    const auth = 'abc';
-    mockCompileIdData(DATA1);
-    mockCompileIdData(DATA2);
-    const options = null;
+    const id1 = await taskDao.create(TASK1);
+    const id2 = await taskDao.create(TASK2);
+    const id = taskDao.appendIds(id1, id2);
+    mockCompileData(DATA1);
+    mockCompileData(DATA2);
 
-    await expect(dataApi.get(auth, [TASK_ID1, TASK_ID2], options)).resolves.toStrictEqual([DATA1, DATA2]);
+    await expect(dataApi.get({ taskDao, id })).resolves.toStrictEqual(DATA2);
 
-    expect(compileId).toHaveBeenCalledTimes(2);
-    expect(compileId).toHaveBeenNthCalledWith(1, auth, TASK_ID1, null);
-    expect(compileId).toHaveBeenNthCalledWith(2, auth, TASK_ID2, null);
+    expect(compile).toHaveBeenCalledTimes(2);
+    expect(compile).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        lang: TASK2.lang,
+        code: TASK2.code,
+      }),
+    );
+    expect(compile).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        lang: TASK1.lang,
+        code: TASK1.code,
+      }),
+    );
   });
 });

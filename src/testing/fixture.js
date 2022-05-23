@@ -1,4 +1,4 @@
-exports.TASK_ID1 = 'yLimC0';
+exports.TASK_ID1 = "yLimC0";
 exports.TASK1 = {
   lang: "0",
   code: {
@@ -9,9 +9,9 @@ exports.TASK1 = {
     "version": "1"
   }
 };
-exports.DATA1 = 'hello, world!';
+exports.DATA1 = "hello, world!";
 
-exports.TASK_ID2 = 'WaiqIp';
+exports.TASK_ID2 = "WaiqIp";
 exports.TASK2 = {
   lang: "0",
   code: {
@@ -22,4 +22,4 @@ exports.TASK2 = {
     "version": "1"
   }
 };
-exports.DATA2 = 'goodbye, world!';
+exports.DATA2 = "goodbye, world!";

@@ -21,3 +21,10 @@ class InvalidArgumentError extends HttpError {
   }
 }
 exports.InvalidArgumentError = InvalidArgumentError;
+
+class DecodeIdError extends HttpError {
+  constructor(message) {
+    super({ code: 4001, statusCode: 400, message });
+  }
+}
+exports.DecodeIdError = DecodeIdError;

@@ -94,6 +94,10 @@ function isNonEmptyString(str) {
   return ('string' === typeof (str) && 0 < str.length);
 }
 
+function isNonNullObject(obj) {
+  return (typeof obj === 'object' && obj !== null);
+}
+
 function cleanAndTrimObj(str) {
   if (!str) {
     return str;
@@ -177,6 +181,7 @@ exports.getCompilerHost = getCompilerHost;
 exports.getCompilerPort = getCompilerPort;
 exports.setMetadataBuilds = setMetadataBuilds;
 exports.isNonEmptyString = isNonEmptyString;
+exports.isNonNullObject = isNonNullObject;
 exports.parseJSON = parseJSON;
 exports.cleanAndTrimObj = cleanAndTrimObj;
 exports.cleanAndTrimSrc = cleanAndTrimSrc;

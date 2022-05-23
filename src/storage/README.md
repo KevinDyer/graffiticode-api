@@ -1,7 +1,21 @@
 Storage
 ---
-Graffiticode API storage package allows for 
+Graffiticode API storage package allows for creation and retrieval of Tasks.
 
-# Task DAOs
-A Task DAO has two methods, `create` and `findById`. Tasks are considered immutable and forever
+## Models
 
+### `Task` [`object`]
+Tasks are considered immutable and forever
+
+- `lang`: The language identifier for this task
+  - Type: `string`
+- `code`: The AST for this task
+  - Type: `object`
+
+### `Id` [`string`]
+Opaque identifier of a `Task`.
+
+## Task DAO API
+- `create(Task) -> Id`
+- `get(Id) -> [Task]`
+- `appends(Id, ...Ids) -> Id`

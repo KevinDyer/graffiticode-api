@@ -18,22 +18,43 @@ const createCodeHash = code =>
     .update(JSON.stringify(code))
     .digest("hex");
 
-const encodeFirestoreId = ({ langId, taskId }) =>
-  Buffer.from(JSON.stringify({ typ: "firestore", lid: langId, cid: taskId }), "utf8").toString("base64url");
-exports.encodeFirestoreId = encodeFirestoreId;
+const encodeId = ({ taskIds }) => {
+  const idObj = { type: "firestore", taskIds };
+  return Buffer.from(JSON.stringify(idObj), "utf8").toString("base64url");
+}
+exports.encodeId = encodeId;
 
-const decodeFirestoreId = id => {
+const decodeId = id => {
   try {
-    const { lid: langId, cid: taskId } = JSON.parse(Buffer.from(id, "base64url").toString("utf8"));
-    return { ok: true, langId, taskId };
+    const { taskIds } = JSON.parse(Buffer.from(id, "base64url").toString("utf8"));
+    if (!Array.isArray(taskIds) || taskIds.length < 1) {
+      console.warn(`firestore id ${id} contains no taskIds`);
+      return { ok: false };
+    }
+    return { ok: true, taskIds };
   } catch (err) {
+    console.warn(`failed to decode firestore id ${id}`);
     return { ok: false };
   }
 };
 
+const appendIds = (id, ...otherIds) => {
+  const { ok, taskIds } = decodeId(id);
+  if (!ok) {
+    throw new DecodeIdError(`failed to decode id ${id}`);
+  }
+  otherIds.forEach(otherId => {
+    const { ok, taskIds: otherTaskIds } = decodeId(otherId);
+    if (!ok) {
+      throw new DecodeIdError(`failed to decode otherId ${otherId}`);
+    }
+    taskIds.push(...otherTaskIds);
+  });
+  return encodeId({ taskIds });
+}
+
 const buildTaskCreate = ({ db }) => async task => {
   const { lang, code } = task;
-  const langId = Number.parseInt(lang);
   const codeHash = createCodeHash(code);
 
   const codeHashRef = doc(db, "code-hashes", codeHash);
@@ -52,30 +73,33 @@ const buildTaskCreate = ({ db }) => async task => {
     taskId = taskRef.id;
     await setDoc(codeHashRef, { taskId });
   }
-  return encodeFirestoreId({ langId, taskId });
+  return encodeId({ taskIds: [taskId] });
 };
 
-const buildTaskFindById = ({ db }) => async id => {
-  const { ok, taskId } = decodeFirestoreId(id);
+const buildTaskGet = ({ db }) => async id => {
+  const { ok, taskIds } = decodeId(id);
   if (!ok) {
-    throw new NotFoundError("failed to parse id");
+    throw new DecodeIdError(`failed to decode id ${id}`);
   }
-
-  const taskRef = doc(db, "tasks", taskId);
-  const taskDoc = await getDoc(taskRef);
-  if (!taskDoc.exists()) {
-    throw new NotFoundError("taskId does not exist");
-  }
-
-  const lang = taskDoc.get("lang");
-  const code = taskDoc.get("code");
-  return { lang, code };
+  const tasks = await Promise.all(
+    taskIds.map(async taskId => {
+      const taskRef = doc(db, "tasks", taskId);
+      const taskDoc = await getDoc(taskRef);
+      if (!taskDoc.exists()) {
+        throw new NotFoundError("taskId does not exist");
+      }
+      const lang = taskDoc.get("lang");
+      const code = taskDoc.get("code");
+      return { lang, code };
+    })
+  );
+  return tasks;
 };
 
 const buildFirestoreTaskDao = ({ db }) => {
   const create = buildTaskCreate({ db });
-  const findById = buildTaskFindById({ db });
-  return { create, findById };
+  const get = buildTaskGet({ db });
+  return { create, get, appendIds };
 };
 exports.buildFirestoreTaskDao = buildFirestoreTaskDao;
 

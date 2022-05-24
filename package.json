@@ -12,6 +12,7 @@
   "dependencies": {
     "@firebase/app": "^0.7.24",
     "@firebase/firestore": "^3.4.9",
+    "@graffiticode/tracing": "^0.3.0",
     "bent": "^7.3.12",
     "child_process": "^1.0.2",
     "errorhandler": "^1.5.1",
@@ -29,9 +30,9 @@
     "supertest": "^6.2.2"
   },
   "scripts": {
-    "start": "firebase emulators:exec --ui  \"node src/app.js\"",
+    "start": "node -r @graffiticode/tracing src/app.js",
     "test": "firebase emulators:exec --ui jest",
-    "dev": "nodemon --exec \"npm test && npm start\"",
+    "dev": "firebase emulators:exec --ui \"nodemon --exec \\\"jest && npm start\\\"\"",
     "coverage": "nyc npm run test"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 default: build
-	npm start
+	node src/app.js
 
 test:
 	npm test

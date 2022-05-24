@@ -81,4 +81,12 @@ describe('storage/firestore', () => {
 
     await expect(callGet(multiId)).resolves.toStrictEqual([TASK1, TASK2]);
   });
+
+  it('should get appended task ids', async () => {
+    const id1 = await callCreate(TASK1);
+    const id2 = await callCreate(TASK2);
+    const id = `${id1}+${id2}`;
+
+    await expect(callGet(id)).resolves.toStrictEqual([TASK1, TASK2]);
+  });
 });

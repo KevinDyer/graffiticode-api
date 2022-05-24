@@ -1,5 +1,5 @@
 const { createHash } = require("crypto");
-const { NotFoundError } = require("../errors/http");
+const { NotFoundError, DecodeIdError } = require("../errors/http");
 const { initializeApp } = require("@firebase/app");
 const {
   addDoc,
@@ -19,35 +19,42 @@ const createCodeHash = code =>
     .digest("hex");
 
 const encodeId = ({ taskIds }) => {
-  const idObj = { type: "firestore", taskIds };
+  const idObj = { taskIds };
   return Buffer.from(JSON.stringify(idObj), "utf8").toString("base64url");
 }
 exports.encodeId = encodeId;
 
-const decodeId = id => {
+const decodeIdPart = id => {
+  let taskIds;
   try {
-    const { taskIds } = JSON.parse(Buffer.from(id, "base64url").toString("utf8"));
-    if (!Array.isArray(taskIds) || taskIds.length < 1) {
-      console.warn(`firestore id ${id} contains no taskIds`);
-      return { ok: false };
-    }
-    return { ok: true, taskIds };
+    const idObj = JSON.parse(Buffer.from(id, "base64url").toString("utf8"));
+    taskIds = idObj.taskIds;
   } catch (err) {
-    console.warn(`failed to decode firestore id ${id}`);
-    return { ok: false };
+    throw new DecodeIdError(`failed to decode firestore id ${id}: ${err.message}`);
   }
+  if (!Array.isArray(taskIds) || taskIds.length < 1) {
+    throw new DecodeIdError(`firestore id ${id} contains no taskIds`);
+  }
+  return taskIds;
+};
+
+const decodeId = id => {
+  const idParts = id.split("+");
+  const taskIds = idParts.reduce(
+    (taskIds, idPart) => {
+      const idPartTaskIds = decodeIdPart(idPart);
+      taskIds.push(...idPartTaskIds);
+      return taskIds;
+    },
+    [],
+  );
+  return taskIds;
 };
 
 const appendIds = (id, ...otherIds) => {
-  const { ok, taskIds } = decodeId(id);
-  if (!ok) {
-    throw new DecodeIdError(`failed to decode id ${id}`);
-  }
+  const taskIds = decodeId(id);
   otherIds.forEach(otherId => {
-    const { ok, taskIds: otherTaskIds } = decodeId(otherId);
-    if (!ok) {
-      throw new DecodeIdError(`failed to decode otherId ${otherId}`);
-    }
+    const otherTaskIds = decodeId(otherId);
     taskIds.push(...otherTaskIds);
   });
   return encodeId({ taskIds });
@@ -64,8 +71,8 @@ const buildTaskCreate = ({ db }) => async task => {
   let taskRef;
   if (codeHashDoc.exists()) {
     taskId = codeHashDoc.get("taskId");
-    taskRef = doc(db, "tasks", taskId)
-    await updateDoc(taskRef, { count: increment(1) })
+    taskRef = doc(db, "tasks", taskId);
+    await updateDoc(taskRef, { count: increment(1) });
   } else {
     const tasksCol = collection(db, "tasks");
     const task = { lang, code, codeHash, count: 1 };
@@ -77,10 +84,7 @@ const buildTaskCreate = ({ db }) => async task => {
 };
 
 const buildTaskGet = ({ db }) => async id => {
-  const { ok, taskIds } = decodeId(id);
-  if (!ok) {
-    throw new DecodeIdError(`failed to decode id ${id}`);
-  }
+  const taskIds = decodeId(id);
   const tasks = await Promise.all(
     taskIds.map(async taskId => {
       const taskRef = doc(db, "tasks", taskId);

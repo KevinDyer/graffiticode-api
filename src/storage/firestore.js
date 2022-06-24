@@ -1,17 +1,6 @@
 const { createHash } = require("crypto");
 const { NotFoundError, DecodeIdError } = require("../errors/http");
-const { initializeApp } = require("@firebase/app");
-const {
-  addDoc,
-  collection,
-  connectFirestoreEmulator,
-  doc,
-  getDoc,
-  getFirestore,
-  increment,
-  setDoc,
-  updateDoc,
-} = require("@firebase/firestore");
+const admin = require('firebase-admin');
 
 const createCodeHash = code =>
   createHash("sha256")
@@ -64,32 +53,33 @@ const buildTaskCreate = ({ db }) => async task => {
   const { lang, code } = task;
   const codeHash = createCodeHash(code);
 
-  const codeHashRef = doc(db, "code-hashes", codeHash);
-  const codeHashDoc = await getDoc(codeHashRef);
+  const codeHashRef = db.doc(`code-hashes/${codeHash}`);
+  const codeHashDoc = await codeHashRef.get();
 
   let taskId;
   let taskRef;
-  if (codeHashDoc.exists()) {
+  if (codeHashDoc.exists) {
     taskId = codeHashDoc.get("taskId");
-    taskRef = doc(db, "tasks", taskId);
-    await updateDoc(taskRef, { count: increment(1) });
+    taskRef = db.doc(`tasks/${taskId}`);
+    await taskRef.update({ count: admin.firestore.FieldValue.increment(1) });
   } else {
-    const tasksCol = collection(db, "tasks");
+    const tasksCol = db.collection("tasks");
     const task = { lang, code, codeHash, count: 1 };
-    const taskRef = await addDoc(tasksCol, task);
+    const taskRef = await tasksCol.add(task);
     taskId = taskRef.id;
-    await setDoc(codeHashRef, { taskId });
+    await codeHashRef.set({ taskId });
   }
   return encodeId({ taskIds: [taskId] });
 };
 
 const buildTaskGet = ({ db }) => async id => {
+  console.log(id);
   const taskIds = decodeId(id);
   const tasks = await Promise.all(
     taskIds.map(async taskId => {
-      const taskRef = doc(db, "tasks", taskId);
-      const taskDoc = await getDoc(taskRef);
-      if (!taskDoc.exists()) {
+      const taskRef = db.doc(`tasks/${taskId}`);
+      const taskDoc = await taskRef.get();
+      if (!taskDoc.exists) {
         throw new NotFoundError("taskId does not exist");
       }
       const lang = taskDoc.get("lang");
@@ -108,21 +98,8 @@ const buildFirestoreTaskDao = ({ db }) => {
 exports.buildFirestoreTaskDao = buildFirestoreTaskDao;
 
 const createFirestoreDb = ({ }) => {
-  const firebaseConfig = {
-    apiKey: "AIzaSyAoVuUNi8ElnS7cn6wc3D8XExML-URLw0I",
-    authDomain: "graffiticode.firebaseapp.com",
-    databaseURL: "https://graffiticode.firebaseio.com",
-    projectId: "graffiticode",
-    storageBucket: "graffiticode.appspot.com",
-    messagingSenderId: "656973052505",
-    appId: "1:656973052505:web:f3f3cc6397a844599c8f48",
-    measurementId: "G-KRPK1CDB19",
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  if (process.env.NODE_ENV !== "production") {
-    connectFirestoreEmulator(db, "localhost", 8080);
-  }
+  admin.initializeApp();
+  const db = admin.firestore();
   return db;
 };
 exports.createFirestoreDb = createFirestoreDb;

@@ -33,9 +33,6 @@
     "dev": "firebase emulators:exec --ui \"nodemon --exec \\\"jest && npm start\\\"\"",
     "coverage": "nyc npm run test"
   },
-  "devDependencies": {
-    "@firebase/rules-unit-testing": "^2.0.2"
-  },
   "engines": {
     "node": "^16.13.1"
   }

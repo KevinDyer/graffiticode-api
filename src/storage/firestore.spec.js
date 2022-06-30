@@ -1,31 +1,9 @@
-const fs = require('fs');
-const { initializeTestEnvironment } = require('@firebase/rules-unit-testing');
 const { buildFirestoreTaskDao, encodeId, createFirestoreDb } = require('./firestore');
 const { TASK1, TASK2 } = require('../testing/fixture');
 
 describe('storage/firestore', () => {
   const db = createFirestoreDb({});
   const taskDao = buildFirestoreTaskDao({ db });
-
-  let testEnv = null;
-  beforeEach(async () => {
-    testEnv = await initializeTestEnvironment({
-      projectId: 'graffiticode',
-      firestore: {
-        host: 'localhost',
-        port: 8080,
-        rules: fs.readFileSync('firestore.rules', 'utf8'),
-      },
-    });
-  });
-
-  afterEach(async () => {
-    if (testEnv) {
-      // await testEnv.clearFirestore();
-      await testEnv.cleanup();
-      testEnv = null;
-    }
-  });
 
   it('should throw NotFoundError if task is not created', async () => {
     const id = encodeId({ taskIds: ['foo'] });

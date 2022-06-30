@@ -16,7 +16,7 @@ describe('data', () => {
     compile.mockResolvedValueOnce(data);
 
   it('should compile a created task', async () => {
-    const id = await taskDao.create(TASK1);
+    const id = await taskDao.create({ task: TASK1 });
     mockCompileData(DATA1);
 
     await expect(dataApi.get({ taskDao, id })).resolves.toStrictEqual(DATA1);
@@ -32,8 +32,8 @@ describe('data', () => {
   });
 
   it('should compile created tasks', async () => {
-    const id1 = await taskDao.create(TASK1);
-    const id2 = await taskDao.create(TASK2);
+    const id1 = await taskDao.create({ task: TASK1 });
+    const id2 = await taskDao.create({ task: TASK2 });
     const id = taskDao.appendIds(id1, id2);
     mockCompileData(DATA1);
     mockCompileData(DATA2);

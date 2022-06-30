@@ -17,14 +17,14 @@ const buildObjectToId = ({ idsByObject, objectsById }) => obj => {
 
 const buildObjectFromId = ({ objectsById }) => id => objectsById.get(id);
 
-const buildTaskCreate = ({ objectToId }) => async task => {
+const buildTaskCreate = ({ objectToId }) => async ({ task }) => {
   const langId = task.lang;
   const codeId = objectToId(task.code);
   const id = encodeID([langId, codeId, 0]);
   return id;
 };
 
-const buildTaskGet = ({ objectFromId }) => async id => {
+const buildTaskGet = ({ objectFromId }) => async ({ id }) => {
   let ids = decodeID(id);
 
   const tasks = [];

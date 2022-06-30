@@ -8,20 +8,20 @@ describe('storage/memory', () => {
   });
 
   it('should throw NotFoundError if task is not created', async () => {
-    await expect(taskDao.get(TASK_ID1)).rejects.toThrow();
+    await expect(taskDao.get({ id: TASK_ID1 })).rejects.toThrow();
   });
 
   it('should return created task', async () => {
-    const id = await taskDao.create(TASK1);
+    const id = await taskDao.create({ task: TASK1 });
 
-    await expect(taskDao.get(id)).resolves.toStrictEqual([TASK1]);
+    await expect(taskDao.get({ id })).resolves.toStrictEqual([TASK1]);
   });
 
   it('should return multi task id', async () => {
-    const id1 = await taskDao.create(TASK1);
-    const id2 = await taskDao.create(TASK2);
+    const id1 = await taskDao.create({ task: TASK1 });
+    const id2 = await taskDao.create({ task: TASK2 });
     const id = taskDao.appendIds(id1, id2);
 
-    await expect(taskDao.get(id)).resolves.toStrictEqual([TASK1, TASK2]);
+    await expect(taskDao.get({ id })).resolves.toStrictEqual([TASK1, TASK2]);
   });
 });

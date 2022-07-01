@@ -49,7 +49,7 @@ const appendIds = (id, ...otherIds) => {
   return encodeId({ taskIds });
 }
 
-const buildTaskCreate = ({ db }) => async task => {
+const buildTaskCreate = ({ db }) => async ({ task }) => {
   const { lang, code } = task;
   const codeHash = createCodeHash(code);
 
@@ -72,8 +72,7 @@ const buildTaskCreate = ({ db }) => async task => {
   return encodeId({ taskIds: [taskId] });
 };
 
-const buildTaskGet = ({ db }) => async id => {
-  console.log(id);
+const buildTaskGet = ({ db }) => async ({ id }) => {
   const taskIds = decodeId(id);
   const tasks = await Promise.all(
     taskIds.map(async taskId => {

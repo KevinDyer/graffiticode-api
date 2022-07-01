@@ -1,6 +1,6 @@
 const buildGetData = ({ compile }) =>
   async ({ taskDao, id, auth, options }) => {
-    const tasks = await taskDao.get(id);
+    const tasks = await taskDao.get({ id });
     const obj = await tasks.reduceRight(
       async (dataPromise, task) => {
         const data = await dataPromise;

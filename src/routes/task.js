@@ -26,7 +26,7 @@ const buildGetTaskHandler = ({ taskDaoFactory }) => {
     }
 
     const taskDao = getTaskDaoForRequest(req);
-    const tasksForIds = await Promise.all(ids.map(async id => taskDao.get(id)));
+    const tasksForIds = await Promise.all(ids.map(async id => taskDao.get({ id })));
     const tasks = tasksForIds.reduce((tasks, tasksForId) => {
       tasks.push(...tasksForId);
       return tasks;
@@ -46,7 +46,7 @@ const buildPostTaskHandler = ({ taskDaoFactory }) => {
     }
 
     const taskDao = getTaskDaoForRequest(req);
-    const ids = await Promise.all(tasks.map(task => taskDao.create(task)));
+    const ids = await Promise.all(tasks.map(task => taskDao.create({ task })));
     const id = getIdFromIds(ids);
 
     res.set("Access-Control-Allow-Origin", "*");

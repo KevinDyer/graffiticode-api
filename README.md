@@ -3,6 +3,8 @@ Graffiticode API Gateway
 
 # Getting started
 
+## [Authorization](docs/authorization.md)
+
 ## Steps include (Mac OSX)
 
 * Clone and initialize the GC repo.

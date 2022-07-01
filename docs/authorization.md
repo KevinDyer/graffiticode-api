@@ -1,8 +1,8 @@
 Authorization
 ---
-This document describes how Graffiticode API handles authorization. Currently the `/tasks` and `/data` endpoints will used authorization to provide access control to `Task`s and `Data`s.
+This document describes how Graffiticode API handles authorization. Currently the `/task` and `/data` endpoints will used authorization to provide access control to `Task`s and `Data`s.
 
-## General philosphy
+## General philosophy
 A user can read a task that user creates
 
 - Senario 1
@@ -33,7 +33,8 @@ A user can read a task that user creates
 ### Single Task Unauthorizaed
 <img src="authorization_single_task_unauthorized.png" />
 
-### Multiple Tasks
+### Multiple 
+
 <img src="authorization_multiple_tasks.png" />
 
 ### Multiple Tasks Unauthorizaed

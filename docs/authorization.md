@@ -38,3 +38,14 @@ A user can read a task that user creates
 
 ### Multiple Tasks Unauthorizaed
 <img src="authorization_multiple_tasks_unauthorized.png" />
+
+### Multiple Users, Same Task
+<img src="authorization_multiple_users_same_task.png" />
+
+## How to update these diagrams
+
+1. Go to https://sequencediagram.org/
+1. Open the diagram to be modified
+1. Modify the diagram
+1. Save the diagram
+1. Export the png

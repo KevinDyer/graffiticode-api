@@ -24,4 +24,12 @@ describe('storage/memory', () => {
 
     await expect(taskDao.get({ id })).resolves.toStrictEqual([TASK1, TASK2]);
   });
+
+  it('should get appended task ids', async () => {
+    const id1 = await taskDao.create({ task: TASK1 });
+    const id2 = await taskDao.create({ task: TASK2 });
+    const id = `${id1}+${id2}`;
+
+    await expect(taskDao.get({ id })).resolves.toStrictEqual([TASK1, TASK2]);
+  });
 });

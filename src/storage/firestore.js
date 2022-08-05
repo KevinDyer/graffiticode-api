@@ -49,7 +49,7 @@ const appendIds = (id, ...otherIds) => {
   return encodeId({ taskIds });
 }
 
-const buildTaskCreate = ({ db }) => async ({ task }) => {
+const buildTaskCreate = ({ db }) => async ({ task, auth }) => {
   const { lang, code } = task;
   const codeHash = createCodeHash(code);
 
@@ -61,10 +61,22 @@ const buildTaskCreate = ({ db }) => async ({ task }) => {
   if (codeHashDoc.exists) {
     taskId = codeHashDoc.get("taskId");
     taskRef = db.doc(`tasks/${taskId}`);
-    await taskRef.update({ count: admin.firestore.FieldValue.increment(1) });
+    const taskUpdate = { count: admin.firestore.FieldValue.increment(1) };
+    if (auth) {
+      taskUpdate[`acls.uids.${auth.uid}`] = true;
+    } else {
+      taskUpdate["acls.public"] = true;
+    }
+    await taskRef.update(taskUpdate);
   } else {
+    let acls;
+    if (auth) {
+      acls = { public: false, uids: { [auth.uid]: true } };
+    } else {
+      acls = { public: true, uids: {} };
+    }
     const tasksCol = db.collection("tasks");
-    const task = { lang, code, codeHash, count: 1 };
+    const task = { lang, code, codeHash, count: 1, acls };
     const taskRef = await tasksCol.add(task);
     taskId = taskRef.id;
     await codeHashRef.set({ taskId });
@@ -72,21 +84,43 @@ const buildTaskCreate = ({ db }) => async ({ task }) => {
   return encodeId({ taskIds: [taskId] });
 };
 
-const buildTaskGet = ({ db }) => async ({ id }) => {
-  const taskIds = decodeId(id);
-  const tasks = await Promise.all(
-    taskIds.map(async taskId => {
-      const taskRef = db.doc(`tasks/${taskId}`);
-      const taskDoc = await taskRef.get();
-      if (!taskDoc.exists) {
-        throw new NotFoundError("taskId does not exist");
-      }
-      const lang = taskDoc.get("lang");
-      const code = taskDoc.get("code");
-      return { lang, code };
-    })
-  );
-  return tasks;
+const buildCheckAuth = ({ }) => ({ taskDoc, auth }) => {
+  const acls = taskDoc.get("acls");
+  if (!acls) {
+    return;
+  }
+  if (acls.public) {
+    return;
+  }
+  if (!auth) {
+    throw new NotFoundError();
+  }
+  if (acls.uids[auth.uid]) {
+    return;
+  }
+  throw new NotFoundError();
+
+};
+
+const buildTaskGet = ({ db }) => {
+  const checkAuth = buildCheckAuth({});
+  return async ({ id, auth }) => {
+    const taskIds = decodeId(id);
+    const tasks = await Promise.all(
+      taskIds.map(async taskId => {
+        const taskRef = db.doc(`tasks/${taskId}`);
+        const taskDoc = await taskRef.get();
+        if (!taskDoc.exists) {
+          throw new NotFoundError("taskId does not exist");
+        }
+        checkAuth({ taskDoc, auth });
+        const lang = taskDoc.get("lang");
+        const code = taskDoc.get("code");
+        return { lang, code };
+      })
+    );
+    return tasks;
+  };
 };
 
 const buildFirestoreTaskDao = ({ db }) => {
@@ -96,9 +130,14 @@ const buildFirestoreTaskDao = ({ db }) => {
 };
 exports.buildFirestoreTaskDao = buildFirestoreTaskDao;
 
-const createFirestoreDb = ({ }) => {
-  admin.initializeApp();
-  const db = admin.firestore();
-  return db;
+const buildCreateFirestoreDb = () => {
+  let db;
+  return () => {
+    if (!db) {
+      admin.initializeApp();
+      db = admin.firestore();
+    }
+    return db;
+  };
 };
-exports.createFirestoreDb = createFirestoreDb;
+exports.createFirestoreDb = buildCreateFirestoreDb();

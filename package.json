@@ -29,8 +29,8 @@
   },
   "scripts": {
     "start": "node -r @graffiticode/tracing src/app.js",
-    "test": "firebase emulators:exec --ui jest",
-    "dev": "firebase emulators:exec --ui \"nodemon --exec \\\"jest && npm start\\\"\"",
+    "test": "firebase emulators:exec --ui \"jest --runInBand\"",
+    "dev": "firebase emulators:exec --ui \"nodemon --exec \\\"jest --runInBand && npm start\\\"\"",
     "coverage": "nyc npm run test"
   },
   "engines": {

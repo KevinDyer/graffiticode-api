@@ -1,22 +1,15 @@
 const { buildFirestoreTaskDao, encodeId, createFirestoreDb } = require('./firestore');
 const { TASK1, TASK2 } = require('../testing/fixture');
+const { clearFirestore } = require('../testing/firestore');
 
 describe('storage/firestore', () => {
-  let db;
-  beforeAll(() => {
-    db = createFirestoreDb({});
+  beforeEach(async () => {
+    await clearFirestore();
   });
 
   let taskDao;
   beforeEach(async () => {
-    const cols = await db.listCollections();
-    await Promise.all(cols.map(c => db.recursiveDelete(c)));
-    taskDao = buildFirestoreTaskDao({ db });
-  });
-
-  afterEach(async () => {
-    const cols = await db.listCollections();
-    await Promise.all(cols.map(c => db.recursiveDelete(c)));
+    taskDao = buildFirestoreTaskDao({ db: createFirestoreDb({}) });
   });
 
   it('should throw NotFoundError if task is not created', async () => {

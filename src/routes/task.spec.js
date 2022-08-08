@@ -1,9 +1,14 @@
 const request = require("supertest");
 const { createApp } = require("../app");
+const { clearFirestore } = require("../testing/firestore");
 const { TASK1, TASK2, TASK_ID1, TASK_ID2 } = require("../testing/fixture");
 const { createError, createErrorResponse, createSuccessResponse } = require("./utils");
 
 describe("routes/task", () => {
+  beforeEach(async () => {
+    await clearFirestore();
+  });
+
   let app;
   beforeAll(() => {
     app = createApp();

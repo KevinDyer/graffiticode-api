@@ -1,12 +1,11 @@
 const { buildDataApi } = require('./data');
 const { buildTaskDaoFactory } = require('./storage');
-const { createFirestoreDb } = require('./storage/firestore');
+const { clearFirestore } = require('./testing/firestore');
 const { DATA1, DATA2, TASK1, TASK2 } = require('./testing/fixture');
 
 describe('data', () => {
-  let db;
-  beforeAll(() => {
-    db = createFirestoreDb({});
+  beforeEach(async () => {
+    await clearFirestore();
   });
 
   let taskDao;
@@ -16,11 +15,6 @@ describe('data', () => {
     taskDao = buildTaskDaoFactory({}).create({ type: 'memory' });
     compile = jest.fn();
     dataApi = buildDataApi({ compile });
-  });
-
-  afterEach(async () => {
-    const cols = await db.listCollections();
-    await Promise.all(cols.map(c => db.recursiveDelete(c)));
   });
 
   const mockCompileData = data =>

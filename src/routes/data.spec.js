@@ -1,23 +1,17 @@
 const request = require("supertest");
 const { createApp } = require("../app");
-const { createFirestoreDb } = require("../storage/firestore");
+const { clearFirestore } = require("../testing/firestore");
 const { TASK1, DATA1, DATA2, TASK2 } = require("../testing/fixture");
 const { createSuccessResponse } = require("./utils");
 
 describe("/data endpoint", () => {
-  let db;
-  beforeAll(() => {
-    db = createFirestoreDb({});
+  beforeEach(async () => {
+    await clearFirestore();
   });
 
   let app;
   beforeEach(() => {
     app = createApp();
-  });
-
-  beforeEach(async () => {
-    const cols = await db.listCollections();
-    await Promise.all(cols.map(c => db.recursiveDelete(c)));
   });
 
   it("get single data", async () => {

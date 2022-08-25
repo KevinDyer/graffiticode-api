@@ -21,6 +21,10 @@ exports.parseAuthFromRequest = req => {
   return null;
 };
 
+exports.parseAuthTokenFromRequest = req => {
+  return null;
+};
+
 const handleError = (err, res, next) => {
   if (err instanceof HttpError) {
     res

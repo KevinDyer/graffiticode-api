@@ -3,7 +3,6 @@ const express = require('express');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
 
-const { buildLocalCache } = require('./cache');
 const { buildCompile } = require('./comp');
 const { buildDataApi } = require('./data');
 const { compile: langCompile } = require('./lang');
@@ -23,10 +22,9 @@ require('./../config/config.json');
 global.config = require(process.env.CONFIG || './../config/config.json');
 global.config.useLocalCompiles = process.env.LOCAL_COMPILES === 'true';
 
-const createApp = () => {
+const createApp = ({ } = {}) => {
   const compile = buildCompile({ langCompile });
   const taskDaoFactory = buildTaskDaoFactory({});
-  const cache = buildLocalCache({});
   const dataApi = buildDataApi({ compile });
 
   const app = express();

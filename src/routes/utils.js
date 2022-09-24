@@ -21,6 +21,17 @@ exports.parseAuthFromRequest = req => {
   return null;
 };
 
+exports.parseAuthTokenFromRequest = req => {
+  let headerAuthToken = req.get("Authorization");
+  if (isNonEmptyString(headerAuthToken)) {
+    if (headerAuthToken.startsWith("Bearer ")) {
+      headerAuthToken = headerAuthToken.slice("Bearer ".length);
+    }
+    return headerAuthToken;
+  }
+  return null;
+};
+
 const handleError = (err, res, next) => {
   if (err instanceof HttpError) {
     res

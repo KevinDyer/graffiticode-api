@@ -11,14 +11,15 @@ const {
 const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
   const getTaskDaoForRequest = buildGetTaskDaoForRequest(taskDaoFactory);
   return buildHttpHandler(async (req, res) => {
-    const auth = parseAuthFromRequest(req);
+    const auth = req.auth.context;
+    const authToken = parseAuthFromRequest(req);
     const ids = parseIdsFromRequest(req);
     if (ids.length < 1) {
       throw new InvalidArgumentError("must provide at least one id");
     }
 
     const taskDao = getTaskDaoForRequest(req);
-    const objs = await Promise.all(ids.map(id => dataApi.get({ taskDao, id, auth })));
+    const objs = await Promise.all(ids.map(id => dataApi.get({ taskDao, id, auth, authToken })));
 
     let data;
     if (objs.length > 1) {

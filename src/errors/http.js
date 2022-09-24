@@ -28,3 +28,10 @@ class DecodeIdError extends HttpError {
   }
 }
 exports.DecodeIdError = DecodeIdError;
+
+class UnauthenticatedError extends HttpError {
+  constructor(message) {
+    super({ code: 401, message });
+  }
+}
+exports.UnauthenticatedError = UnauthenticatedError;

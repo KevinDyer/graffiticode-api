@@ -2,8 +2,8 @@ const errorHandler = require('errorhandler');
 const express = require('express');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
+const { buildValidateToken } = require('./auth');
 
-const { buildLocalCache } = require('./cache');
 const { buildCompile } = require('./comp');
 const { buildDataApi } = require('./data');
 const { compile: langCompile } = require('./lang');
@@ -23,10 +23,9 @@ require('./../config/config.json');
 global.config = require(process.env.CONFIG || './../config/config.json');
 global.config.useLocalCompiles = process.env.LOCAL_COMPILES === 'true';
 
-const createApp = () => {
+const createApp = ({ authUrl } = {}) => {
   const compile = buildCompile({ langCompile });
   const taskDaoFactory = buildTaskDaoFactory({});
-  const cache = buildLocalCache({});
   const dataApi = buildDataApi({ compile });
 
   const app = express();
@@ -53,6 +52,10 @@ const createApp = () => {
   }
   app.use(express.json({ limit: '50mb' }));
   app.use(methodOverride());
+
+  // Authentication
+  const validateToken = buildValidateToken({ authUrl });
+  app.use(routes.auth({ validateToken }));
 
   // Routes
   app.use('/', routes.root());

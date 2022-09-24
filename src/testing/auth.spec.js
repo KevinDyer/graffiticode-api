@@ -58,15 +58,13 @@ describe("testing/auth", () => {
       expect(res.body).toHaveProperty("error.message", "must provide a token");
     });
 
-    it("/validateSignIn should return 404 if jwt is missing", async () => {
+    it("/validateSignIn should return 401 if jwt is missing", async () => {
       const token = "abc123";
 
-      const res = await request(authApp.app)
+      await request(authApp.app)
         .post("/validateSignIn")
         .send({ jwt: token })
-        .expect(404);
-
-      expect(res.body).toHaveProperty("error.message", "no user for abc123");
+        .expect(401);
     });
 
     it("/validateSignIn should return 500 if providing error", async () => {

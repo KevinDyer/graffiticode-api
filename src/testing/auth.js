@@ -1,6 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
-const { UnauthenticatedError, InvalidArgumentError, NotFoundError } = require("../errors/http");
+const { UnauthenticatedError, InvalidArgumentError } = require("../errors/http");
 const { buildHttpHandler } = require("../routes/utils");
 const { isNonNullObject, isNonEmptyString } = require("../util");
 
@@ -28,14 +28,14 @@ const buildArtCompilerAuthApplication = () => {
   const app = express();
   app.use(morgan("dev"));
   app.use(express.json({}));
-  app.use(express.urlencoded({}));
+  app.use(express.urlencoded({ extended: true }));
   app.post("/validateSignIn", buildHttpHandler(async (req, res) => {
     if (!isNonNullObject(req.body) || !isNonEmptyString(req.body.jwt)) {
       throw new InvalidArgumentError("must provide a token");
     }
     const token = req.body.jwt;
     if (!idsByToken.has(token)) {
-      throw new NotFoundError(`no user for ${token}`);
+      throw new UnauthenticatedError();
     }
     const id = idsByToken.get(token);
     if (id instanceof Error) {

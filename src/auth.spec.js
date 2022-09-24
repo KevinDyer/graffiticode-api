@@ -1,17 +1,15 @@
-const { buildAuthProvider } = require("./auth");
-const { buildFakeAuthProvider, buildArtCompilerAuthApplication } = require("./testing/auth");
+const { buildValidateToken } = require("./auth");
+const { buildArtCompilerAuthApplication } = require("./testing/auth");
 
 describe("auth", () => {
-  describe("provider", () => {
+  describe("validateToken", () => {
     let authApp;
     let authServer;
-    let authProvider;
+    let validateToken;
     beforeEach(async () => {
       authApp = buildArtCompilerAuthApplication();
-      await new Promise(resolve => {
-        authServer = authApp.listen(resolve);
-      });
-      authProvider = buildAuthProvider({
+      await new Promise(resolve => authServer = authApp.listen(resolve));
+      validateToken = buildValidateToken({
         authUrl: `http://localhost:${authServer.address().port}`,
       });
     });
@@ -24,13 +22,20 @@ describe("auth", () => {
       const token = "abc123";
       authApp.addIdForToken(token, 1);
 
-      await expect(authProvider.validate(token)).resolves.toStrictEqual({ uid: "1" });
+      await expect(validateToken(token)).resolves.toStrictEqual({ uid: "1" });
     });
 
     it("should reject for missing token", async () => {
       const token = "abc123";
 
-      await expect(authProvider.validate(token)).rejects.toThrow();
+      await expect(validateToken(token)).rejects.toThrow();
+    });
+
+    it("should reject if auth app rejects", async () => {
+      const token = "abc123";
+      authApp.addIdForToken(token, new Error("unknown auth error"));
+
+      await expect(validateToken(token)).rejects.toThrow();
     });
   });
 });

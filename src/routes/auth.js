@@ -1,6 +1,6 @@
 const { buildHttpHandler, parseAuthTokenFromRequest } = require("./utils");
 
-module.exports = ({ authProvider }) => buildHttpHandler(async (req, res, next) => {
+module.exports = ({ validateToken }) => buildHttpHandler(async (req, res, next) => {
   req.auth = {};
 
   const token = parseAuthTokenFromRequest(req);
@@ -8,7 +8,7 @@ module.exports = ({ authProvider }) => buildHttpHandler(async (req, res, next) =
 
   let authContext = null;
   if (token) {
-    authContext = await authProvider.validate(token);
+    authContext = await validateToken(token);
   }
   req.auth.context = authContext;
 

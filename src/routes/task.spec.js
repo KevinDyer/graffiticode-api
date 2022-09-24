@@ -1,5 +1,6 @@
 const request = require("supertest");
 const { createApp } = require("../app");
+const { buildArtCompilerAuthApplication } = require("../testing/auth");
 const { clearFirestore } = require("../testing/firestore");
 const { TASK1, TASK2, TASK_ID1, TASK_ID2 } = require("../testing/fixture");
 const { createError, createErrorResponse, createSuccessResponse } = require("./utils");
@@ -9,9 +10,17 @@ describe("routes/task", () => {
     await clearFirestore();
   });
 
+  let authApp;
+  let authServer;
   let app;
-  beforeAll(() => {
-    app = createApp();
+  beforeEach(async () => {
+    authApp = buildArtCompilerAuthApplication();
+    await new Promise(resolve => authServer = authApp.listen(resolve));
+    app = createApp({ authUrl: `http://localhost:${authServer.address().port}` });
+  });
+
+  afterEach((done) => {
+    authServer.close(done);
   });
 
   it("should create a task", async () => {
@@ -35,12 +44,67 @@ describe("routes/task", () => {
   });
 
   it("should get a task that has been created", async () => {
-    const res = await request(app).post("/task").send({ task: TASK1 });
+    const res = await request(app)
+      .post("/task")
+      .send({ task: TASK1 })
+      .expect(200);
     expect(res).toHaveProperty("body.status", "success");
     const id = res.body.data.id;
 
     await request(app)
       .get("/task")
+      .query({ id })
+      .expect(200, createSuccessResponse([TASK1]));
+  });
+
+  it("should get a task with token that has been created with token", async () => {
+    const token = "abc123";
+    authApp.addIdForToken(token, 1);
+    const res = await request(app)
+      .post("/task")
+      .set("Authorization", token)
+      .send({ task: TASK1 })
+      .expect(200);
+    expect(res).toHaveProperty("body.status", "success");
+    const id = res.body.data.id;
+
+    await request(app)
+      .get("/task")
+      .set("Authorization", token)
+      .query({ id })
+      .expect(200, createSuccessResponse([TASK1]));
+  });
+
+  it("should return not found for a task that has been created with token", async () => {
+    const token = "abc123";
+    authApp.addIdForToken(token, 1);
+    const res = await request(app)
+      .post("/task")
+      .set("Authorization", token)
+      .send({ task: TASK1 })
+      .expect(200);
+    expect(res).toHaveProperty("body.status", "success");
+    const id = res.body.data.id;
+
+    await request(app)
+      .get("/task")
+      .query({ id })
+      .expect(404);
+  });
+
+  it("should get a task with token that has been created without a token", async () => {
+    const token = "abc123";
+    authApp.addIdForToken(token, 1);
+    const res = await request(app)
+      .post("/task")
+      .send({ task: TASK1 })
+      .expect(200);
+    expect(res).toHaveProperty("body.status", "success");
+    const id = res.body.data.id;
+
+    await request(app)
+      .get("/task")
+      .set("Authorization", token)
       .query({ id })
       .expect(200, createSuccessResponse([TASK1]));
   });

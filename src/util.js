@@ -1,20 +1,20 @@
-const DEBUG = process.env.GRAFFITICODE_DEBUG === 'true' || false;
-const assert = (function assert() {
+const DEBUG = process.env.GRAFFITICODE_DEBUG === "true" || false;
+const assert = (function assert () {
   // If 'DEBUG' is false then 'assert' is a no-op.
-  return !DEBUG ?
-    () => { } :
-    (test, str) => {
-      if (str === undefined) {
-        str = "failed!";
-      }
-      if (!val) {
-        let err = new Error(str);
-        throw err;
-      }
-    };
+  return !DEBUG
+    ? () => { }
+    : (test, str) => {
+        if (str === undefined) {
+          str = "failed!";
+        }
+        if (!val) {
+          const err = new Error(str);
+          throw err;
+        }
+      };
 })();
 
-function error(val, err) {
+function error (val, err) {
   // If 'val' is false then report 'err'.
   if (!val) {
     throw new Error(err);
@@ -22,7 +22,7 @@ function error(val, err) {
 }
 
 const messages = {};
-function message(errorCode, args = []) {
+function message (errorCode, args = []) {
   let str = messages[errorCode];
   if (args) {
     args.forEach(function (arg, i) {
@@ -33,16 +33,16 @@ function message(errorCode, args = []) {
 }
 
 const reservedCodes = [];
-function reserveCodeRange(first, last, moduleName) {
+function reserveCodeRange (first, last, moduleName) {
   assert(first <= last, "Invalid code range");
-  let noConflict = reservedCodes.every(function (range) {
+  const noConflict = reservedCodes.every(function (range) {
     return last < range.first || first > range.last;
   });
   assert(noConflict, "Conflicting request for error code range");
-  reservedCodes.push({ first: first, last: last, name: moduleName });
+  reservedCodes.push({ first, last, name: moduleName });
 }
 
-function parseJSON(str) {
+function parseJSON (str) {
   try {
     return JSON.parse(str);
   } catch (e) {
@@ -52,8 +52,8 @@ function parseJSON(str) {
   }
 }
 
-function setMetadataBuilds(data, build) {
-  if (typeof data !== 'object' || data === null || data instanceof Array) {
+function setMetadataBuilds (data, build) {
+  if (typeof data !== "object" || data === null || data instanceof Array) {
     // We got nothing to hang the metadata on.
     return;
   }
@@ -68,10 +68,10 @@ function setMetadataBuilds(data, build) {
   }
 }
 
-function getCompilerHost(lang, config) {
+function getCompilerHost (lang, config) {
   config = config || global.config || {};
   if (config.useLocalCompiles) {
-    return 'localhost';
+    return "localhost";
   }
   if (config.hosts && config.hosts[lang]) {
     return config.hosts[lang];
@@ -79,7 +79,7 @@ function getCompilerHost(lang, config) {
   return `${lang.toLowerCase()}.artcompiler.com`;
 }
 
-function getCompilerPort(lang, config) {
+function getCompilerPort (lang, config) {
   config = config || global.config || {};
   if (config.useLocalCompiles) {
     return `5${lang.substring(1)}`;
@@ -87,18 +87,18 @@ function getCompilerPort(lang, config) {
   if (config.ports && config.ports[lang]) {
     return config.ports[lang];
   }
-  return '443';
+  return "443";
 }
 
-function isNonEmptyString(str) {
-  return ('string' === typeof (str) && 0 < str.length);
+function isNonEmptyString (str) {
+  return (typeof (str) === "string" && str.length > 0);
 }
 
-function isNonNullObject(obj) {
-  return (typeof obj === 'object' && obj !== null);
+function isNonNullObject (obj) {
+  return (typeof obj === "object" && obj !== null);
 }
 
-function cleanAndTrimObj(str) {
+function cleanAndTrimObj (str) {
   if (!str) {
     return str;
   }
@@ -113,7 +113,7 @@ function cleanAndTrimObj(str) {
   return str;
 }
 
-function cleanAndTrimSrc(str) {
+function cleanAndTrimSrc (str) {
   if (!str || typeof str !== "string") {
     return str;
   }
@@ -128,25 +128,25 @@ function cleanAndTrimSrc(str) {
 }
 
 // From http://javascript.about.com/library/blipconvert.htm
-function dot2num(dot) {
-  var d = dot.split('.');
-  var n = ((((((+d[0]) * 256) + (+d[1])) * 256) + (+d[2])) * 256) + (+d[3]);
+function dot2num (dot) {
+  const d = dot.split(".");
+  const n = ((((((+d[0]) * 256) + (+d[1])) * 256) + (+d[2])) * 256) + (+d[3]);
   if (isNaN(n)) {
     return 0;
   }
   return n;
 }
 
-function num2dot(num) {
-  var d = num % 256;
-  for (var i = 3; i > 0; i--) {
+function num2dot (num) {
+  let d = num % 256;
+  for (let i = 3; i > 0; i--) {
     num = Math.floor(num / 256);
-    d = num % 256 + '.' + d;
+    d = num % 256 + "." + d;
   }
   return d;
 }
 
-function statusCodeFromErrors(errs) {
+function statusCodeFromErrors (errs) {
   if (!Array.isArray(errs)) {
     errs = [errs];
   }
@@ -157,7 +157,7 @@ function statusCodeFromErrors(errs) {
   ) && statusCode || 500;
 }
 
-function messageFromErrors(errs) {
+function messageFromErrors (errs) {
   if (!Array.isArray(errs)) {
     errs = [errs];
   }
@@ -171,9 +171,9 @@ function messageFromErrors(errs) {
 
 const INTERNAL_ERROR = {
   statusCode: 500,
-  error: "Internal error",
+  error: "Internal error"
 };
-function internalError(error) {
+function internalError (error) {
   return Object.assign(INTERNAL_ERROR, { error });
 }
 

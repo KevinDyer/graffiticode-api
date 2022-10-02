@@ -1,6 +1,6 @@
 const { createHash } = require("crypto");
 const { NotFoundError, DecodeIdError } = require("../errors/http");
-const admin = require('firebase-admin');
+const admin = require("firebase-admin");
 
 const createCodeHash = code =>
   createHash("sha256")
@@ -10,7 +10,7 @@ const createCodeHash = code =>
 const encodeId = ({ taskIds }) => {
   const idObj = { taskIds };
   return Buffer.from(JSON.stringify(idObj), "utf8").toString("base64url");
-}
+};
 exports.encodeId = encodeId;
 
 const decodeIdPart = id => {
@@ -35,7 +35,7 @@ const decodeId = id => {
       taskIds.push(...idPartTaskIds);
       return taskIds;
     },
-    [],
+    []
   );
   return taskIds;
 };
@@ -47,7 +47,7 @@ const appendIds = (id, ...otherIds) => {
     taskIds.push(...otherTaskIds);
   });
   return encodeId({ taskIds });
-}
+};
 
 const buildTaskCreate = ({ db }) => async ({ task, auth }) => {
   const { lang, code } = task;
@@ -99,7 +99,6 @@ const buildCheckAuth = ({ }) => ({ taskDoc, auth }) => {
     return;
   }
   throw new NotFoundError();
-
 };
 
 const buildTaskGet = ({ db }) => {

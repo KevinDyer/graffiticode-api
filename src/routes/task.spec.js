@@ -152,5 +152,4 @@ describe("routes/task", () => {
       .set("x-graffiticode-storage-type", "memory")
       .expect(404);
   });
-
 });

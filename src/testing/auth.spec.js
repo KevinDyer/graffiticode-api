@@ -1,6 +1,6 @@
 const {
   buildFakeAuthProvider,
-  buildArtCompilerAuthApplication,
+  buildArtCompilerAuthApplication
 } = require("./auth");
 const request = require("supertest");
 

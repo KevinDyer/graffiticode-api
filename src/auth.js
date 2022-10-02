@@ -26,21 +26,21 @@ exports.buildValidateToken = ({ authUrl = "https://auth.artcompiler.com" }) => {
   };
 };
 
-function postAuth(path, data, resume) {
-  let encodedData = JSON.stringify(data);
-  var options = {
+function postAuth (path, data, resume) {
+  const encodedData = JSON.stringify(data);
+  const options = {
     host: "auth.artcompiler.com",
     port: "443",
-    path: path,
+    path,
     method: "POST",
     headers: {
       "Content-Type": "text/plain",
-      "Content-Length": Buffer.byteLength(encodedData),
-    },
+      "Content-Length": Buffer.byteLength(encodedData)
+    }
   };
-  var req = https.request(options);
+  const req = https.request(options);
   req.on("response", (res) => {
-    var data = "";
+    let data = "";
     res.on("data", function (chunk) {
       data += chunk;
     }).on("end", function () {

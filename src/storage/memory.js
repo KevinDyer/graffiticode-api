@@ -1,6 +1,5 @@
-const { decodeID, encodeID } = require('../id');
+const { decodeID, encodeID } = require("../id");
 const { NotFoundError, InvalidArgumentError } = require("../errors/http");
-
 
 const buildObjectToId = ({ idsByObject, objectsById }) => obj => {
   if (obj === null) {
@@ -13,7 +12,7 @@ const buildObjectToId = ({ idsByObject, objectsById }) => obj => {
     objectsById.set(newId, obj);
   }
   return idsByObject.get(key);
-}
+};
 
 const buildObjectFromId = ({ objectsById }) => id => objectsById.get(id);
 
@@ -79,7 +78,7 @@ const buildTaskGet = ({ objectFromId, aclsById }) => {
   };
 };
 
-const appendIds = (id, ...otherIds) => [id, ...otherIds].join('+');
+const appendIds = (id, ...otherIds) => [id, ...otherIds].join("+");
 
 const buildMemoryTaskDao = () => {
   const aclsById = new Map();

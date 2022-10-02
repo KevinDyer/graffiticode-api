@@ -3,7 +3,7 @@ const {
   buildHttpHandler,
   createSuccessResponse,
   parseAuthFromRequest,
-  optionsHandler,
+  optionsHandler
 } = require("./utils");
 const { isNonNullObject } = require("../util");
 const { InvalidArgumentError } = require("../errors/http");

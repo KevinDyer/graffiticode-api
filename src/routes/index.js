@@ -1,18 +1,18 @@
-const { Router } = require('express');
+const { Router } = require("express");
 
-const { getConfig } = require('./../config');
-const { pingLang, getAsset } = require('./../lang');
-const { isNonEmptyString } = require('./../util');
+const { getConfig } = require("./../config");
+const { pingLang, getAsset } = require("./../lang");
+const { isNonEmptyString } = require("./../util");
 
-const { buildConfigHandler } = require('./config');
-const { buildLangRouter } = require('./lang');
+const { buildConfigHandler } = require("./config");
+const { buildLangRouter } = require("./lang");
 
 const configHandler = buildConfigHandler({ getConfig });
 const langRouter = buildLangRouter({
   newRouter: () => new Router(),
   isNonEmptyString,
   pingLang,
-  getAsset,
+  getAsset
 });
 
 exports.auth = require("./auth");

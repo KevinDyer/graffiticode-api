@@ -1,3 +1,3 @@
-const {buildGetConfig} = require('./config');
+const { buildGetConfig } = require("./config");
 
 exports.getConfig = buildGetConfig({ global });

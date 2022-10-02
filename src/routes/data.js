@@ -1,12 +1,12 @@
-const { Router } = require('express');
+const { Router } = require("express");
 const {
   buildGetTaskDaoForRequest,
   buildHttpHandler,
   createSuccessResponse,
   parseIdsFromRequest,
   parseAuthFromRequest,
-  optionsHandler,
-} = require('./utils');
+  optionsHandler
+} = require("./utils");
 
 const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
   const getTaskDaoForRequest = buildGetTaskDaoForRequest(taskDaoFactory);
@@ -35,7 +35,7 @@ const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
 
 module.exports = ({ taskDaoFactory, dataApi }) => {
   const router = new Router();
-  router.get('/', buildGetDataHandler({ taskDaoFactory, dataApi }));
-  router.options('/', optionsHandler);
+  router.get("/", buildGetDataHandler({ taskDaoFactory, dataApi }));
+  router.options("/", optionsHandler);
   return router;
 };

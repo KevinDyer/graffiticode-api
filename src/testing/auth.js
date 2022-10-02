@@ -17,7 +17,7 @@ const buildFakeAuthProvider = () => {
         throw context;
       }
       return context;
-    },
+    }
   };
 };
 exports.buildFakeAuthProvider = buildFakeAuthProvider;
@@ -48,7 +48,7 @@ const buildArtCompilerAuthApplication = () => {
   return {
     app,
     addIdForToken: (token, id) => idsByToken.set(token, id),
-    listen: (...params) => app.listen(...params),
+    listen: (...params) => app.listen(...params)
   };
 };
 exports.buildArtCompilerAuthApplication = buildArtCompilerAuthApplication;

@@ -5,7 +5,7 @@ const {
   buildHttpHandler,
   createSuccessResponse,
   parseIdsFromRequest,
-  optionsHandler,
+  optionsHandler
 } = require("./utils");
 
 const normalizeTasksParameter = tasks => {

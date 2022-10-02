@@ -1,13 +1,13 @@
-var fs=require('graceful-fs');
+const fs = require("graceful-fs");
 
-fs.readFile("knewton.json", 'utf-8', function(err, data) {
+fs.readFile("knewton.json", "utf-8", function (err, data) {
 //  console.log(data);
   const json = JSON.parse(data);
-  let out = [];
+  const out = [];
   json.forEach(r => {
-    let params = JSON.parse(r["Atoms Learnosity Params"]);
-    let question = JSON.parse(r["Atoms Question"])[0];
-//    console.log(params);
+    const params = JSON.parse(r["Atoms Learnosity Params"]);
+    const question = JSON.parse(r["Atoms Question"])[0];
+    //    console.log(params);
     if (params.validation &&
         params.validation.valid_response &&
         params.validation.valid_response.value &&

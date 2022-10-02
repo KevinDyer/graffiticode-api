@@ -6,8 +6,8 @@ const buildPingLang = ({ getBaseUrlForLanguage, bent, log }) => {
   const pingLangInternal = async (lang) => {
     const baseUrl = getBaseUrlForLanguage(lang);
     try {
-      const headLang = bent(baseUrl, 'HEAD');
-      await headLang('/');
+      const headLang = bent(baseUrl, "HEAD");
+      await headLang("/");
       return true;
     } catch (err) {
       log(`Failed to ping language ${baseUrl}: ${err.message}`);
@@ -16,7 +16,7 @@ const buildPingLang = ({ getBaseUrlForLanguage, bent, log }) => {
   };
 
   return async (lang, resume) => {
-    if (typeof resume !== 'function') {
+    if (typeof resume !== "function") {
       resume = noop;
     }
 

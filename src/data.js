@@ -10,15 +10,14 @@ const buildGetData = ({ compile }) =>
           code,
           data,
           auth: authToken,
-          options,
+          options
         });
         return obj;
       },
-      Promise.resolve({}),
+      Promise.resolve({})
     );
     return obj;
   };
-
 
 exports.buildDataApi = ({ compile }) => {
   return { get: buildGetData({ compile }) };

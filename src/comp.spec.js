@@ -1,6 +1,5 @@
 const { buildCompile } = require("./comp");
-const { buildTaskDaoFactory } = require("./storage");
-const { TASK_ID1, DATA1, TASK1 } = require("./testing/fixture");
+const { DATA1, TASK1 } = require("./testing/fixture");
 
 describe("comp", () => {
   describe("compile", () => {

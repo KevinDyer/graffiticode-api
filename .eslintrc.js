@@ -16,5 +16,9 @@ module.exports = {
   rules: {
     'quotes': [2, 'double'],
     'semi': [2, 'always'],
+    'space-before-function-paren': ['error', {
+      'anonymous': 'always',
+      'named': 'never',
+    }]
   }
 }

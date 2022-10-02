@@ -15,7 +15,9 @@ describe.each(["memory", "firestore"])("/data[%s]", (storageType) => {
   let app;
   beforeEach(async () => {
     authApp = buildArtCompilerAuthApplication();
-    await new Promise(resolve => authServer = authApp.listen(resolve));
+    await new Promise(resolve => {
+      authServer = authApp.listen(resolve);
+    });
     app = createApp({ authUrl: `http://localhost:${authServer.address().port}` });
   });
 

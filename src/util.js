@@ -1,9 +1,9 @@
 const DEBUG = process.env.GRAFFITICODE_DEBUG === "true" || false;
-const assert = (function assert () {
+const assert = (function assert() {
   // If 'DEBUG' is false then 'assert' is a no-op.
   return !DEBUG
     ? () => { }
-    : (test, str) => {
+    : (val, str) => {
         if (str === undefined) {
           str = "failed!";
         }
@@ -14,7 +14,7 @@ const assert = (function assert () {
       };
 })();
 
-function error (val, err) {
+function error(val, err) {
   // If 'val' is false then report 'err'.
   if (!val) {
     throw new Error(err);
@@ -22,7 +22,7 @@ function error (val, err) {
 }
 
 const messages = {};
-function message (errorCode, args = []) {
+function message(errorCode, args = []) {
   let str = messages[errorCode];
   if (args) {
     args.forEach(function (arg, i) {
@@ -31,9 +31,10 @@ function message (errorCode, args = []) {
   }
   return errorCode + ": " + str;
 }
+exports.message = message;
 
 const reservedCodes = [];
-function reserveCodeRange (first, last, moduleName) {
+function reserveCodeRange(first, last, moduleName) {
   assert(first <= last, "Invalid code range");
   const noConflict = reservedCodes.every(function (range) {
     return last < range.first || first > range.last;
@@ -41,8 +42,9 @@ function reserveCodeRange (first, last, moduleName) {
   assert(noConflict, "Conflicting request for error code range");
   reservedCodes.push({ first, last, name: moduleName });
 }
+exports.reserveCodeRange = reserveCodeRange;
 
-function parseJSON (str) {
+function parseJSON(str) {
   try {
     return JSON.parse(str);
   } catch (e) {
@@ -52,7 +54,7 @@ function parseJSON (str) {
   }
 }
 
-function setMetadataBuilds (data, build) {
+function setMetadataBuilds(data, build) {
   if (typeof data !== "object" || data === null || data instanceof Array) {
     // We got nothing to hang the metadata on.
     return;
@@ -68,7 +70,7 @@ function setMetadataBuilds (data, build) {
   }
 }
 
-function getCompilerHost (lang, config) {
+function getCompilerHost(lang, config) {
   config = config || global.config || {};
   if (config.useLocalCompiles) {
     return "localhost";
@@ -79,7 +81,7 @@ function getCompilerHost (lang, config) {
   return `${lang.toLowerCase()}.artcompiler.com`;
 }
 
-function getCompilerPort (lang, config) {
+function getCompilerPort(lang, config) {
   config = config || global.config || {};
   if (config.useLocalCompiles) {
     return `5${lang.substring(1)}`;
@@ -90,20 +92,20 @@ function getCompilerPort (lang, config) {
   return "443";
 }
 
-function isNonEmptyString (str) {
+function isNonEmptyString(str) {
   return (typeof (str) === "string" && str.length > 0);
 }
 
-function isNonNullObject (obj) {
+function isNonNullObject(obj) {
   return (typeof obj === "object" && obj !== null);
 }
 
-function cleanAndTrimObj (str) {
+function cleanAndTrimObj(str) {
   if (!str) {
     return str;
   }
-  str = str.replace(new RegExp("'", "g"), "''");
-  str = str.replace(new RegExp("\n", "g"), " ");
+  str = str.replace(/'/g, "''");
+  str = str.replace(/\n/g, " ");
   while (str.charAt(0) === " ") {
     str = str.substring(1);
   }
@@ -113,11 +115,11 @@ function cleanAndTrimObj (str) {
   return str;
 }
 
-function cleanAndTrimSrc (str) {
+function cleanAndTrimSrc(str) {
   if (!str || typeof str !== "string") {
     return str;
   }
-  str = str.replace(new RegExp("'", "g"), "''");
+  str = str.replace(/'/g, "''");
   while (str.charAt(0) === " ") {
     str = str.substring(1);
   }
@@ -128,7 +130,7 @@ function cleanAndTrimSrc (str) {
 }
 
 // From http://javascript.about.com/library/blipconvert.htm
-function dot2num (dot) {
+function dot2num(dot) {
   const d = dot.split(".");
   const n = ((((((+d[0]) * 256) + (+d[1])) * 256) + (+d[2])) * 256) + (+d[3]);
   if (isNaN(n)) {
@@ -137,7 +139,7 @@ function dot2num (dot) {
   return n;
 }
 
-function num2dot (num) {
+function num2dot(num) {
   let d = num % 256;
   for (let i = 3; i > 0; i--) {
     num = Math.floor(num / 256);
@@ -146,34 +148,38 @@ function num2dot (num) {
   return d;
 }
 
-function statusCodeFromErrors (errs) {
+function statusCodeFromErrors(errs) {
   if (!Array.isArray(errs)) {
     errs = [errs];
   }
-  let statusCode;
-  return errs.some(
-    err => statusCode =
-      err.statusCode
-  ) && statusCode || 500;
+  for (const err in errs) {
+    if (err.statusCode) {
+      return err.statusCode;
+    }
+  }
+  return 500;
 }
 
-function messageFromErrors (errs) {
+function messageFromErrors(errs) {
   if (!Array.isArray(errs)) {
     errs = [errs];
   }
-  let message;
-  return errs.some(
-    err => message =
-      err.data && err.data.error ||
-      err.data
-  ) && message || "Internal error";
+  for (const err in errs) {
+    if (err.data) {
+      if (err.data.error) {
+        return err.data.error;
+      }
+      return err.data;
+    }
+  }
+  return "Internal error";
 }
 
 const INTERNAL_ERROR = {
   statusCode: 500,
   error: "Internal error"
 };
-function internalError (error) {
+function internalError(error) {
   return Object.assign(INTERNAL_ERROR, { error });
 }
 

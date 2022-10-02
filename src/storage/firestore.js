@@ -84,7 +84,7 @@ const buildTaskCreate = ({ db }) => async ({ task, auth }) => {
   return encodeId({ taskIds: [taskId] });
 };
 
-const buildCheckAuth = ({ }) => ({ taskDoc, auth }) => {
+const buildCheckAuth = () => ({ taskDoc, auth }) => {
   const acls = taskDoc.get("acls");
   if (!acls) {
     return;
@@ -102,7 +102,7 @@ const buildCheckAuth = ({ }) => ({ taskDoc, auth }) => {
 };
 
 const buildTaskGet = ({ db }) => {
-  const checkAuth = buildCheckAuth({});
+  const checkAuth = buildCheckAuth();
   return async ({ id, auth }) => {
     const taskIds = decodeId(id);
     const tasks = await Promise.all(

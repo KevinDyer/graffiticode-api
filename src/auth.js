@@ -26,7 +26,7 @@ exports.buildValidateToken = ({ authUrl = "https://auth.artcompiler.com" }) => {
   };
 };
 
-function postAuth (path, data, resume) {
+function postAuth(path, data, resume) {
   const encodedData = JSON.stringify(data);
   const options = {
     host: "auth.artcompiler.com",

@@ -43,7 +43,10 @@ const buildArtCompilerAuthApplication = () => {
     }
     res.status(200).json({ id });
   }));
-  app.use((err, req, res, next) => res.sendStatus(500));
+  app.use((err, req, res, next) => {
+    console.log(err);
+    res.sendStatus(500);
+  });
 
   return {
     app,

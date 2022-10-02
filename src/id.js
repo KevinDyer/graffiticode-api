@@ -3,7 +3,7 @@ const Hashids = require("hashids");
 
 const hashids = new Hashids("Art Compiler LLC"); // This string shall never change!
 
-function decodeID (id) {
+function decodeID(id) {
   // console.log('[1] decodeID() >> ' + id);
   // 123456, 123+534653+0, Px4xO423c, 123+123456+0+Px4xO423c, Px4xO423c+Px4xO423c
   if (id === undefined) {
@@ -52,7 +52,7 @@ function decodeID (id) {
   return ids;
 }
 
-function encodeID (ids) {
+function encodeID(ids) {
   // console.log('[1] encodeID() >> ' + JSON.stringify(ids));
   let length = ids.length;
   if (length >= 3 &&

@@ -8,7 +8,9 @@ describe("auth", () => {
     let validateToken;
     beforeEach(async () => {
       authApp = buildArtCompilerAuthApplication();
-      await new Promise(resolve => authServer = authApp.listen(resolve));
+      await new Promise(resolve => {
+        authServer = authApp.listen(resolve);
+      });
       validateToken = buildValidateToken({
         authUrl: `http://localhost:${authServer.address().port}`
       });

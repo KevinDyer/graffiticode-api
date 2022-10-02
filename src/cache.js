@@ -52,7 +52,7 @@ const buildRedisCacheDel = ({ client }) => async (id, type) => {
   await client.del(key);
 };
 
-const buildRedisCache = ({ }) => {
+const buildRedisCache = () => {
   const client = redis.createClient({ url: process.env.REDIS_URL });
   const get = buildRedisCacheGet({ client });
   const set = buildRedisCacheSet({ client });

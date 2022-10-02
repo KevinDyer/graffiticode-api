@@ -15,7 +15,13 @@ const normalizeTasksParameter = tasks => {
   return tasks;
 };
 
-const getIdFromIds = ids => ids.length === 1 && ids[0] || ids;
+const getIdFromIds = ids => {
+  if (ids.length === 1) {
+    return ids[0];
+  } else {
+    return ids;
+  }
+};
 
 const buildGetTaskHandler = ({ taskDaoFactory }) => {
   const getTaskDaoForRequest = buildGetTaskDaoForRequest(taskDaoFactory);

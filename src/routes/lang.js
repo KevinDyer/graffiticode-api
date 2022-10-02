@@ -4,7 +4,7 @@ const getLangIdFromRequest = (req) => {
   if (base === "lang" && Number.isInteger(id)) {
     return id;
   }
-  const re = new RegExp("^[Ll](\\d+)$");
+  const re = /^[Ll](\\d+)$/;
   const match = re.exec(base);
   if (!match) {
     const err = new Error("must provide a language identifier");

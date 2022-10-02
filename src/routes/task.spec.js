@@ -1,9 +1,9 @@
-const request = require("supertest");
-const { createApp } = require("../app");
-const { buildArtCompilerAuthApplication } = require("../testing/auth");
-const { clearFirestore } = require("../testing/firestore");
-const { TASK1, TASK2, TASK_ID1, TASK_ID2 } = require("../testing/fixture");
-const { createError, createErrorResponse, createSuccessResponse } = require("./utils");
+import request from "supertest";
+import { createApp } from "../app.js";
+import { buildArtCompilerAuthApplication } from "../testing/auth.js";
+import { clearFirestore } from "../testing/firestore.js";
+import { TASK1, TASK2, TASK_ID1, TASK_ID2 } from "../testing/fixture.js";
+import { createError, createErrorResponse, createSuccessResponse } from "./utils.js";
 
 describe("routes/task", () => {
   beforeEach(async () => {

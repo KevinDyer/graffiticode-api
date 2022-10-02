@@ -1,25 +1,20 @@
-const { Router } = require("express");
+import { Router } from "express";
+import { getConfig } from "./../config/index.js";
+import { pingLang, getAsset } from "./../lang/index.js";
+import { isNonEmptyString } from "./../util.js";
+import { buildConfigHandler } from "./config.js";
+import { buildLangRouter } from "./lang.js";
 
-const { getConfig } = require("./../config");
-const { pingLang, getAsset } = require("./../lang");
-const { isNonEmptyString } = require("./../util");
-
-const { buildConfigHandler } = require("./config");
-const { buildLangRouter } = require("./lang");
-
-const configHandler = buildConfigHandler({ getConfig });
-const langRouter = buildLangRouter({
+export const configHandler = buildConfigHandler({ getConfig });
+export const langRouter = buildLangRouter({
   newRouter: () => new Router(),
   isNonEmptyString,
   pingLang,
   getAsset
 });
 
-exports.auth = require("./auth");
-exports.compile = require("./compile");
-exports.data = require("./data");
-exports.root = require("./root");
-exports.task = require("./task");
-
-exports.langRouter = langRouter;
-exports.configHandler = configHandler;
+export { auth } from "./auth.js";
+export { compile } from "./compile.js";
+export { data } from "./data.js";
+export { root } from "./root.js";
+export { task } from "./task.js";

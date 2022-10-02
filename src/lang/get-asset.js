@@ -1,4 +1,4 @@
-const buildGetAsset = ({ getBaseUrlForLanguage, bent }) => {
+export const buildGetAsset = ({ getBaseUrlForLanguage, bent }) => {
   return async (lang, path) => {
     const baseUrl = getBaseUrlForLanguage(lang);
     const getLanguageAsset = bent(baseUrl, "string");
@@ -6,4 +6,3 @@ const buildGetAsset = ({ getBaseUrlForLanguage, bent }) => {
     return asset;
   };
 };
-exports.buildGetAsset = buildGetAsset;

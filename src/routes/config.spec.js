@@ -1,4 +1,4 @@
-const { buildConfigHandler } = require("./config");
+import { buildConfigHandler } from "./config.js";
 
 describe("routes", () => {
   describe("config", () => {

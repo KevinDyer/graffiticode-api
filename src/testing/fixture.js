@@ -1,5 +1,6 @@
-exports.TASK_ID1 = "yLimC0";
-exports.TASK1 = {
+export const TASK_ID1 = "yLimC0";
+
+export const TASK1 = {
   lang: "0",
   code: {
     1: { tag: "STR", elts: ["hello, world!"] },
@@ -9,10 +10,11 @@ exports.TASK1 = {
     version: "1"
   }
 };
-exports.DATA1 = "hello, world!";
 
-exports.TASK_ID2 = "WaiqIp";
-exports.TASK2 = {
+export const DATA1 = "hello, world!";
+export const TASK_ID2 = "WaiqIp";
+
+export const TASK2 = {
   lang: "0",
   code: {
     1: { tag: "STR", elts: ["goodbye, world!"] },
@@ -22,4 +24,5 @@ exports.TASK2 = {
     version: "1"
   }
 };
-exports.DATA2 = "goodbye, world!";
+
+export const DATA2 = "goodbye, world!";

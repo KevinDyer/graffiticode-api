@@ -1,5 +1,5 @@
-const { buildGetBaseUrlForLanguage } = require("./base-url");
-const { isNonEmptyString } = require("../util");
+import { buildGetBaseUrlForLanguage } from "./base-url.js";
+import { isNonEmptyString } from "../util.js";
 
 describe("baseUrl", () => {
   it("should throw if lang is not a string", async () => {

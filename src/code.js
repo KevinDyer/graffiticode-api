@@ -67,7 +67,7 @@ function objectChildToCode(data) {
   return node;
 }
 
-function objectToCode(data) {
+export function objectToCode(data) {
   if (!data || Object.keys(data).length === 0) {
     return null;
   }
@@ -76,7 +76,6 @@ function objectToCode(data) {
   intern(objectChildToCode(data));
   return poolToObject();
 }
-exports.objectToCode = objectToCode;
 
 function poolToObject() {
   const obj = {};

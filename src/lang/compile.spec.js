@@ -1,4 +1,4 @@
-const { buildCompile } = require("./compile.js");
+import { buildCompile } from "./compile.js";
 
 describe("compile", () => {
   it("should return language response", async () => {

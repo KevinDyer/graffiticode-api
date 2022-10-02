@@ -1,6 +1,6 @@
-const request = require("supertest");
-const { createApp } = require("./app");
-const { buildArtCompilerAuthApplication } = require("./testing/auth");
+import request from "supertest";
+import { createApp } from "./app.js";
+import { buildArtCompilerAuthApplication } from "./testing/auth.js";
 
 describe("api", () => {
   let authApp;

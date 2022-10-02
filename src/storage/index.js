@@ -3,10 +3,10 @@ const buildCreate = ({ cache }) => ({ type = "memory" } = {}) => {
   if (!cache.has(type)) {
     let taskDao;
     if (type === "memory") {
-      const { buildMemoryTaskDao } = require("./memory");
+      const { buildMemoryTaskDao } = require("./memory.js");
       taskDao = buildMemoryTaskDao();
     } else if (type === "firestore") {
-      const { buildFirestoreTaskDao, createFirestoreDb } = require("./firestore");
+      const { buildFirestoreTaskDao, createFirestoreDb } = require("./firestore.js");
       const db = createFirestoreDb({});
       taskDao = buildFirestoreTaskDao({ db });
     } else {
@@ -17,9 +17,8 @@ const buildCreate = ({ cache }) => ({ type = "memory" } = {}) => {
   return cache.get(type);
 };
 
-const buildTaskDaoFactory = () => {
+export const buildTaskDaoFactory = () => {
   const cache = new Map();
   const create = buildCreate({ cache });
   return { create };
 };
-exports.buildTaskDaoFactory = buildTaskDaoFactory;

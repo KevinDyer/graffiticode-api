@@ -14,7 +14,7 @@ const assert = (function assert() {
       };
 })();
 
-function error(val, err) {
+export function error(val, err) {
   // If 'val' is false then report 'err'.
   if (!val) {
     throw new Error(err);
@@ -22,7 +22,7 @@ function error(val, err) {
 }
 
 const messages = {};
-function message(errorCode, args = []) {
+export function message(errorCode, args = []) {
   let str = messages[errorCode];
   if (args) {
     args.forEach(function (arg, i) {
@@ -31,10 +31,9 @@ function message(errorCode, args = []) {
   }
   return errorCode + ": " + str;
 }
-exports.message = message;
 
 const reservedCodes = [];
-function reserveCodeRange(first, last, moduleName) {
+export function reserveCodeRange(first, last, moduleName) {
   assert(first <= last, "Invalid code range");
   const noConflict = reservedCodes.every(function (range) {
     return last < range.first || first > range.last;
@@ -42,9 +41,8 @@ function reserveCodeRange(first, last, moduleName) {
   assert(noConflict, "Conflicting request for error code range");
   reservedCodes.push({ first, last, name: moduleName });
 }
-exports.reserveCodeRange = reserveCodeRange;
 
-function parseJSON(str) {
+export function parseJSON(str) {
   try {
     return JSON.parse(str);
   } catch (e) {
@@ -54,7 +52,7 @@ function parseJSON(str) {
   }
 }
 
-function setMetadataBuilds(data, build) {
+export function setMetadataBuilds(data, build) {
   if (typeof data !== "object" || data === null || data instanceof Array) {
     // We got nothing to hang the metadata on.
     return;
@@ -70,7 +68,7 @@ function setMetadataBuilds(data, build) {
   }
 }
 
-function getCompilerHost(lang, config) {
+export function getCompilerHost(lang, config) {
   config = config || global.config || {};
   if (config.useLocalCompiles) {
     return "localhost";
@@ -81,7 +79,7 @@ function getCompilerHost(lang, config) {
   return `${lang.toLowerCase()}.artcompiler.com`;
 }
 
-function getCompilerPort(lang, config) {
+export function getCompilerPort(lang, config) {
   config = config || global.config || {};
   if (config.useLocalCompiles) {
     return `5${lang.substring(1)}`;
@@ -92,15 +90,15 @@ function getCompilerPort(lang, config) {
   return "443";
 }
 
-function isNonEmptyString(str) {
+export function isNonEmptyString(str) {
   return (typeof (str) === "string" && str.length > 0);
 }
 
-function isNonNullObject(obj) {
+export function isNonNullObject(obj) {
   return (typeof obj === "object" && obj !== null);
 }
 
-function cleanAndTrimObj(str) {
+export function cleanAndTrimObj(str) {
   if (!str) {
     return str;
   }
@@ -115,7 +113,7 @@ function cleanAndTrimObj(str) {
   return str;
 }
 
-function cleanAndTrimSrc(str) {
+export function cleanAndTrimSrc(str) {
   if (!str || typeof str !== "string") {
     return str;
   }
@@ -130,7 +128,7 @@ function cleanAndTrimSrc(str) {
 }
 
 // From http://javascript.about.com/library/blipconvert.htm
-function dot2num(dot) {
+export function dot2num(dot) {
   const d = dot.split(".");
   const n = ((((((+d[0]) * 256) + (+d[1])) * 256) + (+d[2])) * 256) + (+d[3]);
   if (isNaN(n)) {
@@ -139,7 +137,7 @@ function dot2num(dot) {
   return n;
 }
 
-function num2dot(num) {
+export function num2dot(num) {
   let d = num % 256;
   for (let i = 3; i > 0; i--) {
     num = Math.floor(num / 256);
@@ -148,7 +146,7 @@ function num2dot(num) {
   return d;
 }
 
-function statusCodeFromErrors(errs) {
+export function statusCodeFromErrors(errs) {
   if (!Array.isArray(errs)) {
     errs = [errs];
   }
@@ -160,7 +158,7 @@ function statusCodeFromErrors(errs) {
   return 500;
 }
 
-function messageFromErrors(errs) {
+export function messageFromErrors(errs) {
   if (!Array.isArray(errs)) {
     errs = [errs];
   }
@@ -179,21 +177,6 @@ const INTERNAL_ERROR = {
   statusCode: 500,
   error: "Internal error"
 };
-function internalError(error) {
+export function internalError(error) {
   return Object.assign(INTERNAL_ERROR, { error });
 }
-
-exports.getCompilerHost = getCompilerHost;
-exports.getCompilerPort = getCompilerPort;
-exports.setMetadataBuilds = setMetadataBuilds;
-exports.isNonEmptyString = isNonEmptyString;
-exports.isNonNullObject = isNonNullObject;
-exports.parseJSON = parseJSON;
-exports.cleanAndTrimObj = cleanAndTrimObj;
-exports.cleanAndTrimSrc = cleanAndTrimSrc;
-exports.dot2num = dot2num;
-exports.num2dot = num2dot;
-exports.error = error;
-exports.statusCodeFromErrors = statusCodeFromErrors;
-exports.messageFromErrors = messageFromErrors;
-exports.internalError = internalError;

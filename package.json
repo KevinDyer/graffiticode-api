@@ -32,7 +32,8 @@
     "test": "firebase emulators:exec --ui \"jest --runInBand\"",
     "dev": "firebase emulators:exec --ui \"nodemon --exec \\\"jest --runInBand && npm start\\\"\"",
     "coverage": "nyc npm run test",
-    "lint": "eslint src/ tools/"
+    "lint": "eslint src/ tools/",
+    "lint:fix": "eslint --fix src/ tools/"
   },
   "engines": {
     "node": "^16.13.1"

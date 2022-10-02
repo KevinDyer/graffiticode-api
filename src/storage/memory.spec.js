@@ -1,5 +1,5 @@
-const { buildMemoryTaskDao } = require("./memory");
-const { TASK1, TASK_ID1, TASK2 } = require("../testing/fixture");
+import { buildMemoryTaskDao } from "./memory.js";
+import { TASK1, TASK_ID1, TASK2 } from "../testing/fixture.js";
 
 describe("storage/memory", () => {
   let taskDao = null;

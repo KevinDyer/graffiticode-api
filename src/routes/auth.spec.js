@@ -1,8 +1,7 @@
-const express = require("express");
-const request = require("supertest");
-const { UnauthenticatedError } = require("../errors/http");
-
-const buildAuthHandler = require("./auth");
+import express from "express";
+import request from "supertest";
+import { UnauthenticatedError } from "../errors/http.js";
+import buildAuthHandler from "./auth.js";
 
 describe("routes/auth", () => {
   let validateToken;

@@ -1,4 +1,4 @@
-const buildGetBaseUrlForLanguage = ({
+export const buildGetBaseUrlForLanguage = ({
   isNonEmptyString,
   env,
   getConfig,
@@ -23,5 +23,3 @@ const buildGetBaseUrlForLanguage = ({
   }
   return `${protocol}://${host}:${port}`;
 };
-
-exports.buildGetBaseUrlForLanguage = buildGetBaseUrlForLanguage;

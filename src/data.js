@@ -19,6 +19,6 @@ const buildGetData = ({ compile }) =>
     return obj;
   };
 
-exports.buildDataApi = ({ compile }) => {
+export const buildDataApi = ({ compile }) => {
   return { get: buildGetData({ compile }) };
 };

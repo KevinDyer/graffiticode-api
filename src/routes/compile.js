@@ -1,12 +1,14 @@
-const { Router } = require("express");
-const {
+import { Router } from "express";
+
+import {
   buildHttpHandler,
   createSuccessResponse,
   parseAuthFromRequest,
   optionsHandler
-} = require("./utils");
-const { isNonNullObject } = require("../util");
-const { InvalidArgumentError } = require("../errors/http");
+} from "./utils.js";
+
+import { isNonNullObject } from "../util.js";
+import { InvalidArgumentError } from "../errors/http.js";
 
 const buildPostCompileHandler = ({ compile }) => buildHttpHandler(async (req, res) => {
   const auth = parseAuthFromRequest(req);
@@ -23,7 +25,7 @@ const buildPostCompileHandler = ({ compile }) => buildHttpHandler(async (req, re
   res.status(200).json(createSuccessResponse(obj));
 });
 
-module.exports = ({ compile }) => {
+export default ({ compile }) => {
   const router = new Router();
   router.post("/", buildPostCompileHandler({ compile }));
   router.options("/", optionsHandler);

@@ -1,5 +1,5 @@
-const bent = require("bent");
-const { TASK1, TASK2 } = require("../src/testing/fixture");
+import bent from "bent";
+import { TASK1, TASK2 } from "../src/testing/fixture.js";
 
 // const baseUrl = "https://api.graffiticode.org";
 const baseUrl = "https://firestore---graffiticode-api-sja7fatcta-uc.a.run.app/";

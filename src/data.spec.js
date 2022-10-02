@@ -1,7 +1,7 @@
-const { buildDataApi } = require("./data");
-const { buildTaskDaoFactory } = require("./storage");
-const { clearFirestore } = require("./testing/firestore");
-const { DATA1, DATA2, TASK1, TASK2 } = require("./testing/fixture");
+import { buildDataApi } from "./data.js";
+import { buildTaskDaoFactory } from "./storage/index.js";
+import { clearFirestore } from "./testing/firestore.js";
+import { DATA1, DATA2, TASK1, TASK2 } from "./testing/fixture.js";
 
 describe("data", () => {
   beforeEach(async () => {

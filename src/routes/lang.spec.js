@@ -1,9 +1,9 @@
-const express = require("express");
-const request = require("supertest");
+import express from "express";
+import request from "supertest";
+import { buildLangRouter } from "./lang.js";
+import { isNonEmptyString } from "../util.js";
 
 const { Router } = express;
-const { buildLangRouter } = require("./lang.js");
-const { isNonEmptyString } = require("../util");
 
 describe.each([
   ["path param with L", (l, p) => `/L${l}${p}`],

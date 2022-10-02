@@ -1,4 +1,4 @@
-const { buildPingLang } = require("./ping-lang.js");
+import { buildPingLang } from "./ping-lang.js";
 
 describe("pingLang", () => {
   const log = jest.fn();

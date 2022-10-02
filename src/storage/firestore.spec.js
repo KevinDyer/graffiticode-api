@@ -1,6 +1,6 @@
-const { buildFirestoreTaskDao, encodeId, createFirestoreDb } = require("./firestore");
-const { TASK1, TASK2 } = require("../testing/fixture");
-const { clearFirestore } = require("../testing/firestore");
+import { buildFirestoreTaskDao, encodeId, createFirestoreDb } from "./firestore.js";
+import { TASK1, TASK2 } from "../testing/fixture.js";
+import { clearFirestore } from "../testing/firestore.js";
 
 describe("storage/firestore", () => {
   beforeEach(async () => {

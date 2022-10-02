@@ -1,9 +1,9 @@
-const assert = require("assert");
-const Hashids = require("hashids");
+import assert from "assert";
+import Hashids from "hashids";
 
 const hashids = new Hashids("Art Compiler LLC"); // This string shall never change!
 
-function decodeID(id) {
+export function decodeID(id) {
   // console.log('[1] decodeID() >> ' + id);
   // 123456, 123+534653+0, Px4xO423c, 123+123456+0+Px4xO423c, Px4xO423c+Px4xO423c
   if (id === undefined) {
@@ -52,7 +52,7 @@ function decodeID(id) {
   return ids;
 }
 
-function encodeID(ids) {
+export function encodeID(ids) {
   // console.log('[1] encodeID() >> ' + JSON.stringify(ids));
   let length = ids.length;
   if (length >= 3 &&
@@ -75,6 +75,3 @@ function encodeID(ids) {
   // console.log('[2] encodeID() << ' + id);
   return id;
 }
-
-module.exports.decodeID = decodeID;
-module.exports.encodeID = encodeID;

@@ -1,8 +1,4 @@
-const {
-  getCompilerHost,
-  getCompilerPort,
-  isNonEmptyString
-} = require("./util");
+import { getCompilerHost, getCompilerPort, isNonEmptyString } from "./util.js";
 
 describe("util", () => {
   describe("getCompilerHost", () => {

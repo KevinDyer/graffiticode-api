@@ -1,4 +1,4 @@
-const { buildGetConfig } = require("./config.js");
+import { buildGetConfig } from "./config.js";
 
 describe("config", () => {
   it("return the global", () => {

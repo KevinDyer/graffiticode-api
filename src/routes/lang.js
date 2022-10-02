@@ -20,7 +20,7 @@ const getLangIdFromRequest = (req) => {
   return id;
 };
 
-const buildLangRouter = ({ newRouter, pingLang, getAsset, isNonEmptyString }) => {
+export const buildLangRouter = ({ newRouter, pingLang, getAsset, isNonEmptyString }) => {
   const router = newRouter();
   router.get("/", async (req, res, next) => {
     try {
@@ -45,4 +45,3 @@ const buildLangRouter = ({ newRouter, pingLang, getAsset, isNonEmptyString }) =>
   });
   return router;
 };
-exports.buildLangRouter = buildLangRouter;

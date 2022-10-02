@@ -1,29 +1,29 @@
-const errorHandler = require("errorhandler");
-const express = require("express");
-const methodOverride = require("method-override");
-const morgan = require("morgan");
-const { buildValidateToken } = require("./auth");
-
-const { buildCompile } = require("./comp");
-const { buildDataApi } = require("./data");
-const { compile: langCompile } = require("./lang");
-const routes = require("./routes");
-const { buildTaskDaoFactory } = require("./storage");
-
-const port = global.port = process.env.PORT || 3100;
-const env = process.env.NODE_ENV || "development";
-
-require("events").EventEmitter.defaultMaxListeners = 15;
+import EventEmitter from "events";
+import errorHandler from "errorhandler";
+import express from "express";
+import methodOverride from "method-override";
+import morgan from "morgan";
+import { buildValidateToken } from "./auth.js";
+import { buildCompile } from "./comp.js";
+import { buildDataApi } from "./data.js";
+import { compile as langCompile } from "./lang/index.js";
+import routes from "./routes/index.js";
+import { buildTaskDaoFactory } from "./storage/index.js";
 
 // This line is required to ensure the typescript compiler moves the default
 // config into the build directory.
 // TODO(kevindyer) Refactor the creation of the app to inject the config
-require("./../config/config.json");
+import "./../config/config.json";
+
+EventEmitter.defaultMaxListeners = 15;
+
+const port = global.port = process.env.PORT || 3100;
+const env = process.env.NODE_ENV || "development";
 
 global.config = require(process.env.CONFIG || "./../config/config.json");
 global.config.useLocalCompiles = process.env.LOCAL_COMPILES === "true";
 
-const createApp = ({ authUrl } = {}) => {
+export const createApp = ({ authUrl } = {}) => {
   const compile = buildCompile({ langCompile });
   const taskDaoFactory = buildTaskDaoFactory({});
   const dataApi = buildDataApi({ compile });
@@ -74,8 +74,6 @@ const createApp = ({ authUrl } = {}) => {
 
   return app;
 };
-
-exports.createApp = createApp;
 
 if (!module.parent) {
   const app = createApp();

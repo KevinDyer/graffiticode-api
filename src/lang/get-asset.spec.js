@@ -1,4 +1,4 @@
-const { buildGetAsset } = require("./get-asset.js");
+import { buildGetAsset } from "./get-asset.js";
 
 describe("getAsset", () => {
   it("should returned fetched asset", async () => {

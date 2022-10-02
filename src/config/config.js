@@ -1,4 +1,3 @@
-const buildGetConfig = ({ global }) => {
+export const buildGetConfig = ({ global }) => {
   return () => global.config;
 };
-exports.buildGetConfig = buildGetConfig;

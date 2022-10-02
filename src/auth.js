@@ -1,8 +1,8 @@
-const bent = require("bent");
-const https = require("https");
-const { UnauthenticatedError } = require("./errors/http");
+import bent from "bent";
+import https from "https";
+import { UnauthenticatedError } from "./errors/http.js";
 
-exports.buildValidateToken = ({ authUrl = "https://auth.artcompiler.com" }) => {
+export const buildValidateToken = ({ authUrl = "https://auth.artcompiler.com" }) => {
   // Note: The ArtCompiler application will respond with either a
   // - 401 Unauthenticated
   // - 200 OK with a body containing the user id.
@@ -26,7 +26,7 @@ exports.buildValidateToken = ({ authUrl = "https://auth.artcompiler.com" }) => {
   };
 };
 
-function postAuth(path, data, resume) {
+export function postAuth(path, data, resume) {
   const encodedData = JSON.stringify(data);
   const options = {
     host: "auth.artcompiler.com",
@@ -65,4 +65,3 @@ function postAuth(path, data, resume) {
     resume(err);
   });
 }
-exports.postAuth = postAuth;

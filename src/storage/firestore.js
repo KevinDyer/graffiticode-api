@@ -1,17 +1,16 @@
-const { createHash } = require("crypto");
-const { NotFoundError, DecodeIdError } = require("../errors/http");
-const admin = require("firebase-admin");
+import { createHash } from "crypto";
+import { NotFoundError, DecodeIdError } from "../errors/http.js";
+import admin from "firebase-admin";
 
 const createCodeHash = code =>
   createHash("sha256")
     .update(JSON.stringify(code))
     .digest("hex");
 
-const encodeId = ({ taskIds }) => {
+export const encodeId = ({ taskIds }) => {
   const idObj = { taskIds };
   return Buffer.from(JSON.stringify(idObj), "utf8").toString("base64url");
 };
-exports.encodeId = encodeId;
 
 const decodeIdPart = id => {
   let taskIds;
@@ -122,14 +121,13 @@ const buildTaskGet = ({ db }) => {
   };
 };
 
-const buildFirestoreTaskDao = ({ db }) => {
+export const buildFirestoreTaskDao = ({ db }) => {
   const create = buildTaskCreate({ db });
   const get = buildTaskGet({ db });
   return { create, get, appendIds };
 };
-exports.buildFirestoreTaskDao = buildFirestoreTaskDao;
 
-const buildCreateFirestoreDb = () => {
+export const buildCreateFirestoreDb = () => {
   let db;
   return () => {
     if (!db) {
@@ -139,4 +137,4 @@ const buildCreateFirestoreDb = () => {
     return db;
   };
 };
-exports.createFirestoreDb = buildCreateFirestoreDb();
+export const createFirestoreDb = buildCreateFirestoreDb();

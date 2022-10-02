@@ -1,4 +1,4 @@
-const { decodeID, encodeID } = require("./id");
+import { decodeID, encodeID } from "./id.js";
 
 describe("id", () => {
   describe("decodeID", () => {

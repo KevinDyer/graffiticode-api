@@ -1,7 +1,7 @@
-const request = require("supertest");
-const { createApp } = require("../app");
-const { TASK1, DATA1 } = require("../testing/fixture");
-const { createSuccessResponse, createErrorResponse, createError } = require("./utils");
+import request from "supertest";
+import { createApp } from "../app.js";
+import { TASK1, DATA1 } from "../testing/fixture.js";
+import { createSuccessResponse, createErrorResponse, createError } from "./utils.js";
 
 describe("routes/compile", () => {
   let app;

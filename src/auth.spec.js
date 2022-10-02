@@ -1,5 +1,5 @@
-const { buildValidateToken } = require("./auth");
-const { buildArtCompilerAuthApplication } = require("./testing/auth");
+import { buildValidateToken } from "./auth.js";
+import { buildArtCompilerAuthApplication } from "./testing/auth.js";
 
 describe("auth", () => {
   describe("validateToken", () => {

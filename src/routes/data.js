@@ -1,13 +1,14 @@
-const { Router } = require("express");
-const { InvalidArgumentError } = require("../errors/http");
-const {
+import { Router } from "express";
+import { InvalidArgumentError } from "../errors/http.js";
+
+import {
   buildGetTaskDaoForRequest,
   buildHttpHandler,
   createSuccessResponse,
   parseIdsFromRequest,
   parseAuthFromRequest,
   optionsHandler
-} = require("./utils");
+} from "./utils.js";
 
 const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
   const getTaskDaoForRequest = buildGetTaskDaoForRequest(taskDaoFactory);
@@ -34,7 +35,7 @@ const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
   });
 };
 
-module.exports = ({ taskDaoFactory, dataApi }) => {
+export default ({ taskDaoFactory, dataApi }) => {
   const router = new Router();
   router.get("/", buildGetDataHandler({ taskDaoFactory, dataApi }));
   router.options("/", optionsHandler);

@@ -1,5 +1,5 @@
-const { buildCompile } = require("./comp");
-const { DATA1, TASK1 } = require("./testing/fixture");
+import { buildCompile } from "./comp.js";
+import { DATA1, TASK1 } from "./testing/fixture.js";
 
 describe("comp", () => {
   describe("compile", () => {

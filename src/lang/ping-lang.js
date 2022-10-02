@@ -1,6 +1,6 @@
 const noop = _ => { };
 
-const buildPingLang = ({ getBaseUrlForLanguage, bent, log }) => {
+export const buildPingLang = ({ getBaseUrlForLanguage, bent, log }) => {
   const cache = new Map();
 
   const pingLangInternal = async (lang) => {
@@ -32,4 +32,3 @@ const buildPingLang = ({ getBaseUrlForLanguage, bent, log }) => {
     return pong;
   };
 };
-exports.buildPingLang = buildPingLang;

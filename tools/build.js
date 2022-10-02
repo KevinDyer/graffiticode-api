@@ -1,8 +1,9 @@
 const fs = require("fs");
 const { execSync } = require("child_process");
 
-function rmdir (path) {
-  try { var files = fs.readdirSync(path); } catch (e) { return; }
+function rmdir(path) {
+  let files;
+  try { files = fs.readdirSync(path); } catch (e) { return; }
   if (files.length > 0) {
     for (let i = 0; i < files.length; i++) {
       const filePath = path + "/" + files[i];
@@ -20,31 +21,31 @@ function rmdir (path) {
   fs.rmdirSync(path);
 }
 
-function mkdir (path) {
+function mkdir(path) {
   fs.mkdirSync(path);
 }
 
-function cldir (path) {
+function cldir(path) {
   rmdir(path);
   mkdir(path);
 }
 
-function exec (cmd, args) {
+function exec(cmd, args) {
   const result = execSync(cmd, args);
   return result;
 }
 
-function clean () {
+function clean() {
   console.log("Cleaning...");
   cldir("./build");
 }
 
-function compile () {
+function compile() {
   console.log("Compiling...");
   exec("tsc");
 }
 
-function bundle () {
+function bundle() {
   console.log("Bundling...");
   exec("cp -r ./config ./build/config");
   exec("cp build.json ./build");
@@ -64,7 +65,7 @@ const build = async () => {
   }
 };
 
-function prebuild () {
+function prebuild() {
   const commit = String(exec("git rev-parse HEAD")).trim().slice(0, 7);
   const build = {
     name: "api",

@@ -4,7 +4,7 @@ pg.defaults.ssl = true;
 
 load();
 
-function load () {
+function load() {
   const obj = [];
   const hash = {};
   const emptyCount = 0; const eraseCount = 0;
@@ -18,7 +18,7 @@ function load () {
   });
 }
 
-function insertItems (items, resume) {
+function insertItems(items, resume) {
   if (items.length === 0) {
     resume();
   } else {
@@ -30,7 +30,7 @@ function insertItems (items, resume) {
   }
 }
 
-function insertItem (src, resume) {
+function insertItem(src, resume) {
   const lang = "L107";
   const user = "0";
   const label = "new";
@@ -55,7 +55,7 @@ function insertItem (src, resume) {
   });
 }
 
-function cleanAndTrimSrc (str) {
+function cleanAndTrimSrc(str) {
   if (!str || typeof str !== "string") {
     return str;
   }
@@ -70,7 +70,7 @@ function cleanAndTrimSrc (str) {
 }
 
 const DB = process.env.DATABASE_URL;
-function dbQuery (query, resume) {
+function dbQuery(query, resume) {
   pg.connect(DB, function (err, client, done) {
     // If there is an error, client is null and done is a noop
     if (err) {

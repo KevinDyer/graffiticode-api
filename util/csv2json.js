@@ -36,7 +36,7 @@
   };
 
   // Picks the separator we find the most.
-  function detectSeparator (csv) {
+  function detectSeparator(csv) {
     const counts = {};
     let sepMax;
     separators.forEach(function (sep, i) {
@@ -48,7 +48,7 @@
   }
 
   // Source: https://stackoverflow.com/questions/4856717/javascript-equivalent-of-pythons-zip-function
-  function zip () {
+  function zip() {
     const args = [].slice.call(arguments);
     const longest = args.reduce(function (a, b) {
       return a.length > b.length ? a : b;
@@ -61,7 +61,7 @@
     });
   }
 
-  function convert (csv, options) {
+  function convert(csv, options) {
     options || (options = {});
     if (csv.length == 0) throw errorEmpty;
 
@@ -126,7 +126,7 @@
      *
      */
 
-    function quote (s) {
+    function quote(s) {
       /*
        * ECMA-262, 5th ed., 7.8.4: All characters may appear literally in a
        * string literal except for the closing quote character, backslash,
@@ -180,7 +180,7 @@
         let rightmostFailuresPos = 0;
         let rightmostFailuresExpected = [];
 
-        function padLeft (input, padding, length) {
+        function padLeft(input, padding, length) {
           let result = input;
 
           const padLength = length - input.length;
@@ -191,7 +191,7 @@
           return result;
         }
 
-        function escape (ch) {
+        function escape(ch) {
           const charCode = ch.charCodeAt(0);
           let escapeChar;
           let length;
@@ -207,7 +207,7 @@
           return "\\" + escapeChar + padLeft(charCode.toString(16).toUpperCase(), "0", length);
         }
 
-        function matchFailed (failure) {
+        function matchFailed(failure) {
           if (pos < rightmostFailuresPos) {
             return;
           }
@@ -220,7 +220,7 @@
           rightmostFailuresExpected.push(failure);
         }
 
-        function parse_comma () {
+        function parse_comma() {
           let result0, result1;
           let pos0, pos1;
 
@@ -248,7 +248,7 @@
           return result0;
         }
 
-        function parse_semicolon () {
+        function parse_semicolon() {
           let result0, result1;
           let pos0, pos1;
 
@@ -276,7 +276,7 @@
           return result0;
         }
 
-        function parse_tab () {
+        function parse_tab() {
           let result0, result1;
           let pos0, pos1;
 
@@ -304,7 +304,7 @@
           return result0;
         }
 
-        function parse_sv () {
+        function parse_sv() {
           let result0, result1, result2, result3, result4;
           let pos0, pos1, pos2, pos3;
 
@@ -481,7 +481,7 @@
           return result0;
         }
 
-        function parse_line () {
+        function parse_line() {
           let result0, result1, result2, result3, result4;
           let pos0, pos1, pos2, pos3;
 
@@ -588,7 +588,7 @@
           return result0;
         }
 
-        function parse_field () {
+        function parse_field() {
           let result0, result1, result2;
           let pos0, pos1, pos2;
 
@@ -714,7 +714,7 @@
           return result0;
         }
 
-        function parse_char () {
+        function parse_char() {
           let result0, result1;
           let pos0, pos1;
 
@@ -769,7 +769,7 @@
           return result0;
         }
 
-        function cleanupExpected (expected) {
+        function cleanupExpected(expected) {
           expected.sort();
 
           let lastExpected = null;
@@ -783,7 +783,7 @@
           return cleanExpected;
         }
 
-        function computeErrorPosition () {
+        function computeErrorPosition() {
           /*
            * The first idea was to use |String.split| to break the input up to the
            * error position along newlines and derive the line and column from
@@ -866,7 +866,7 @@
     /* Thrown when a parser encounters a syntax error. */
 
     result.SyntaxError = function (expected, found, offset, line, column) {
-      function buildMessage (expected, found) {
+      function buildMessage(expected, found) {
         let expectedHumanized, foundHumanized;
 
         switch (expected.length) {

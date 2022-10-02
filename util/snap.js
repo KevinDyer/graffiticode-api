@@ -1,5 +1,5 @@
 "use strict";
-function waitFor (testFx, onReady, timeOutMillis) {
+function waitFor(testFx, onReady, timeOutMillis) {
   const maxtimeOutMillis = timeOutMillis || 3000; // < Default Max Timout is 3s
   const start = new Date().getTime();
   let condition = false;
@@ -52,7 +52,7 @@ const t0 = new Date();
 page.open("https://acx.ac/s/JePIZ7g4fx", function () {
 // page.open('http://www.google.com', function() {
   console.log("hello");
-  function checkLoaded (t0) {
+  function checkLoaded(t0) {
     const td = new Date() - t0;
     if (td > 10000) {
       console.log("Aborting. Page taking too long to load.");

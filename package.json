@@ -31,7 +31,8 @@
     "start": "node -r @graffiticode/tracing src/app.js",
     "test": "firebase emulators:exec --ui \"jest --runInBand\"",
     "dev": "firebase emulators:exec --ui \"nodemon --exec \\\"jest --runInBand && npm start\\\"\"",
-    "coverage": "nyc npm run test"
+    "coverage": "nyc npm run test",
+    "lint": "eslint src/ tools/"
   },
   "engines": {
     "node": "^16.13.1"

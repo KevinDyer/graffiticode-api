@@ -2,6 +2,7 @@ import express from "express";
 import request from "supertest";
 import { jest } from "@jest/globals";
 import { buildLangRouter } from "./lang.js";
+import { createApp } from "../app.js";
 import { isNonEmptyString } from "../util.js";
 
 const { Router } = express;
@@ -50,6 +51,18 @@ describe.each([
     // Act
     await request(app)
       .get(getPath("ab", "/thing"))
+      .expect(400);
+
+    // Assert
+  });
+
+  it("should return 400 if lang id is NaN", async () => {
+    // Arrange
+    const app = createApp();
+
+    // Act
+    await request(app)
+      .get(getPath("NaN", ""))
       .expect(400);
 
     // Assert

@@ -1,3 +1,6 @@
+import { InvalidArgumentError } from "../errors/http.js";
+import { buildHttpHandler } from "./utils.js";
+
 const getLangIdFromRequest = (req) => {
   const [, base] = req.baseUrl.split("/");
   let id = Number.parseInt(req.query.id);
@@ -7,9 +10,7 @@ const getLangIdFromRequest = (req) => {
   const re = /^[Ll](\d+)$/;
   const match = re.exec(base);
   if (!match) {
-    const err = new Error("must provide a language identifier");
-    err.statusCode = 400;
-    throw err;
+    throw new InvalidArgumentError("must provide a language identifier");
   }
   id = Number.parseInt(match[1]);
   if (!Number.isInteger(id)) {
@@ -22,26 +23,22 @@ const getLangIdFromRequest = (req) => {
 
 export const buildLangRouter = ({ newRouter, pingLang, getAsset, isNonEmptyString }) => {
   const router = newRouter();
-  router.get("/", async (req, res, next) => {
-    try {
-      const langId = getLangIdFromRequest(req);
-      const lang = `L${langId}`;
-      const [, , path] = req.baseUrl.split("/");
-      const pong = await pingLang(lang);
-      if (!pong) {
-        res.sendStatus(404);
-      } else if (isNonEmptyString(path)) {
-        const asset = await getAsset(lang, `/${path}`);
-        if (path.indexOf(".svg") > 0) {
-          res.setHeader("Content-Type", "image/svg+xml");
-        }
-        res.send(asset);
-      } else {
-        res.sendStatus(200);
+  router.get("/", buildHttpHandler(async (req, res) => {
+    const langId = getLangIdFromRequest(req);
+    const lang = `L${langId}`;
+    const [, , path] = req.baseUrl.split("/");
+    const pong = await pingLang(lang);
+    if (!pong) {
+      res.sendStatus(404);
+    } else if (isNonEmptyString(path)) {
+      const asset = await getAsset(lang, `/${path}`);
+      if (path.indexOf(".svg") > 0) {
+        res.setHeader("Content-Type", "image/svg+xml");
       }
-    } catch (err) {
-      next(err);
+      res.send(asset);
+    } else {
+      res.sendStatus(200);
     }
-  });
+  }));
   return router;
 };

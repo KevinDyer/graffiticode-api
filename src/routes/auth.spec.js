@@ -1,5 +1,6 @@
 import express from "express";
 import request from "supertest";
+import { jest } from "@jest/globals";
 import { UnauthenticatedError } from "../errors/http.js";
 import buildAuthHandler from "./auth.js";
 

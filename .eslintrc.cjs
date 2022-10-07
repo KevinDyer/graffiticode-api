@@ -24,4 +24,4 @@ module.exports = {
     'import/no-commonjs': 2,
     'import/extensions': [2, 'ignorePackages']
   }
-}
+};

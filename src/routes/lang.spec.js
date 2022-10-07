@@ -1,5 +1,6 @@
 import express from "express";
 import request from "supertest";
+import { jest } from "@jest/globals";
 import { buildLangRouter } from "./lang.js";
 import { isNonEmptyString } from "../util.js";
 

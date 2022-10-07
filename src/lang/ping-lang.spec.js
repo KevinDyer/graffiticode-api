@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { buildPingLang } from "./ping-lang.js";
 
 describe("pingLang", () => {

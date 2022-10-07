@@ -2,26 +2,32 @@ import EventEmitter from "events";
 import errorHandler from "errorhandler";
 import express from "express";
 import methodOverride from "method-override";
+import { createRequire } from "module";
 import morgan from "morgan";
+import { fileURLToPath } from "url";
 import { buildValidateToken } from "./auth.js";
 import { buildCompile } from "./comp.js";
 import { buildDataApi } from "./data.js";
 import { compile as langCompile } from "./lang/index.js";
-import routes from "./routes/index.js";
+import * as routes from "./routes/index.js";
 import { buildTaskDaoFactory } from "./storage/index.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const require = createRequire(import.meta.url);
 
 // This line is required to ensure the typescript compiler moves the default
 // config into the build directory.
 // TODO(kevindyer) Refactor the creation of the app to inject the config
-import "./../config/config.json";
+/* eslint-disable import/no-commonjs */
+require("./../config/config.json");
 
 EventEmitter.defaultMaxListeners = 15;
 
-const port = global.port = process.env.PORT || 3100;
-const env = process.env.NODE_ENV || "development";
-
 global.config = require(process.env.CONFIG || "./../config/config.json");
 global.config.useLocalCompiles = process.env.LOCAL_COMPILES === "true";
+
+const port = global.port = process.env.PORT || 3100;
+const env = process.env.NODE_ENV || "development";
 
 export const createApp = ({ authUrl } = {}) => {
   const compile = buildCompile({ langCompile });
@@ -75,7 +81,7 @@ export const createApp = ({ authUrl } = {}) => {
   return app;
 };
 
-if (!module.parent) {
+const run = async () => {
   const app = createApp();
   app.listen(port, () => {
     console.log(`Listening on ${port}...`);
@@ -84,4 +90,9 @@ if (!module.parent) {
   process.on("uncaughtException", (err) => {
     console.log(`ERROR Caught exception: ${err.stack}`);
   });
+};
+
+const entryFile = process.argv?.[1];
+if (entryFile === __filename) {
+  run();
 }

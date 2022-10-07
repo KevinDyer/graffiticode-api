@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { buildGetAsset } from "./get-asset.js";
 
 describe("getAsset", () => {

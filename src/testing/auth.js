@@ -42,8 +42,8 @@ export const buildArtCompilerAuthApplication = () => {
     }
     res.status(200).json({ id });
   }));
+  /* eslint-disable n/handle-callback-err */
   app.use((err, req, res, next) => {
-    console.log(err);
     res.sendStatus(500);
   });
 

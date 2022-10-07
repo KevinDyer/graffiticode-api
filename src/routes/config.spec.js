@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { buildConfigHandler } from "./config.js";
 
 describe("routes", () => {

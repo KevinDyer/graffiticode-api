@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { buildCompile } from "./compile.js";
 
 describe("compile", () => {

@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { buildGetBaseUrlForLanguage } from "./base-url.js";
 import { isNonEmptyString } from "../util.js";
 

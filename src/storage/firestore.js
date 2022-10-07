@@ -1,17 +1,16 @@
-const { createHash } = require("crypto");
-const { NotFoundError, DecodeIdError } = require("../errors/http");
-const admin = require('firebase-admin');
+import { createHash } from "crypto";
+import { NotFoundError, DecodeIdError } from "../errors/http.js";
+import admin from "firebase-admin";
 
 const createCodeHash = code =>
   createHash("sha256")
     .update(JSON.stringify(code))
     .digest("hex");
 
-const encodeId = ({ taskIds }) => {
+export const encodeId = ({ taskIds }) => {
   const idObj = { taskIds };
   return Buffer.from(JSON.stringify(idObj), "utf8").toString("base64url");
-}
-exports.encodeId = encodeId;
+};
 
 const decodeIdPart = id => {
   let taskIds;
@@ -35,7 +34,7 @@ const decodeId = id => {
       taskIds.push(...idPartTaskIds);
       return taskIds;
     },
-    [],
+    []
   );
   return taskIds;
 };
@@ -47,7 +46,7 @@ const appendIds = (id, ...otherIds) => {
     taskIds.push(...otherTaskIds);
   });
   return encodeId({ taskIds });
-}
+};
 
 const buildTaskCreate = ({ db }) => async ({ task, auth }) => {
   const { lang, code } = task;
@@ -84,7 +83,7 @@ const buildTaskCreate = ({ db }) => async ({ task, auth }) => {
   return encodeId({ taskIds: [taskId] });
 };
 
-const buildCheckAuth = ({ }) => ({ taskDoc, auth }) => {
+const buildCheckAuth = () => ({ taskDoc, auth }) => {
   const acls = taskDoc.get("acls");
   if (!acls) {
     return;
@@ -99,11 +98,10 @@ const buildCheckAuth = ({ }) => ({ taskDoc, auth }) => {
     return;
   }
   throw new NotFoundError();
-
 };
 
 const buildTaskGet = ({ db }) => {
-  const checkAuth = buildCheckAuth({});
+  const checkAuth = buildCheckAuth();
   return async ({ id, auth }) => {
     const taskIds = decodeId(id);
     const tasks = await Promise.all(
@@ -123,14 +121,13 @@ const buildTaskGet = ({ db }) => {
   };
 };
 
-const buildFirestoreTaskDao = ({ db }) => {
+export const buildFirestoreTaskDao = ({ db }) => {
   const create = buildTaskCreate({ db });
   const get = buildTaskGet({ db });
   return { create, get, appendIds };
 };
-exports.buildFirestoreTaskDao = buildFirestoreTaskDao;
 
-const buildCreateFirestoreDb = () => {
+export const buildCreateFirestoreDb = () => {
   let db;
   return () => {
     if (!db) {
@@ -140,4 +137,4 @@ const buildCreateFirestoreDb = () => {
     return db;
   };
 };
-exports.createFirestoreDb = buildCreateFirestoreDb();
+export const createFirestoreDb = buildCreateFirestoreDb();

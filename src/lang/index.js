@@ -1,28 +1,22 @@
-const bent = require('bent');
-const { getConfig } = require('../config');
-const { isNonEmptyString, getCompilerHost, getCompilerPort } = require('../util');
+import bent from "bent";
+import { getConfig } from "../config/index.js";
+import { isNonEmptyString, getCompilerHost, getCompilerPort } from "../util.js";
+import { buildGetBaseUrlForLanguage } from "./base-url.js";
+import { buildCompile } from "./compile.js";
+import { buildGetAsset } from "./get-asset.js";
+import { buildPingLang } from "./ping-lang.js";
 
-const { buildGetBaseUrlForLanguage } = require('./base-url');
-const { buildCompile } = require('./compile');
-const { buildGetAsset } = require('./get-asset');
-const { buildPingLang } = require('./ping-lang');
-
-const getBaseUrlForLanguage = buildGetBaseUrlForLanguage({
+export const getBaseUrlForLanguage = buildGetBaseUrlForLanguage({
   isNonEmptyString,
   env: process.env,
   getConfig,
   getCompilerHost,
-  getCompilerPort,
+  getCompilerPort
 });
-const compile = buildCompile({ getBaseUrlForLanguage, bent });
-const getAsset = buildGetAsset({ getBaseUrlForLanguage, bent });
-const pingLang = buildPingLang({
+export const compile = buildCompile({ getBaseUrlForLanguage, bent });
+export const getAsset = buildGetAsset({ getBaseUrlForLanguage, bent });
+export const pingLang = buildPingLang({
   getBaseUrlForLanguage,
   bent,
   log: console.log
 });
-
-exports.getBaseUrlForLanguage = getBaseUrlForLanguage;
-exports.compile = compile;
-exports.getAsset = getAsset;
-exports.pingLang = pingLang;

@@ -1,26 +1,25 @@
-const assert = require('assert');
-const Hashids = require('hashids');
+import assert from "assert";
+import Hashids from "hashids";
 
+const hashids = new Hashids("Art Compiler LLC"); // This string shall never change!
 
-const hashids = new Hashids('Art Compiler LLC');  // This string shall never change!
-
-function decodeID(id) {
+export function decodeID(id) {
   // console.log('[1] decodeID() >> ' + id);
   // 123456, 123+534653+0, Px4xO423c, 123+123456+0+Px4xO423c, Px4xO423c+Px4xO423c
   if (id === undefined) {
-    id = '0';
+    id = "0";
   }
   if (Number.isInteger(id)) {
-    id = '' + id;
+    id = "" + id;
   }
   if (Array.isArray(id)) {
     // Looks like it is already decoded.
     assert(Number.isInteger(id[0]) && Number.isInteger(id[1]));
     return id;
   }
-  assert(typeof id === 'string', 'Invalid id ' + id);
-  id = id.replace(/\+/g, ' ');
-  let parts = id.split(' ');
+  assert(typeof id === "string", "Invalid id " + id);
+  id = id.replace(/\+/g, " ");
+  const parts = id.split(" ");
   let ids = [];
   // Concatenate the first two integer ids and the last hash id. Everything
   // else gets erased. This is to enable updating the dataID.
@@ -53,7 +52,7 @@ function decodeID(id) {
   return ids;
 }
 
-function encodeID(ids) {
+export function encodeID(ids) {
   // console.log('[1] encodeID() >> ' + JSON.stringify(ids));
   let length = ids.length;
   if (length >= 3 &&
@@ -66,16 +65,13 @@ function encodeID(ids) {
   }
   if (length === 1) {
     if (+ids[0] === 0) {
-      return '0';
+      return "0";
     }
     ids = [0, +ids[0], 0];
   } else if (length === 2) {
     ids = [0, +ids[0], 113, +ids[1], 0];
   }
-  let id = hashids.encode(ids);
+  const id = hashids.encode(ids);
   // console.log('[2] encodeID() << ' + id);
   return id;
 }
-
-module.exports.decodeID = decodeID;
-module.exports.encodeID = encodeID;

@@ -1,12 +1,13 @@
-const { Router } = require("express");
-const { InvalidArgumentError } = require("../errors/http");
-const {
+import { Router } from "express";
+import { InvalidArgumentError } from "../errors/http.js";
+
+import {
   buildGetTaskDaoForRequest,
   buildHttpHandler,
   createSuccessResponse,
   parseIdsFromRequest,
-  optionsHandler,
-} = require("./utils");
+  optionsHandler
+} from "./utils.js";
 
 const normalizeTasksParameter = tasks => {
   if (!Array.isArray(tasks)) {
@@ -15,7 +16,13 @@ const normalizeTasksParameter = tasks => {
   return tasks;
 };
 
-const getIdFromIds = ids => ids.length === 1 && ids[0] || ids;
+const getIdFromIds = ids => {
+  if (ids.length === 1) {
+    return ids[0];
+  } else {
+    return ids;
+  }
+};
 
 const buildGetTaskHandler = ({ taskDaoFactory }) => {
   const getTaskDaoForRequest = buildGetTaskDaoForRequest(taskDaoFactory);
@@ -56,7 +63,7 @@ const buildPostTaskHandler = ({ taskDaoFactory }) => {
   });
 };
 
-module.exports = ({ taskDaoFactory }) => {
+export default ({ taskDaoFactory }) => {
   const router = new Router();
   router.get("/", buildGetTaskHandler({ taskDaoFactory }));
   router.post("/", buildPostTaskHandler({ taskDaoFactory }));

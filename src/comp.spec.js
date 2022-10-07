@@ -1,6 +1,6 @@
-const { buildCompile } = require("./comp");
-const { buildTaskDaoFactory } = require("./storage");
-const { TASK_ID1, DATA1, TASK1 } = require("./testing/fixture");
+import { jest } from "@jest/globals";
+import { buildCompile } from "./comp.js";
+import { DATA1, TASK1 } from "./testing/fixture.js";
 
 describe("comp", () => {
   describe("compile", () => {

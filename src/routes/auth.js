@@ -1,6 +1,6 @@
-const { buildHttpHandler, parseAuthTokenFromRequest } = require("./utils");
+import { buildHttpHandler, parseAuthTokenFromRequest } from "./utils.js";
 
-module.exports = ({ validateToken }) => buildHttpHandler(async (req, res, next) => {
+export default ({ validateToken }) => buildHttpHandler(async (req, res, next) => {
   req.auth = {};
 
   const token = parseAuthTokenFromRequest(req);

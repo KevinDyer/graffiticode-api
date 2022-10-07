@@ -1,6 +1,6 @@
-const request = require("supertest");
-const { createApp } = require("./app");
-const { buildArtCompilerAuthApplication } = require("./testing/auth");
+import request from "supertest";
+import { createApp } from "./app.js";
+import { buildArtCompilerAuthApplication } from "./testing/auth.js";
 
 describe("api", () => {
   let authApp;
@@ -8,7 +8,9 @@ describe("api", () => {
   let app;
   beforeEach(async () => {
     authApp = buildArtCompilerAuthApplication();
-    await new Promise(resolve => authServer = authApp.listen(resolve));
+    await new Promise(resolve => {
+      authServer = authApp.listen(resolve);
+    });
     app = createApp({ authUrl: `http://localhost:${authServer.address().port}` });
   });
 

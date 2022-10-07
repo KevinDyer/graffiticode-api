@@ -1,7 +1,7 @@
-const { isNonEmptyString } = require("../util");
-const { HttpError } = require("./../errors/http");
+import { isNonEmptyString } from "../util.js";
+import { HttpError } from "./../errors/http.js";
 
-exports.parseIdsFromRequest = req => {
+export const parseIdsFromRequest = req => {
   const id = req.query.id;
   if (isNonEmptyString(id)) {
     return id.split(",");
@@ -9,7 +9,7 @@ exports.parseIdsFromRequest = req => {
   return [];
 };
 
-exports.parseAuthFromRequest = req => {
+export const parseAuthFromRequest = req => {
   const { auth: queryAuth } = req.query;
   if (isNonEmptyString(queryAuth)) {
     return queryAuth;
@@ -21,7 +21,7 @@ exports.parseAuthFromRequest = req => {
   return null;
 };
 
-exports.parseAuthTokenFromRequest = req => {
+export const parseAuthTokenFromRequest = req => {
   let headerAuthToken = req.get("Authorization");
   if (isNonEmptyString(headerAuthToken)) {
     if (headerAuthToken.startsWith("Bearer ")) {
@@ -42,31 +42,26 @@ const handleError = (err, res, next) => {
   }
 };
 
-const buildHttpHandler = handler => async (req, res, next) => {
+export const buildHttpHandler = handler => async (req, res, next) => {
   try {
     await handler(req, res, next);
   } catch (err) {
     handleError(err, res, next);
   }
 };
-exports.buildHttpHandler = buildHttpHandler;
 
-const createError = (code, message) => ({ code, message });
-exports.createError = createError;
+export const createError = (code, message) => ({ code, message });
 
-const createErrorResponse = error => ({ status: "error", error, data: null });
-exports.createErrorResponse = createErrorResponse;
+export const createErrorResponse = error => ({ status: "error", error, data: null });
 
-const createSuccessResponse = data => ({ status: "success", error: null, data });
-exports.createSuccessResponse = createSuccessResponse;
+export const createSuccessResponse = data => ({ status: "success", error: null, data });
 
-const getStorageTypeForRequest = req => req.get("x-graffiticode-storage-type");
-exports.getStorageTypeForRequest = getStorageTypeForRequest;
+export const getStorageTypeForRequest = req => req.get("x-graffiticode-storage-type");
 
-exports.buildGetTaskDaoForRequest = taskDaoFactory => req =>
+export const buildGetTaskDaoForRequest = taskDaoFactory => req =>
   taskDaoFactory.create({ type: getStorageTypeForRequest(req) });
 
-exports.optionsHandler = buildHttpHandler(async (req, res) => {
+export const optionsHandler = buildHttpHandler(async (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");
   res.set("Access-Control-Request-Methods", "POST, GET, OPTIONS");
   res.set("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type");

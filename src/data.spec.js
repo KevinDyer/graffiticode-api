@@ -1,9 +1,10 @@
-const { buildDataApi } = require('./data');
-const { buildTaskDaoFactory } = require('./storage');
-const { clearFirestore } = require('./testing/firestore');
-const { DATA1, DATA2, TASK1, TASK2 } = require('./testing/fixture');
+import { jest } from "@jest/globals";
+import { buildDataApi } from "./data.js";
+import { buildTaskDaoFactory } from "./storage/index.js";
+import { clearFirestore } from "./testing/firestore.js";
+import { DATA1, DATA2, TASK1, TASK2 } from "./testing/fixture.js";
 
-describe('data', () => {
+describe("data", () => {
   beforeEach(async () => {
     await clearFirestore();
   });
@@ -12,7 +13,7 @@ describe('data', () => {
   let compile;
   let dataApi;
   beforeEach(() => {
-    taskDao = buildTaskDaoFactory({}).create({ type: 'memory' });
+    taskDao = buildTaskDaoFactory({}).create({ type: "memory" });
     compile = jest.fn();
     dataApi = buildDataApi({ compile });
   });
@@ -20,7 +21,7 @@ describe('data', () => {
   const mockCompileData = data =>
     compile.mockResolvedValueOnce(data);
 
-  it('should compile a created task', async () => {
+  it("should compile a created task", async () => {
     const id = await taskDao.create({ task: TASK1 });
     mockCompileData(DATA1);
 
@@ -31,12 +32,12 @@ describe('data', () => {
       1,
       expect.objectContaining({
         lang: TASK1.lang,
-        code: TASK1.code,
-      }),
+        code: TASK1.code
+      })
     );
   });
 
-  it('should compile created tasks', async () => {
+  it("should compile created tasks", async () => {
     const id1 = await taskDao.create({ task: TASK1 });
     const id2 = await taskDao.create({ task: TASK2 });
     const id = taskDao.appendIds(id1, id2);
@@ -50,15 +51,15 @@ describe('data', () => {
       1,
       expect.objectContaining({
         lang: TASK2.lang,
-        code: TASK2.code,
-      }),
+        code: TASK2.code
+      })
     );
     expect(compile).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         lang: TASK1.lang,
-        code: TASK1.code,
-      }),
+        code: TASK1.code
+      })
     );
   });
 });

@@ -1,15 +1,15 @@
-const fs=require('graceful-fs');
-const pg = require('pg');
+const fs = require("graceful-fs");
+const pg = require("pg");
 pg.defaults.ssl = true;
 
 load();
 
 function load() {
-  var obj = [];
-  var hash = {};
-  var emptyCount = 0, eraseCount = 0;
-  fs.readFile("107dump.gc", 'utf-8', function(err, data) {
-    var items = data.split("\n");
+  const obj = [];
+  const hash = {};
+  const emptyCount = 0; const eraseCount = 0;
+  fs.readFile("107dump.gc", "utf-8", function (err, data) {
+    const items = data.split("\n");
     console.log("load() items=" + items);
     insertItems(items, () => {
       console.log("done");
@@ -22,7 +22,7 @@ function insertItems(items, resume) {
   if (items.length === 0) {
     resume();
   } else {
-    let item = items.shift();
+    const item = items.shift();
     console.log(items.length + ": insertItems() item=" + item);
     insertItem(item, () => {
       insertItems(items, resume);
@@ -31,20 +31,20 @@ function insertItems(items, resume) {
 }
 
 function insertItem(src, resume) {
-  var lang = "L107";
-  var user = "0";
-  var label = "new";
-  var queryStr = "SELECT id FROM pieces WHERE language='" + lang + "' AND user_id='" + user + "' AND src = '" + cleanAndTrimSrc(src) + "'";
+  const lang = "L107";
+  const user = "0";
+  const label = "new";
+  const queryStr = "SELECT id FROM pieces WHERE language='" + lang + "' AND user_id='" + user + "' AND src = '" + cleanAndTrimSrc(src) + "'";
   dbQuery(queryStr, (err, result) => {
     if (err) {
       console.log("ERROR queryStr=" + queryStr);
       resume(err);
     } else if (result && result.rows.length === 0) {
-      var insertStr =
+      const insertStr =
         "INSERT INTO pieces (user_id, parent_id, views, forks, created, src, obj, language, label)" +
         " VALUES ('" + 0 + "', '" + 0 + "', '" + 0 +
         " ', '" + 0 + "', now(), '" + src + "', '" + "" +
-        " ', '" + lang + "', '" + label + "');"
+        " ', '" + lang + "', '" + label + "');";
       dbQuery(insertStr, function (err, result) {
         console.log("insertItem() result=" + JSON.stringify(result));
         resume(err, []);
@@ -59,11 +59,11 @@ function cleanAndTrimSrc(str) {
   if (!str || typeof str !== "string") {
     return str;
   }
-  str = str.replace(new RegExp("'","g"), "''");
-  while(str.charAt(0) === " ") {
+  str = str.replace(new RegExp("'", "g"), "''");
+  while (str.charAt(0) === " ") {
     str = str.substring(1);
   }
-  while(str.charAt(str.length - 1) === " ") {
+  while (str.charAt(str.length - 1) === " ") {
     str = str.substring(0, str.length - 1);
   }
   return str;
@@ -85,7 +85,7 @@ function dbQuery(query, resume) {
         }
         if (!result) {
           result = {
-            rows: [],
+            rows: []
           };
         }
         return resume(err, result);
@@ -97,5 +97,3 @@ function dbQuery(query, resume) {
     }
   });
 };
-
-

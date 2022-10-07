@@ -1,9 +1,9 @@
-const {buildGetConfig} = require('./config.js');
+import { buildGetConfig } from "./config.js";
 
-describe('config', () => {
-  it('return the global', () => {
+describe("config", () => {
+  it("return the global", () => {
     // Arrange
-    const global = { config: 'config' };
+    const global = { config: "config" };
     const getConfig = buildGetConfig({ global });
 
     // Act

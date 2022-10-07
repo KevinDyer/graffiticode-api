@@ -1,6 +1,7 @@
 {
   "name": "@graffiticode/api",
   "version": "0.0.2",
+  "type": "module",
   "description": "Gateway for compilers as a service.",
   "author": "Art Compiler LLC",
   "license": "MIT",
@@ -29,11 +30,20 @@
   },
   "scripts": {
     "start": "node -r @graffiticode/tracing src/app.js",
-    "test": "firebase emulators:exec --ui \"jest --runInBand\"",
-    "dev": "firebase emulators:exec --ui \"nodemon --exec \\\"jest --runInBand && npm start\\\"\"",
-    "coverage": "nyc npm run test"
+    "test": "NODE_OPTIONS=--experimental-vm-modules firebase emulators:exec --ui \"jest --runInBand\"",
+    "dev": "NODE_OPTIONS=--experimental-vm-modules firebase emulators:exec --ui \"nodemon --exec \\\"jest --runInBand && npm start\\\"\"",
+    "coverage": "nyc npm run test",
+    "lint": "eslint src/ tools/",
+    "lint:fix": "eslint --fix src/ tools/"
   },
   "engines": {
     "node": "^16.13.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.24.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.3.0",
+    "eslint-plugin-promise": "^6.0.1"
   }
 }

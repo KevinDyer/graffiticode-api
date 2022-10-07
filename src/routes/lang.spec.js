@@ -1,78 +1,79 @@
-const express = require('express');
-const request = require('supertest');
+import express from "express";
+import request from "supertest";
+import { jest } from "@jest/globals";
+import { buildLangRouter } from "./lang.js";
+import { isNonEmptyString } from "../util.js";
 
 const { Router } = express;
-const { buildLangRouter } = require('./lang.js');
-const { isNonEmptyString } = require('../util');
 
 describe.each([
-  ['path param with L', (l, p) => `/L${l}${p}`],
-  ['path param with l', (l, p) => `/l${l}${p}`],
-  ['query param', (l, p) => `/lang${p}?id=${l}`],
-])('lang router: %s', (name, getPath) => {
-  it('should return languages asset', async () => {
+  ["path param with L", (l, p) => `/L${l}${p}`],
+  ["path param with l", (l, p) => `/l${l}${p}`],
+  ["query param", (l, p) => `/lang${p}?id=${l}`]
+])("lang router: %s", (name, getPath) => {
+  it("should return languages asset", async () => {
     // Arrange
     const pong = true;
     const pingLang = jest.fn().mockResolvedValue(pong);
-    const asset = 'asset';
+    const asset = "asset";
     const getAsset = jest.fn().mockResolvedValue(asset);
     const langRouter = buildLangRouter({
       newRouter: () => new Router(),
       isNonEmptyString,
       pingLang,
-      getAsset,
+      getAsset
     });
     const app = express();
-    app.use('/lang', langRouter);
-    app.use('/L*', langRouter);
+    app.use("/lang", langRouter);
+    app.use("/L*", langRouter);
 
     // Act
     const res = await request(app)
-      .get(getPath(42, '/thing'))
+      .get(getPath(42, "/thing"))
       .expect(200);
 
     // Assert
-    expect(pingLang).toHaveBeenCalledWith('L42');
+    expect(pingLang).toHaveBeenCalledWith("L42");
     expect(res.text).toBe(asset);
   });
 
-  it('should return 400 if invalid lang id', async () => {
+  it("should return 400 if invalid lang id", async () => {
     // Arrange
     const langRouter = buildLangRouter({
       newRouter: () => new Router(),
-      isNonEmptyString,
+      isNonEmptyString
     });
     const app = express();
-    app.use('/lang', langRouter);
-    app.use('/L*', langRouter);
+    app.use("/lang", langRouter);
+    app.use("/L*", langRouter);
 
     // Act
     await request(app)
-      .get(getPath('ab', '/thing'))
+      .get(getPath("ab", "/thing"))
       .expect(400);
 
     // Assert
   });
 
-  it('should return 404 is if ping fails', async () => {
+  it("should return 404 is if ping fails", async () => {
     // Arrange
     const pong = false;
     const pingLang = jest.fn().mockResolvedValue(pong);
     const langRouter = buildLangRouter({
       newRouter: () => new Router(),
       isNonEmptyString,
-      pingLang,
+      pingLang
     });
     const app = express();
-    app.use('/lang', langRouter);
-    app.use('/L*', langRouter);
+    app.use("/lang", langRouter);
+    app.use("/L*", langRouter);
 
     // Act
     await request(app)
-      .get(getPath(42, '/thing'))
+      .get(getPath(42, "/thing"))
       .expect(404);
 
     // Assert
-    expect(pingLang).toHaveBeenCalledWith('L42');
+    expect(pingLang).toHaveBeenCalledWith("L42");
   });
 });

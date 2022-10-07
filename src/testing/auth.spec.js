@@ -1,8 +1,5 @@
-const {
-  buildFakeAuthProvider,
-  buildArtCompilerAuthApplication,
-} = require("./auth");
-const request = require("supertest");
+import { buildFakeAuthProvider, buildArtCompilerAuthApplication } from "./auth.js";
+import request from "supertest";
 
 describe("testing/auth", () => {
   describe("provider", () => {

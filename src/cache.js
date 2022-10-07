@@ -1,4 +1,4 @@
-const redis = require('redis');
+import redis from "redis";
 
 const createKey = (id, type) => `${id}.${type}`;
 
@@ -11,7 +11,7 @@ const buildLocalCacheGet = ({ localCache, delegate }) => async (id, type) => {
     return await delegate.get(id, type);
   }
   return null;
-}
+};
 
 const buildLocalCacheSet = ({ localCache, delegate }) => async (id, type, value) => {
   const key = createKey(id, type);
@@ -19,7 +19,7 @@ const buildLocalCacheSet = ({ localCache, delegate }) => async (id, type, value)
   if (delegate) {
     await delegate.set(id, type, value);
   }
-}
+};
 
 const buildLocalCacheDel = ({ localCache, delegate }) => async (id, type) => {
   const key = createKey(id, type);
@@ -27,9 +27,9 @@ const buildLocalCacheDel = ({ localCache, delegate }) => async (id, type) => {
   if (delegate) {
     await delegate.set(id, type);
   }
-}
+};
 
-const buildLocalCache = ({ delegate }) => {
+export const buildLocalCache = ({ delegate }) => {
   const localCache = new Map();
   const get = buildLocalCacheGet({ localCache, delegate });
   const set = buildLocalCacheSet({ localCache, delegate });
@@ -40,19 +40,19 @@ const buildLocalCache = ({ delegate }) => {
 const buildRedisCacheGet = ({ client }) => async (id, type) => {
   const key = createKey(id, type);
   return await client.get(key);
-}
+};
 
 const buildRedisCacheSet = ({ client }) => async (id, type, value) => {
   const key = createKey(id, type);
   await client.set(key, value);
-}
+};
 
 const buildRedisCacheDel = ({ client }) => async (id, type) => {
   const key = createKey(id, type);
   await client.del(key);
-}
+};
 
-const buildRedisCache = ({ }) => {
+export const buildRedisCache = () => {
   const client = redis.createClient({ url: process.env.REDIS_URL });
   const get = buildRedisCacheGet({ client });
   const set = buildRedisCacheSet({ client });
@@ -60,6 +60,4 @@ const buildRedisCache = ({ }) => {
   return { get, set, del };
 };
 
-exports.buildLocalCache = buildLocalCache;
-exports.buildRedisCache = buildRedisCache;
-exports.cacheApi = buildLocalCache({});
+export const cacheApi = buildLocalCache({});

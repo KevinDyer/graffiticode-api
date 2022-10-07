@@ -1,8 +1,8 @@
-const express = require("express");
-const request = require("supertest");
-const { UnauthenticatedError } = require("../errors/http");
-
-const buildAuthHandler = require("./auth");
+import express from "express";
+import request from "supertest";
+import { jest } from "@jest/globals";
+import { UnauthenticatedError } from "../errors/http.js";
+import buildAuthHandler from "./auth.js";
 
 describe("routes/auth", () => {
   let validateToken;
@@ -13,11 +13,13 @@ describe("routes/auth", () => {
     app = express();
     app.use(buildAuthHandler({ validateToken }));
     app.get("/", (req, res) => res.status(200).json({ auth: req.auth }));
-    app.use((err, req, res, next) => res.sendStatus(500));
+    app.use((err, req, res, next) => {
+      console.log(err);
+      res.sendStatus(500);
+    });
   });
 
   it("should have null authContext if no auth token", async () => {
-    const token = "abc123";
     validateToken.mockResolvedValue({ uid: "1" });
 
     const res = await request(app)

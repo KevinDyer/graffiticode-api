@@ -1,10 +1,10 @@
-const express = require("express");
-const morgan = require("morgan");
-const { UnauthenticatedError, InvalidArgumentError } = require("../errors/http");
-const { buildHttpHandler } = require("../routes/utils");
-const { isNonNullObject, isNonEmptyString } = require("../util");
+import express from "express";
+import morgan from "morgan";
+import { UnauthenticatedError, InvalidArgumentError } from "../errors/http.js";
+import { buildHttpHandler } from "../routes/utils.js";
+import { isNonNullObject, isNonEmptyString } from "../util.js";
 
-const buildFakeAuthProvider = () => {
+export const buildFakeAuthProvider = () => {
   const contextsByToken = new Map();
   return {
     addContextForToken: (token, context) => contextsByToken.set(token, context),
@@ -17,12 +17,11 @@ const buildFakeAuthProvider = () => {
         throw context;
       }
       return context;
-    },
+    }
   };
 };
-exports.buildFakeAuthProvider = buildFakeAuthProvider;
 
-const buildArtCompilerAuthApplication = () => {
+export const buildArtCompilerAuthApplication = () => {
   const idsByToken = new Map();
 
   const app = express();
@@ -43,12 +42,14 @@ const buildArtCompilerAuthApplication = () => {
     }
     res.status(200).json({ id });
   }));
-  app.use((err, req, res, next) => res.sendStatus(500));
+  /* eslint-disable n/handle-callback-err */
+  app.use((err, req, res, next) => {
+    res.sendStatus(500);
+  });
 
   return {
     app,
     addIdForToken: (token, id) => idsByToken.set(token, id),
-    listen: (...params) => app.listen(...params),
+    listen: (...params) => app.listen(...params)
   };
 };
-exports.buildArtCompilerAuthApplication = buildArtCompilerAuthApplication;

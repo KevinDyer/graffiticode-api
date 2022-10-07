@@ -1,39 +1,45 @@
-const errorHandler = require('errorhandler');
-const express = require('express');
-const methodOverride = require('method-override');
-const morgan = require('morgan');
-const { buildValidateToken } = require('./auth');
+import EventEmitter from "events";
+import errorHandler from "errorhandler";
+import express from "express";
+import methodOverride from "method-override";
+import { createRequire } from "module";
+import morgan from "morgan";
+import { fileURLToPath } from "url";
+import { buildValidateToken } from "./auth.js";
+import { buildCompile } from "./comp.js";
+import { buildDataApi } from "./data.js";
+import { compile as langCompile } from "./lang/index.js";
+import * as routes from "./routes/index.js";
+import { buildTaskDaoFactory } from "./storage/index.js";
 
-const { buildCompile } = require('./comp');
-const { buildDataApi } = require('./data');
-const { compile: langCompile } = require('./lang');
-const routes = require('./routes');
-const { buildTaskDaoFactory } = require('./storage');
-
-const port = global.port = process.env.PORT || 3100;
-const env = process.env.NODE_ENV || 'development';
-
-require('events').EventEmitter.defaultMaxListeners = 15;
+const __filename = fileURLToPath(import.meta.url);
+const require = createRequire(import.meta.url);
 
 // This line is required to ensure the typescript compiler moves the default
 // config into the build directory.
 // TODO(kevindyer) Refactor the creation of the app to inject the config
-require('./../config/config.json');
+/* eslint-disable import/no-commonjs */
+require("./../config/config.json");
 
-global.config = require(process.env.CONFIG || './../config/config.json');
-global.config.useLocalCompiles = process.env.LOCAL_COMPILES === 'true';
+EventEmitter.defaultMaxListeners = 15;
 
-const createApp = ({ authUrl } = {}) => {
+global.config = require(process.env.CONFIG || "./../config/config.json");
+global.config.useLocalCompiles = process.env.LOCAL_COMPILES === "true";
+
+const port = global.port = process.env.PORT || 3100;
+const env = process.env.NODE_ENV || "development";
+
+export const createApp = ({ authUrl } = {}) => {
   const compile = buildCompile({ langCompile });
   const taskDaoFactory = buildTaskDaoFactory({});
   const dataApi = buildDataApi({ compile });
 
   const app = express();
-  app.all('*', (req, res, next) => {
+  app.all("*", (req, res, next) => {
     if (req.headers.host.match(/^localhost/) === null) {
-      if (req.headers['x-forwarded-proto'] !== 'https' && env === 'production') {
-        console.log('app.all redirecting headers=' + JSON.stringify(req.headers, null, 2) + ' url=' + req.url);
-        res.redirect(['https://', req.headers.host, req.url].join(''));
+      if (req.headers["x-forwarded-proto"] !== "https" && env === "production") {
+        console.log("app.all redirecting headers=" + JSON.stringify(req.headers, null, 2) + " url=" + req.url);
+        res.redirect(["https://", req.headers.host, req.url].join(""));
       } else {
         next();
       }
@@ -42,15 +48,15 @@ const createApp = ({ authUrl } = {}) => {
     }
   });
 
-  if (['development', 'test'].includes(env)) {
-    app.use(morgan('dev'));
+  if (["development", "test"].includes(env)) {
+    app.use(morgan("dev"));
     app.use(errorHandler({ dumpExceptions: true, showStack: true }));
   } else {
-    app.use(morgan('combined', {
-      skip: (req, res) => res.statusCode < 400,
+    app.use(morgan("combined", {
+      skip: (req, res) => res.statusCode < 400
     }));
   }
-  app.use(express.json({ limit: '50mb' }));
+  app.use(express.json({ limit: "50mb" }));
   app.use(methodOverride());
 
   // Authentication
@@ -58,13 +64,13 @@ const createApp = ({ authUrl } = {}) => {
   app.use(routes.auth({ validateToken }));
 
   // Routes
-  app.use('/', routes.root());
-  app.use('/compile', routes.compile({ compile }));
-  app.use('/task', routes.task({ taskDaoFactory }));
-  app.use('/data', routes.data({ taskDaoFactory, dataApi }));
-  app.use('/lang', routes.langRouter);
-  app.use('/config', routes.configHandler);
-  app.use('/L*', routes.langRouter);
+  app.use("/", routes.root());
+  app.use("/compile", routes.compile({ compile }));
+  app.use("/task", routes.task({ taskDaoFactory }));
+  app.use("/data", routes.data({ taskDaoFactory, dataApi }));
+  app.use("/lang", routes.langRouter);
+  app.use("/config", routes.configHandler);
+  app.use("/L*", routes.langRouter);
 
   // Error handling
   app.use((err, req, res, next) => {
@@ -75,15 +81,18 @@ const createApp = ({ authUrl } = {}) => {
   return app;
 };
 
-exports.createApp = createApp;
-
-if (!module.parent) {
+const run = async () => {
   const app = createApp();
   app.listen(port, () => {
     console.log(`Listening on ${port}...`);
   });
 
-  process.on('uncaughtException', (err) => {
+  process.on("uncaughtException", (err) => {
     console.log(`ERROR Caught exception: ${err.stack}`);
   });
+};
+
+const entryFile = process.argv?.[1];
+if (entryFile === __filename) {
+  run();
 }

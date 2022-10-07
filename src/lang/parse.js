@@ -1,0 +1,104 @@
+import vm from 'vm';
+import { getAsset } from './index';
+import { parser } from './parser';
+
+var nodePool
+var nodeStack
+
+// commonjs export
+var main = {
+  parse(src, lexicon, resume) {
+    var stream = new parser.StringStream(src);
+    var state = {
+      cc: parser.program,   // top level parsing function
+      argc: 0,
+      argcStack: [0],
+      paramc: 0,
+      paramcStack: [0],
+      env: [ {name: "global", lexicon: lexicon } ],
+      exprc: 0,
+      exprcStack: [0],
+      nodeStack: [],
+      nodeStackStack: [],
+      nodePool: ["unused"],
+      nodeMap: {},
+      nextToken: -1,
+      errors: [],
+      coords: [],
+      inStr: 0,
+      quoteCharStack: [],
+    };
+    var next = function () {
+      return parser.parse(stream, state, resume);
+    }
+    while (state.cc != null && stream.peek()) {
+      next()
+      nodePool = state.nodePool
+      nodeStack = state.nodeStack
+    }
+    if (state.cc) {
+      throw "End of program reached.";
+    }
+    return nodePool;
+  }
+};
+
+export const buildParse = ({
+  log,
+  cache,
+  getLangAsset,
+  main,
+  vm,
+}) => {
+  return function parse(lang, src, resume) {
+    if (cache.has(lang)) {
+      main.parse(src, cache.get(lang), resume);
+    } else {
+      getLangAsset(lang, 'lexicon.js', (err, data) => {
+        if (err) {
+          resume(err);
+          return;
+        }
+        // TODO Make lexicon JSON.
+        if (data instanceof Buffer) {
+          data = data.toString();
+        }
+        if (typeof(data) !== 'string') {
+          log(`Failed to get usable lexicon for ${lang}`, typeof(data), data);
+          resume(new Error(`unable to use lexicon`));
+          return;
+        }
+
+        const lstr = data.substring(data.indexOf('{'));
+        let lexicon;
+        try {
+          lexicon = JSON.parse(lstr);
+        } catch (err) {
+          if (err instanceof SyntaxError) {
+            log(`failed to parse ${lang} lexicon: ${err.message}`);
+
+            const context = { window: { gcexports: {} } };
+            vm.createContext(context);
+            vm.runInContext(data, context);
+            if (typeof(context.window.gcexports.globalLexicon) === 'object') {
+              lexicon = context.window.gcexports.globalLexicon;
+            }
+          }
+          if (!lexicon) {
+            resume(err);
+          }
+        }
+        cache.set(lang, lexicon);
+        main.parse(src, lexicon, resume);
+      });
+    }
+  };
+};
+
+export const parse = buildParse({
+  log: console.log,
+  cache: new Map(),
+  getAsset,
+  main,
+  vm,
+});

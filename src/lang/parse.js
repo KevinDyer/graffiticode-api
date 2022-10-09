@@ -1,21 +1,21 @@
-import vm from 'vm';
-import { getAsset } from './index';
-import { parser } from './parser';
+import vm from "vm";
+import { getAsset } from "./index";
+import { parser } from "./parser";
 
-var nodePool
-var nodeStack
+let nodePool;
+let nodeStack;
 
 // commonjs export
-var main = {
+const main = {
   parse(src, lexicon, resume) {
-    var stream = new parser.StringStream(src);
-    var state = {
-      cc: parser.program,   // top level parsing function
+    const stream = new parser.StringStream(src);
+    const state = {
+      cc: parser.program, // top level parsing function
       argc: 0,
       argcStack: [0],
       paramc: 0,
       paramcStack: [0],
-      env: [ {name: "global", lexicon: lexicon } ],
+      env: [{ name: "global", lexicon }],
       exprc: 0,
       exprcStack: [0],
       nodeStack: [],
@@ -26,15 +26,15 @@ var main = {
       errors: [],
       coords: [],
       inStr: 0,
-      quoteCharStack: [],
+      quoteCharStack: []
     };
-    var next = function () {
+    const next = function () {
       return parser.parse(stream, state, resume);
-    }
+    };
     while (state.cc != null && stream.peek()) {
-      next()
-      nodePool = state.nodePool
-      nodeStack = state.nodeStack
+      next();
+      nodePool = state.nodePool;
+      nodeStack = state.nodeStack;
     }
     if (state.cc) {
       throw "End of program reached.";
@@ -48,13 +48,13 @@ export const buildParse = ({
   cache,
   getLangAsset,
   main,
-  vm,
+  vm
 }) => {
   return function parse(lang, src, resume) {
     if (cache.has(lang)) {
       main.parse(src, cache.get(lang), resume);
     } else {
-      getLangAsset(lang, 'lexicon.js', (err, data) => {
+      getLangAsset(lang, "lexicon.js", (err, data) => {
         if (err) {
           resume(err);
           return;
@@ -63,13 +63,13 @@ export const buildParse = ({
         if (data instanceof Buffer) {
           data = data.toString();
         }
-        if (typeof(data) !== 'string') {
-          log(`Failed to get usable lexicon for ${lang}`, typeof(data), data);
-          resume(new Error(`unable to use lexicon`));
+        if (typeof (data) !== "string") {
+          log(`Failed to get usable lexicon for ${lang}`, typeof (data), data);
+          resume(new Error("unable to use lexicon"));
           return;
         }
 
-        const lstr = data.substring(data.indexOf('{'));
+        const lstr = data.substring(data.indexOf("{"));
         let lexicon;
         try {
           lexicon = JSON.parse(lstr);
@@ -80,7 +80,7 @@ export const buildParse = ({
             const context = { window: { gcexports: {} } };
             vm.createContext(context);
             vm.runInContext(data, context);
-            if (typeof(context.window.gcexports.globalLexicon) === 'object') {
+            if (typeof (context.window.gcexports.globalLexicon) === "object") {
               lexicon = context.window.gcexports.globalLexicon;
             }
           }
@@ -100,5 +100,5 @@ export const parse = buildParse({
   cache: new Map(),
   getAsset,
   main,
-  vm,
+  vm
 });

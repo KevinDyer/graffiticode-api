@@ -5,7 +5,7 @@ export const mockCallbackValue = (value) => {
       const resume = params[params.length - 1];
       resume(null, value);
     } else {
-      throw new Error('no callback paramter given')
+      throw new Error("no callback paramter given");
     }
   });
 };
@@ -16,7 +16,7 @@ export const mockCallbackError = (err) => {
       const resume = params[params.length - 1];
       resume(err);
     } else {
-      throw new Error('no callback paramter given')
+      throw new Error("no callback paramter given");
     }
   });
 };

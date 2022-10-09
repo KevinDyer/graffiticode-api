@@ -1,9 +1,8 @@
 import vm from "vm";
-import { getAsset } from "./index";
-import { parser } from "./parser";
+import { getAsset } from "./index.js";
+import { parser } from "./parser.js";
 
 let nodePool;
-let nodeStack;
 
 // commonjs export
 const main = {
@@ -34,10 +33,9 @@ const main = {
     while (state.cc != null && stream.peek()) {
       next();
       nodePool = state.nodePool;
-      nodeStack = state.nodeStack;
     }
     if (state.cc) {
-      throw "End of program reached.";
+      throw new Error("End of program reached.");
     }
     return nodePool;
   }

@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
-import { buildParse } from "./parse";
-import { mockCallbackValue, mockCallbackError } from "./../testing";
+import { buildParse } from "./parse.js";
+import { mockCallbackValue, mockCallbackError } from "../testing/index.js";
 
 describe("lang/parse", () => {
   const log = jest.fn();

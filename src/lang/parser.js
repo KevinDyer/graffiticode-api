@@ -1,17 +1,17 @@
 // Copyright 2021, ARTCOMPILER INC
 
-var CodeMirror;
+let CodeMirror;
 if (typeof CodeMirror === "undefined") {
-  var CodeMirror = {
+  CodeMirror = {
     Pos: function () {
       return {};
     }
   };
 }
 
-var window;
+let window;
 if (typeof window === "undefined") {
-  var window = {};
+  window = {};
   window = {
     gcexports: {
       coords: {}
@@ -27,13 +27,13 @@ function assert(b, str) {
 
 // ast module
 
-var Ast = (function () {
+const Ast = (function () {
   const ASSERT = true;
   const assert = function (val, str) {
     if (!ASSERT) {
       return;
     }
-    if (str === void 0) {
+    if (str === undefined) {
       str = "failed!";
     }
     if (!val) {
@@ -133,7 +133,6 @@ var Ast = (function () {
     const nodePool = ctx.state.nodePool;
     const tag = n.tag;
     let elts = "";
-    const elts_nids = [];
     const count = n.elts.length;
     for (let i = 0; i < count; i++) {
       if (typeof n.elts[i] === "object") {
@@ -143,7 +142,7 @@ var Ast = (function () {
     }
     const key = tag + count + elts;
     let nid = nodeMap[key];
-    if (nid === void 0) {
+    if (nid === undefined) {
       nodePool.push({ tag, elts: n.elts });
       nid = nodePool.length - 1;
       nodeMap[key] = nid;
@@ -209,16 +208,17 @@ var Ast = (function () {
   }
 
   function nodeToJSON(n) {
+    let obj;
     if (typeof n === "object") {
       switch (n.tag) {
         case "num":
-          var obj = n.elts[0];
+          obj = n.elts[0];
           break;
         case "str":
-          var obj = n.elts[0];
+          obj = n.elts[0];
           break;
         default:
-          var obj = {};
+          obj = {};
           obj.tag = n.tag;
           obj.elts = [];
           for (let i = 0; i < n.elts.length; i++) {
@@ -227,27 +227,28 @@ var Ast = (function () {
           break;
       }
     } else if (typeof n === "string") {
-      var obj = n;
+      obj = n;
     } else {
-      var obj = n;
+      obj = n;
     }
     return obj;
   }
 
   function dump(n) {
+    let s;
     if (typeof n === "object") {
       switch (n.tag) {
         case "num":
-          var s = n.elts[0];
+          s = n.elts[0];
           break;
         case "str":
-          var s = "\"" + n.elts[0] + "\"";
+          s = "\"" + n.elts[0] + "\"";
           break;
         default:
           if (!n.elts) {
             s += "<invalid>";
           } else {
-            var s = "{ tag: \"" + n.tag + "\", elts: [ ";
+            s = "{ tag: \"" + n.tag + "\", elts: [ ";
             for (let i = 0; i < n.elts.length; i++) {
               if (i > 0) {
                 s += " , ";
@@ -259,9 +260,9 @@ var Ast = (function () {
           break;
       }
     } else if (typeof n === "string") {
-      var s = "\"" + n + "\"";
+      s = "\"" + n + "\"";
     } else {
-      var s = n;
+      s = n;
     }
     return s;
   }
@@ -281,12 +282,13 @@ var Ast = (function () {
       const lexicon = fn.env.lexicon;
       const pattern = Ast.node(ctx, fn.env.pattern);
       let outerEnv = null;
+      // let isListPattern;
       // setup inner environment record (lexicon)
       if (pattern && pattern.elts &&
           pattern.elts.length === 1 &&
           pattern.elts[0].tag === "LIST") {
         // For now we only support one pattern per param list.
-        const isListPattern = true;
+        // isListPattern = true;
       }
       for (const id in lexicon) {
         // For each parameter, get its definition assign the value of the argument
@@ -402,10 +404,11 @@ var Ast = (function () {
   // Node constructors
 
   function bool(ctx, val) {
+    let b;
     if (val) {
-      var b = true;
+      b = true;
     } else {
-      var b = false;
+      b = false;
     }
     push(ctx, {
       tag: "BOOL",
@@ -481,7 +484,7 @@ var Ast = (function () {
     const elts = [];
     for (let i = count; i > 0; i--) {
       const elt = pop(ctx);
-      if (elt !== void 0) {
+      if (elt !== undefined) {
         elts.push(elt);
       }
     }
@@ -682,7 +685,7 @@ var Ast = (function () {
     const elts = [];
     for (let i = count; i > 0; i--) {
       const elt = pop(ctx);
-      if (elt !== void 0) {
+      if (elt !== undefined) {
         elts.push(elt);
       }
     }
@@ -737,9 +740,9 @@ var Ast = (function () {
     let elts = [];
     assert(ctx.state.nodeStack.length >= count);
     if (inReverse) {
-      for (var i = count; i > 0; i--) {
-        var elt = pop(ctx);
-        var n;
+      for (let i = count; i > 0; i--) {
+        const elt = pop(ctx);
+        let n;
         if (false && (n = node(ctx, elt)) && n.tag === "EXPRS") {
           elts = elts.concat(n.elts);
         } else {
@@ -747,9 +750,9 @@ var Ast = (function () {
         }
       }
     } else {
-      for (var i = count; i > 0; i--) {
-        var elt = pop(ctx);
-        var n;
+      for (let i = count; i > 0; i--) {
+        const elt = pop(ctx);
+        let n;
         if (false && (n = node(ctx, elt)) && n.tag === "EXPRS") {
           elts = elts.concat(n.elts);
         } else {
@@ -1483,7 +1486,7 @@ export const parser = (function () {
               // recursive branch below and there is no way to know the current
               // operator unless it gets passed as an argument, which is what
               // prevOp is for.
-              if (prevOp !== void 0) {
+              if (prevOp !== undefined) {
                 op = prevOp;
               }
               Ast.binaryExpr(ctx, op);
@@ -1492,7 +1495,7 @@ export const parser = (function () {
           } else {
             Ast.binaryExpr(ctx, prevOp);
             return binaryExpr(ctx, op, function (ctx, prevOp) {
-              if (prevOp !== void 0) {
+              if (prevOp !== undefined) {
                 op = prevOp;
               }
               return cc(ctx, op);
@@ -1882,7 +1885,7 @@ export const parser = (function () {
         stream.next();
       }
       // if this is a blank line, treat it as a comment
-      if (stream.peek() === void 0) {
+      if (stream.peek() === undefined) {
         throw "comment";
       }
       // call the continuation and store the next continuation
@@ -1989,7 +1992,7 @@ export const parser = (function () {
     function start(ctx) {
       let c;
       lexeme = "";
-      while (stream.peek() !== void 0) {
+      while (stream.peek() !== undefined) {
         switch ((c = stream.next().charCodeAt(0))) {
           case 32: // space
           case 9: // tab
@@ -2276,7 +2279,7 @@ var folder = (function () {
     if (node == null) {
       return null;
     }
-    if (node.tag === void 0) {
+    if (node.tag === undefined) {
       return []; // clean up stubs;
     } else if (isFunction(table[node.tag])) {
       // Have a primitive operation so apply it to construct a new node.
@@ -2286,58 +2289,17 @@ var folder = (function () {
     expr(node);
   }
 
-  function isArray(v) {
-    return v instanceof Array;
-  }
-
-  function isString(v) {
-    return typeof v === "string";
-  }
-
-  function isPrimitive(v) {
-    return (
-      v === null ||
-      typeof v === "string" ||
-      typeof v === "number" ||
-      typeof v === "boolean"
-    );
-  }
-
   function isFunction(v) {
     return v instanceof Function;
   }
 
   // BEGIN VISITOR METHODS
 
-  let edgesNode;
-
   function program(node) {
     visit(node.elts[0]);
     Ast.program(ctx);
   }
 
-  function caseExpr(node) {
-    visit(node.elts[node.elts.length - 1]);
-    const expr = Ast.pop(ctx);
-    for (let i = node.elts.length - 2; i >= 0; i--) {
-      const ofNode = ctx.state.nodePool[node.elts[i]];
-      const patternNode = ofNode.elts[1];
-      visit(patternNode);
-      const pattern = Ast.pop(ctx);
-      //      if (Ast.intern(expr) === Ast.intern(pattern)) {
-      if (expr === pattern) {
-        visit(ofNode.elts[0]);
-        return;
-      }
-    }
-  }
-
-  function ofClause(node) {
-    for (let i = 0; i < node.elts.length; i++) {
-      visit(node.elts[i]);
-    }
-    Ast.ofClause(ctx);
-  }
   function pushNodeStack(ctx) {
     ctx.state.nodeStackStack.push(ctx.state.nodeStack);
     ctx.state.nodeStack = [];
@@ -2424,24 +2386,6 @@ var folder = (function () {
     Ast.add(ctx);
   }
 
-  function sub(node) {
-    visit(node.elts[0]);
-    visit(node.elts[1]);
-    Ast.sub(ctx);
-  }
-
-  function mul(node) {
-    visit(node.elts[0]);
-    visit(node.elts[1]);
-    Ast.mul(ctx);
-  }
-
-  function div(node) {
-    visit(node.elts[0]);
-    visit(node.elts[1]);
-    Ast.div(ctx);
-  }
-
   function pow(node) {
     visit(node.elts[0]);
     visit(node.elts[1]);
@@ -2457,54 +2401,6 @@ var folder = (function () {
     visit(node.elts[0]);
     visit(node.elts[1]);
     Ast.mod(ctx);
-  }
-
-  function orelse(node) {
-    visit(node.elts[0]);
-    visit(node.elts[1]);
-    Ast.orelse(ctx);
-  }
-
-  function andalso(node) {
-    visit(node.elts[0]);
-    visit(node.elts[1]);
-    Ast.andalso(ctx);
-  }
-
-  function eq(node) {
-    visit(node.elts[0]);
-    visit(node.elts[1]);
-    Ast.eq(ctx);
-  }
-
-  function ne(node) {
-    visit(node.elts[0]);
-    visit(node.elts[1]);
-    Ast.ne(ctx);
-  }
-
-  function lt(node) {
-    visit(node.elts[0]);
-    visit(node.elts[1]);
-    Ast.lt(ctx);
-  }
-
-  function gt(node) {
-    visit(node.elts[0]);
-    visit(node.elts[1]);
-    Ast.gt(ctx);
-  }
-
-  function le(node) {
-    visit(node.elts[0]);
-    visit(node.elts[1]);
-    Ast.le(ctx);
-  }
-
-  function ge(node) {
-    visit(node.elts[0]);
-    visit(node.elts[1]);
-    Ast.ge(ctx);
   }
 
   function ident(node) {
@@ -2566,16 +2462,4 @@ var folder = (function () {
   function bool(node) {
     Ast.bool(ctx, node.elts[0]);
   }
-
-  function nul(node) {
-    Ast.nul(ctx);
-  }
-
-  function stub(node) {
-    return "";
-  }
 }());
-
-// if (typeof exports !== "undefined") {
-//   exports.parser = window.gcexports.parser;
-// }

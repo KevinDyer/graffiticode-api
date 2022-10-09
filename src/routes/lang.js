@@ -1,4 +1,6 @@
+import { Router } from "express";
 import { InvalidArgumentError } from "../errors/http.js";
+import { isNonEmptyString } from "../util.js";
 import { buildHttpHandler } from "./utils.js";
 
 const getLangIdFromRequest = (req) => {
@@ -21,8 +23,8 @@ const getLangIdFromRequest = (req) => {
   return id;
 };
 
-export const buildLangRouter = ({ newRouter, pingLang, getAsset, isNonEmptyString }) => {
-  const router = newRouter();
+export const buildLangRouter = ({ pingLang, getAsset }) => {
+  const router = new Router();
   router.get("/", buildHttpHandler(async (req, res) => {
     const langId = getLangIdFromRequest(req);
     const lang = `L${langId}`;

@@ -28,9 +28,9 @@ const main = {
       quoteCharStack: []
     };
     const next = function () {
-      return parse.parse(stream, state, resume);
+      return parse.parse(stream, state);
     };
-    while (state.cc != null && stream.peek()) {
+    while (state.cc !== null && stream.peek()) {
       next();
       nodePool = state.nodePool;
     }
@@ -50,64 +50,43 @@ export const buildParser = ({
 }) => {
   return async function parse(lang, src, resume) {
     if (cache.has(lang)) {
-      main.parse(src, cache.get(lang), (err, val) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(val);
-          }
-        });
-      } else {
-        console.log("parse() lang=" + lang);
-        getLangAsset(lang, "lexicon.js", (err, data) => {
-          console.log("parse() err=" + JSON.stringify(err));
-          if (err) {
-            reject(err);
-            return;
-          }
-          // TODO Make lexicon JSON.
-          if (data instanceof Buffer) {
-            data = data.toString();
-          }
-          if (typeof (data) !== "string") {
-            log(`Failed to get usable lexicon for ${lang}`, typeof (data), data);
-            reject(new Error("unable to use lexicon"));
-            return;
-          }
-          
-          const lstr = data.substring(data.indexOf("{"));
-          console.log("getLandAsset() lstr=" + lstr);
-          let lexicon;
-          try {
-            lexicon = JSON.parse(lstr);
-          } catch (err) {
-            if (err instanceof SyntaxError) {
-              log(`failed to parse ${lang} lexicon: ${err.message}`);
-              
-              const context = { window: { gcexports: {} } };
-              vm.createContext(context);
-              vm.runInContext(data, context);
-              if (typeof (context.window.gcexports.globalLexicon) === "object") {
-                lexicon = context.window.gcexports.globalLexicon;
-              }
-            }
-            if (!lexicon) {
-              reject(err);
-            }
-          }
-          cache.set(lang, lexicon);
-          console.log("parse() lexicon=" + JSON.stringify(lexicon, null, 2));
-          main.parse(src, lexicon, (err, val) => {
-            console.log("parse() err=" + err + " val=" + JSON.stringify(val));
-            if (err) {
-              reject(err);
-            } else {
-              resolve(val);
-            }
-          });
-        });
+      return main.parse(src, cache.get(lang));
+    } else {
+      console.log("parse() lang=" + lang);
+      let data = await getLangAsset(lang, "lexicon.js");
+      // TODO Make lexicon JSON.
+      if (data instanceof Buffer) {
+        data = data.toString();
       }
-    });
+      if (typeof (data) !== "string") {
+        log(`Failed to get usable lexicon for ${lang}`, typeof (data), data);
+        throw new Error("unable to use lexicon");
+      }
+      
+      const lstr = data.substring(data.indexOf("{"));
+      console.log("getLandAsset() lstr=" + lstr);
+      let lexicon;
+      try {
+        lexicon = JSON.parse(lstr);
+      } catch (err) {
+        if (err instanceof SyntaxError) {
+          log(`failed to parse ${lang} lexicon: ${err.message}`);
+          
+          const context = { window: { gcexports: {} } };
+          vm.createContext(context);
+          vm.runInContext(data, context);
+          if (typeof (context.window.gcexports.globalLexicon) === "object") {
+            lexicon = context.window.gcexports.globalLexicon;
+          }
+        }
+        if (!lexicon) {
+          throw new Error("Malformed lexicon");
+        }
+      }
+      cache.set(lang, lexicon);
+      console.log("parse() lexicon=" + JSON.stringify(lexicon, null, 2));
+      return await main.parse(src, lexicon);
+    };
   };
 };
 

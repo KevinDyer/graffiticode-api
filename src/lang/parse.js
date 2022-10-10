@@ -1178,10 +1178,10 @@ export const parse = (function () {
     }
     assert(false);
   }
-  function strSuffix(ctx, resume) {
+  function strSuffix(ctx, cc) {
     if (match(ctx, TK_STRSUFFIX)) {
       // We have a STRSUFFIX so we are done.
-      return resume;
+      return cc;
     }
     return strPart(ctx, function (ctx) {
       if (match(ctx, TK_STRMIDDLE)) {
@@ -1191,22 +1191,22 @@ export const parse = (function () {
         Ast.string(ctx, lexeme, coord); // strip quotes;
         countCounter(ctx);
         var ret = function (ctx) {
-          return strSuffix(ctx, resume);
+          return strSuffix(ctx, cc);
         };
         ret.cls = "string";
         return ret;
       }
       var ret = function (ctx) {
-        return strSuffix(ctx, resume);
+        return strSuffix(ctx, cc);
       };
       ret.cls = "string";
       return ret;
     });
   }
-  function strPart(ctx, resume) {
+  function strPart(ctx, cc) {
     return expr(ctx, function (ctx) {
       countCounter(ctx);
-      return resume(ctx);
+      return cc(ctx);
     });
   }
   function ident(ctx, cc) {
@@ -1224,14 +1224,14 @@ export const parse = (function () {
     }
     return str(ctx, cc);
   }
-  function defList(ctx, resume) {
+  function defList(ctx, cc) {
     eat(ctx, TK_LEFTBRACKET);
     const ret = (ctx) => {
       return params(ctx, TK_RIGHTBRACKET, (ctx) => {
         eat(ctx, TK_RIGHTBRACKET);
         Ast.list(ctx, ctx.state.paramc, null, true);
         ctx.state.paramc = 1;
-        return resume;
+        return cc;
       });
     };
     ret.cls = "punc";
@@ -1379,28 +1379,28 @@ export const parse = (function () {
     ret.cls = "punc";
     return ret;
   }
-  function elements(ctx, resume) {
+  function elements(ctx, cc) {
     if (match(ctx, TK_RIGHTBRACKET)) {
-      return resume;
+      return cc;
     }
     return element(ctx, function (ctx) {
       if (match(ctx, TK_COMMA)) {
         eat(ctx, TK_COMMA);
         const ret = function (ctx) {
-          return elements(ctx, resume);
+          return elements(ctx, cc);
         };
         ret.cls = "punc";
         return ret;
       }
       return function (ctx) {
-        return elements(ctx, resume);
+        return elements(ctx, cc);
       };
     });
   }
-  function element(ctx, resume) {
+  function element(ctx, cc) {
     return expr(ctx, function (ctx) {
       countCounter(ctx);
-      return resume(ctx);
+      return cc(ctx);
     });
   }
   function primaryExpr(ctx, cc) {
@@ -1751,7 +1751,7 @@ export const parse = (function () {
 
   // TODO add argument for specifying the break token.
   // e.g. TK_EQUAL | TK_VERTICALBAR
-  // params(ctx, brk, resume) {..}
+  // params(ctx, brk, cc) {..}
   function params(ctx, brk, cc) {
     if (match(ctx, brk)) {
       return cc;
@@ -1872,7 +1872,7 @@ export const parse = (function () {
   window.gcexports.firstTime = true;
   let lastAST;
   let lastTimer;
-  function parse(stream, state, resume) {
+  function parse(stream, state) {
     const ctx = {
       scan: scanner(stream, state.env[0].lexicon),
       state
@@ -1899,42 +1899,41 @@ export const parse = (function () {
         cls = cc.cls;
       }
       if (cc === null) {
-        if (resume) {
-          // FIXME make all paths go through a resume function.
-          if (state.errors.length > 0) {
-            resume(state.errors);
-          } else {
-            resume(null, Ast.poolToJSON(ctx));
-          }
-        } else if (state.errors.length === 0) {
-          window.gcexports.errors = [];
-          const thisAST = Ast.poolToJSON(ctx);
-          if (lastTimer) {
-            // Reset timer to wait another second pause.
-            window.clearTimeout(lastTimer);
-          }
-          if (JSON.stringify(lastAST) !== JSON.stringify(thisAST)) {
-            // Compile code if not first time (newly loaded) and no edit
-            // activity after 1 sec.
-            if (!window.gcexports.firstTime) {
-              lastTimer = window.setTimeout(function () {
-                if (gcexports.errors && gcexports.errors.length === 0) {
-                  compileCode(thisAST, true);
-                }
-              }, 1000);
-            }
-            window.gcexports.firstTime = false;
-          } else {
-            // The AST hasn't changed, but the text has so save the code.
-            lastTimer = window.setTimeout(function () {
-              window.gcexports.errors = window.gcexports.lastErrors;
-              window.gcexports.editor.performLint();
-              saveSrc();
-            }, 1000);
-          }
+        // FIXME make all paths go through a resume function.
+        if (state.errors.length > 0) {
+          throw new Error(state.errors);
         } else {
-          window.gcexports.errors = state.errors;
+          return Ast.poolToJSON(ctx);
         }
+        // } else if (state.errors.length === 0) {
+        //   window.gcexports.errors = [];
+        //   const thisAST = Ast.poolToJSON(ctx);
+        //   if (lastTimer) {
+        //     // Reset timer to wait another second pause.
+        //     window.clearTimeout(lastTimer);
+        //   }
+        //   if (JSON.stringify(lastAST) !== JSON.stringify(thisAST)) {
+        //     // Compile code if not first time (newly loaded) and no edit
+        //     // activity after 1 sec.
+        //     if (!window.gcexports.firstTime) {
+        //       lastTimer = window.setTimeout(function () {
+        //         if (gcexports.errors && gcexports.errors.length === 0) {
+        //           compileCode(thisAST, true);
+        //         }
+        //       }, 1000);
+        //     }
+        //     window.gcexports.firstTime = false;
+        //   } else {
+        //     // The AST hasn't changed, but the text has so save the code.
+        //     lastTimer = window.setTimeout(function () {
+        //       window.gcexports.errors = window.gcexports.lastErrors;
+        //       window.gcexports.editor.performLint();
+        //       saveSrc();
+        //     }, 1000);
+        //   }
+        // } else {
+        //   window.gcexports.errors = state.errors;
+        // }
       }
       var c;
       while ((c = stream.peek()) &&
@@ -1947,10 +1946,7 @@ export const parse = (function () {
         addError(ctx, x.message);
         state.cc = null; // done for now.
         cls = "error";
-        console.log(x.stack);
-        if (resume) {
-          resume(window.gcexports.errors);
-        }
+        throw new Error(window.gcexports.errors);
       } else if (x === "comment") {
         cls = x;
       } else {

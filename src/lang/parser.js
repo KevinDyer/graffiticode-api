@@ -62,7 +62,7 @@ export const buildParser = ({
         log(`Failed to get usable lexicon for ${lang}`, typeof (data), data);
         throw new Error("unable to use lexicon");
       }
-      
+
       const lstr = data.substring(data.indexOf("{"));
       console.log("getLandAsset() lstr=" + lstr);
       let lexicon;
@@ -71,7 +71,7 @@ export const buildParser = ({
       } catch (err) {
         if (err instanceof SyntaxError) {
           log(`failed to parse ${lang} lexicon: ${err.message}`);
-          
+
           const context = { window: { gcexports: {} } };
           vm.createContext(context);
           vm.runInContext(data, context);

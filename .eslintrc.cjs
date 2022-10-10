@@ -22,6 +22,7 @@ module.exports = {
     }],
     'import/no-unresolved': 2,
     'import/no-commonjs': 2,
-    'import/extensions': [2, 'ignorePackages']
+    'import/extensions': [2, 'ignorePackages'],
+    'no-mixed-operators': 0,
   }
 };

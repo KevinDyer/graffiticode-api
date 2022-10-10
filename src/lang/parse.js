@@ -2087,8 +2087,8 @@ export const parse = (function () {
       // 123, 1.23, .123
       while (isNumeric(c) || c === ".".charCodeAt(0) && isNumeric(stream.peek())) {
         lexeme += String.fromCharCode(c);
-        var s;
-        c = (s = stream.next()) ? s.charCodeAt(0) : 0;
+        const s = stream.next();
+        c = s ? s.charCodeAt(0) : 0;
       }
       if (c) {
         stream.backUp(1);
@@ -2103,11 +2103,12 @@ export const parse = (function () {
       ctx.state.quoteCharStack.push(c);
       lexeme += String.fromCharCode(c);
       c = nextCC();
-      while (c !== quoteChar && c !== 0 &&
-            (quoteChar === CC_BACKTICK || !(c === CC_DOLLAR && peekCC() === CC_LEFTBRACE))) {
-        lexeme += String.fromCharCode(c);
-        var s;
-        c = nextCC();
+      if (quoteChar === CC_BACKTICK) {
+        while (c !== quoteChar && c !== 0 &&
+               !(c === CC_DOLLAR && peekCC() === CC_LEFTBRACE)) {
+          lexeme += String.fromCharCode(c);
+          c = nextCC();
+        }
       }
       if (c === CC_DOLLAR &&
           peekCC() === CC_LEFTBRACE) {
@@ -2123,7 +2124,7 @@ export const parse = (function () {
     }
 
     function stringSuffix(ctx) {
-      let c, s;
+      let c;
       const quoteCharStack = ctx.state.quoteCharStack;
       const quoteChar = quoteCharStack[quoteCharStack.length - 1];
       c = nextCC();
@@ -2149,11 +2150,12 @@ export const parse = (function () {
 
     function comment(c) {
       const quoteChar = c;
-      c = (s = stream.next()) ? s.charCodeAt(0) : 0;
+      let s = stream.next();
+      c = (s && s.charCodeAt(0)) || 0;
 
-      while (c !== quoteChar && c != 10 && c != 13 && c !== 0) {
-        var s;
-        c = (s = stream.next()) ? s.charCodeAt(0) : 0;
+      while (c !== quoteChar && c !== 10 && c !== 13 && c !== 0) {
+        s = stream.next();
+        c = (s && s.charCodeAt(0)) || 0;
       }
 
       return TK_COMMENT;
@@ -2213,9 +2215,7 @@ window.gcexports.foldTime = function () {
   return foldTime;
 };
 
-var folder = (function () {
-  const _ = window.gcexports._;
-
+const folder = (function () {
   const table = {
     PROG: program,
     EXPRS: exprs,
@@ -2247,15 +2247,6 @@ var folder = (function () {
     // "CASE": caseExpr,
     // "OF": ofClause,
   };
-
-  const canvasWidth = 0;
-  const canvasHeight = 0;
-
-  return {
-    fold
-  };
-
-  // CONTROL FLOW ENDS HERE
 
   let nodePool;
   let ctx;
@@ -2457,4 +2448,8 @@ var folder = (function () {
   function bool(node) {
     Ast.bool(ctx, node.elts[0]);
   }
+
+  return {
+    fold
+  };
 }());

@@ -20,3 +20,16 @@ export const mockCallbackError = (err) => {
     }
   });
 };
+
+export const mockPromiseValue = (value) => {
+  return jest.fn().mockImplementation((...params) => {
+    new Promise((resolve, reject) => {
+      if (params.length > 0) {
+        resolve(value);
+      } else {
+        reject(new Error("no callback paramter given"));
+      }
+    });
+  });
+};
+

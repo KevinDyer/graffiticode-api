@@ -16,15 +16,7 @@ describe("lang/parse", () => {
     const src = "'foo'..";
 
     // Act
-    await expect(new Promise((resolve, reject) => {
-      parse(lang, src, (err, ast) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(ast);
-        }
-      });
-    })).resolves.toStrictEqual({ root: "0" });
+    await expect(parse(lang, src)).resolves.toStrictEqual({ root: "0" });
 
     // Assert
     expect(getLangAsset).toHaveBeenCalledWith(lang, "lexicon.js", expect.anything());

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { InvalidArgumentError } from "../errors/http.js";
-
+import { parse } from "../lang/parse.js";
 import {
   buildGetTaskDaoForRequest,
   buildHttpHandler,
@@ -9,10 +9,17 @@ import {
   optionsHandler
 } from "./utils.js";
 
-const normalizeTasksParameter = tasks => {
-  if (!Array.isArray(tasks)) {
-    return [tasks];
-  }
+const normalizeTasksParameter = async tasks => {
+  tasks = !Array.isArray(tasks) && [tasks] || tasks;
+  tasks.forEach(async (task) => {
+    if (typeof task.code === 'string') {
+      const lang = task.lang;
+      const code = task.code;
+      // WARNING mutation alert!
+      task.code = await parse(lang, code);
+    }
+  });
+  tasks = await Promise.all(tasks);
   return tasks;
 };
 
@@ -49,7 +56,7 @@ const buildPostTaskHandler = ({ taskDaoFactory }) => {
   const getTaskDaoForRequest = buildGetTaskDaoForRequest(taskDaoFactory);
   return buildHttpHandler(async (req, res) => {
     const auth = req.auth.context;
-    const tasks = normalizeTasksParameter(req.body.task);
+    const tasks = await normalizeTasksParameter(req.body.task);
     if (tasks.length < 1) {
       throw new InvalidArgumentError("must provide at least one task");
     }

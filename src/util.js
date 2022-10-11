@@ -76,6 +76,7 @@ export function getCompilerHost(lang, config) {
   if (config.hosts && config.hosts[lang]) {
     return config.hosts[lang];
   }
+  lang = lang.indexOf("L") === 0 && lang || "L" + lang;
   return `${lang.toLowerCase()}.artcompiler.com`;
 }
 

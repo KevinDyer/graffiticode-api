@@ -30,14 +30,14 @@ const main = {
     const next = function () {
       return parse.parse(stream, state);
     };
+    let ast;
     while (state.cc !== null && stream.peek()) {
-      next();
-      nodePool = state.nodePool;
+      ast = next();
     }
     if (state.cc) {
       throw new Error("End of program reached.");
     }
-    return nodePool;
+    return ast;
   }
 };
 

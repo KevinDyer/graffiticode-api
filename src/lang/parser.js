@@ -2,8 +2,6 @@ import vm from "vm";
 import { getLangAsset } from "./index.js";
 import { parse } from "./parse.js";
 
-let nodePool;
-
 // commonjs export
 const main = {
   parse(src, lexicon, resume) {

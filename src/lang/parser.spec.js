@@ -139,33 +139,32 @@ describe("lang/parser", () => {
     const lang = "0";
     const src = "'hello, world'..";
     const ast = {
-      "1": {
-        "elts": [
-          "hello, world",
+      1: {
+        elts: [
+          "hello, world"
         ],
-        "tag": "STR",
+        tag: "STR"
       },
-      "2": {
-        "elts": [
-          1,
+      2: {
+        elts: [
+          1
         ],
-        "tag": "EXPRS",
+        tag: "EXPRS"
       },
-      "3": {
-        "elts": [
-          2,
+      3: {
+        elts: [
+          2
         ],
-        "tag": "PROG",
+        tag: "PROG"
       },
-      "root": 3,
-      "version": undefined,
+      root: 3,
+      version: undefined
     };
     await expect(parser.parse(lang, src)).resolves.toStrictEqual(ast);
   });
   it("should parse error", async () => {
     const lang = "0";
     const src = "'hello, world'";
-    const ast = {};
     await expect(parser.parse(lang, src)).rejects.toThrow("End of program reached");
   });
   // it("should parse error", async () => {

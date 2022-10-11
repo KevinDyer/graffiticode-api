@@ -14,7 +14,7 @@ export const getBaseUrlForLanguage = buildGetBaseUrlForLanguage({
   getCompilerPort
 });
 export const compile = buildCompile({ getBaseUrlForLanguage, bent });
-export const getAsset = buildGetAsset({ getBaseUrlForLanguage, bent });
+export const getLangAsset = buildGetAsset({ getBaseUrlForLanguage, bent });
 export const pingLang = buildPingLang({
   getBaseUrlForLanguage,
   bent,

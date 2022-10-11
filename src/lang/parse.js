@@ -14,9 +14,9 @@ if (typeof window === "undefined") {
   window = {};
   window = {
     gcexports: {
-      coords: {}
+      coords: {},
+      errors: [],
     },
-    errors: [],
     isSynthetic: true
   };
 }
@@ -789,7 +789,7 @@ const Ast = (function () {
 
 // The following code for StreamString was copied from CodeMirror.
 
-window.gcexports.StringStream = (function () {
+const StringStream = (function () {
   // The character stream used by a mode's parser.
   function StringStream(string, tabSize) {
     this.pos = this.start = 0;
@@ -1149,6 +1149,7 @@ export const parse = (function () {
     if (match(ctx, TK_STR)) {
       eat(ctx, TK_STR);
       var coord = getCoord(ctx);
+      console.log("str() lexeme=" + lexeme);
       Ast.string(ctx, lexeme, coord); // strip quotes;
       cc.cls = "string";
       return cc;
@@ -1178,35 +1179,35 @@ export const parse = (function () {
     }
     assert(false);
   }
-  function strSuffix(ctx, cc) {
+  function strSuffix(ctx, resume) {
     if (match(ctx, TK_STRSUFFIX)) {
       // We have a STRSUFFIX so we are done.
-      return cc;
+      return resume;
     }
     return strPart(ctx, function (ctx) {
       if (match(ctx, TK_STRMIDDLE)) {
         // Not done yet.
         eat(ctx, TK_STRMIDDLE);
-        const coord = getCoord(ctx);
-        Ast.string(ctx, lexeme, coord); // strip quotes;
+        var coord = getCoord(ctx);
+        Ast.string(ctx, lexeme, coord) // strip quotes;
         countCounter(ctx);
         var ret = function (ctx) {
-          return strSuffix(ctx, cc);
+          return strSuffix(ctx, resume);
         };
         ret.cls = "string";
         return ret;
       }
       var ret = function (ctx) {
-        return strSuffix(ctx, cc);
+        return strSuffix(ctx, resume);
       };
       ret.cls = "string";
       return ret;
     });
   }
-  function strPart(ctx, cc) {
-    return expr(ctx, function (ctx) {
+  function strPart(ctx, resume) {
+    return expr(ctx, function(ctx) {
       countCounter(ctx);
-      return cc(ctx);
+      return resume(ctx);
     });
   }
   function ident(ctx, cc) {
@@ -1942,6 +1943,7 @@ export const parse = (function () {
       }
     } catch (x) {
       if (x instanceof Error) {
+        console.log("catch() x=" + x);
         next(ctx);
         addError(ctx, x.message);
         state.cc = null; // done for now.
@@ -2099,27 +2101,26 @@ export const parse = (function () {
     // "abc" --> "abc"
     // "a${x}c" --> concat ["a", x, "b"]
     function string(ctx, c) {
-      const quoteChar = c;
+      var quoteChar = c;
       ctx.state.quoteCharStack.push(c);
-      lexeme += String.fromCharCode(c);
+      lexeme += String.fromCharCode(c)
       c = nextCC();
-      if (quoteChar === CC_BACKTICK) {
-        while (c !== quoteChar && c !== 0 &&
-               !(c === CC_DOLLAR && peekCC() === CC_LEFTBRACE)) {
-          lexeme += String.fromCharCode(c);
-          c = nextCC();
-        }
+      while (c !== quoteChar && c !== 0 &&
+            (quoteChar === CC_BACKTICK || !(c === CC_DOLLAR && peekCC() === CC_LEFTBRACE))) {
+        lexeme += String.fromCharCode(c);
+        var s;
+        c = nextCC();
       }
       if (c === CC_DOLLAR &&
           peekCC() === CC_LEFTBRACE) {
         nextCC(); // Eat CC_LEFTBRACE
-        lexeme = lexeme.substring(1); // Strip off punct.
+        lexeme = lexeme.substring(1);  // Strip off punct.
         return TK_STRPREFIX;
       } else if (c) {
-        lexeme = lexeme.substring(1); // Strip off leading quote.
+        lexeme = lexeme.substring(1);  // Strip off leading quote.
         return TK_STR;
       } else {
-        return 0;
+        return 0
       }
     }
 
@@ -2195,7 +2196,8 @@ export const parse = (function () {
     },
 
     parse,
-    program
+    program,
+    StringStream,
   };
 
   window.gcexports.parse = parser.parse;

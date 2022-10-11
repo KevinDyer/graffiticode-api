@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { InvalidArgumentError } from "../errors/http.js";
-import { parse } from "../lang/parse.js";
+import { parser } from "../lang/parser.js";
 import {
   buildGetTaskDaoForRequest,
   buildHttpHandler,
@@ -10,13 +10,14 @@ import {
 } from "./utils.js";
 
 const normalizeTasksParameter = async tasks => {
-  tasks = (!Array.isArray(tasks) && [tasks]) || tasks;
+  tasks = !Array.isArray(tasks) && [tasks] || tasks;
   tasks.forEach(async (task) => {
     if (typeof task.code === "string") {
+      console.log("normalizeTasksParameter() task.code=" + JSON.stringify(task.code, null, 2));
       const lang = task.lang;
       const code = task.code;
       // WARNING mutation alert!
-      task.code = await parse(lang, code);
+      task.code = await parser.parse(lang, code);
     }
   });
   tasks = await Promise.all(tasks);

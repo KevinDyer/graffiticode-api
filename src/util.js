@@ -82,7 +82,8 @@ export function getCompilerHost(lang, config) {
 export function getCompilerPort(lang, config) {
   config = config || global.config || {};
   if (config.useLocalCompiles) {
-    return `5${lang.substring(1)}`;
+    lang = lang.indexOf('L') === 0 && lang.substring(1) || lang;
+    return `5${lang}`;
   }
   if (config.ports && config.ports[lang]) {
     return config.ports[lang];

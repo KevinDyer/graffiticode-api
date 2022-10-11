@@ -11,15 +11,15 @@ describe("lang/parser", () => {
     const main = {
       parse: mockPromiseValue({ root: "0" })
     };
-    const parse = buildParser({ log, cache, getLangAsset, main });
-    const lang = "L0";
+    const parser = buildParser({ log, cache, getLangAsset, main });
+    const lang = "0";
     const src = "'foo'..";
 
     // Act
-    await expect(parse(lang, src)).resolves.toStrictEqual({ root: "0" });
+    await expect(parser.parse(lang, src)).resolves.toStrictEqual({ root: "0" });
 
     // Assert
-    expect(getLangAsset).toHaveBeenCalledWith(lang, "lexicon.js");
+    expect(getLangAsset).toHaveBeenCalledWith(lang, "/lexicon.js");
     expect(main.parse).toHaveBeenCalledWith(src, {});
     expect(cache.has(lang)).toBe(true);
     expect(cache.get(lang)).toStrictEqual({});
@@ -30,16 +30,16 @@ describe("lang/parser", () => {
     const main = {
       parse: mockPromiseValue({ root: "0" })
     };
-    const parse = buildParser({
+    const parser = buildParser({
       cache,
       main
     });
-    const lang = "L0";
+    const lang = "0";
     const src = "'foo'..";
     cache.set(lang, {});
 
     // Act
-    await expect(parse(lang, src)).resolves.toStrictEqual({ root: "0" });
+    await expect(parser.parse(lang, src)).resolves.toStrictEqual({ root: "0" });
 
     // Assert
     expect(main.parse).toHaveBeenCalledWith(src, {});
@@ -49,18 +49,18 @@ describe("lang/parser", () => {
     const cache = new Map();
     const err = new Error("failed to get lexicon");
     const getLangAsset = mockPromiseError(err);
-    const parse = buildParser({
+    const parser = buildParser({
       cache,
       getLangAsset
     });
-    const lang = "L0";
+    const lang = "00";
     const src = "'foo'..";
 
     // Act
-    await expect(parse(lang, src)).rejects.toBe(err);
+    await expect(parser.parse(lang, src)).rejects.toBe(err);
 
     // Assert
-    expect(getLangAsset).toHaveBeenCalledWith(lang, "lexicon.js");
+    expect(getLangAsset).toHaveBeenCalledWith(lang, "/lexicon.js");
   });
   it("should return error if main parser fails", async () => {
     // Arrange
@@ -69,15 +69,15 @@ describe("lang/parser", () => {
     const getLangAsset = mockPromiseValue("{}");
     const err = new Error("main parser failed");
     const main = { parse: mockPromiseError(err) };
-    const parse = buildParser({ log, cache, getLangAsset, main });
-    const lang = "L0";
+    const parser = buildParser({ log, cache, getLangAsset, main });
+    const lang = "0";
     const src = "'foo'..";
 
     // Act
-    await expect(parse(lang, src)).rejects.toBe(err);
+    await expect(parser.parse(lang, src)).rejects.toBe(err);
 
     // Assert
-    expect(getLangAsset).toHaveBeenCalledWith(lang, "lexicon.js");
+    expect(getLangAsset).toHaveBeenCalledWith(lang, "/lexicon.js");
     expect(main.parse).toHaveBeenCalledWith(src, {});
     expect(cache.has(lang)).toBe(true);
     expect(cache.get(lang)).toStrictEqual({});
@@ -89,15 +89,15 @@ describe("lang/parser", () => {
     const getLangAsset = mockPromiseValue(Buffer.from("{}"));
     const ast = { root: "0" };
     const main = { parse: mockPromiseValue(ast) };
-    const parse = buildParser({ log, cache, getLangAsset, main });
-    const lang = "L0";
+    const parser = buildParser({ log, cache, getLangAsset, main });
+    const lang = "0";
     const src = "'foo'..";
 
     // Act
-    await expect(parse(lang, src)).resolves.toStrictEqual(ast);
+    await expect(parser.parse(lang, src)).resolves.toStrictEqual(ast);
 
     // Assert
-    expect(getLangAsset).toHaveBeenCalledWith(lang, "lexicon.js");
+    expect(getLangAsset).toHaveBeenCalledWith(lang, "/lexicon.js");
     expect(main.parse).toHaveBeenCalledWith(src, {});
     expect(cache.has(lang)).toBe(true);
     expect(cache.get(lang)).toStrictEqual({});
@@ -120,15 +120,15 @@ describe("lang/parser", () => {
         context.window.gcexports.globalLexicon = {};
       })
     };
-    const parse = buildParser({ log, cache, getLangAsset, main, vm });
-    const lang = "L0";
+    const parser = buildParser({ log, cache, getLangAsset, main, vm });
+    const lang = "0";
     const src = "'foo'..";
 
     // Act
-    await expect(parse(lang, src)).resolves.toStrictEqual(ast);
+    await expect(parser.parse(lang, src)).resolves.toStrictEqual(ast);
 
     // Assert
-    expect(getLangAsset).toHaveBeenCalledWith(lang, "lexicon.js");
+    expect(getLangAsset).toHaveBeenCalledWith(lang, "/lexicon.js");
     expect(main.parse).toHaveBeenCalledWith(src, {});
     expect(cache.has(lang)).toBe(true);
     expect(cache.get(lang)).toStrictEqual({});

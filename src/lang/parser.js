@@ -4,7 +4,7 @@ import { parse } from "./parse.js";
 
 // commonjs export
 const main = {
-  parse(src, lexicon, resume) {
+  parse(src, lexicon) {
     const stream = new parse.StringStream(src);
     const state = {
       cc: parse.program, // top level parsing function
@@ -47,7 +47,7 @@ export const buildParser = ({
   vm
 }) => {
   return {
-    async parse(lang, src, resume) {
+    async parse(lang, src) {
       if (cache.has(lang)) {
         return main.parse(src, cache.get(lang));
       } else {

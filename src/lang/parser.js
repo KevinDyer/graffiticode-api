@@ -65,7 +65,6 @@ export const buildParser = ({
         const lstr = data.substring(data.indexOf("{"));
         let lexicon;
         try {
-          console.log("parse() lstr=" + lstr);
           lexicon = JSON.parse(lstr);
         } catch (err) {
           if (err instanceof SyntaxError) {

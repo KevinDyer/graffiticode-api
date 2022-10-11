@@ -1,5 +1,5 @@
 import { buildMemoryTaskDao } from "./memory.js";
-import { TASK1, TASK_ID1, TASK2 } from "../testing/fixture.js";
+import { TASK1, TASK1_ID, TASK2 } from "../testing/fixture.js";
 
 describe("storage/memory", () => {
   let taskDao = null;
@@ -8,7 +8,7 @@ describe("storage/memory", () => {
   });
 
   it("should throw NotFoundError if task is not created", async () => {
-    await expect(taskDao.get({ id: TASK_ID1 })).rejects.toThrow();
+    await expect(taskDao.get({ id: TASK1_ID })).rejects.toThrow();
   });
 
   it("should return created task", async () => {

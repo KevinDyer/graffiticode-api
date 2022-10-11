@@ -1149,7 +1149,6 @@ export const parse = (function () {
     if (match(ctx, TK_STR)) {
       eat(ctx, TK_STR);
       var coord = getCoord(ctx);
-      console.log("str() lexeme=" + lexeme);
       Ast.string(ctx, lexeme, coord); // strip quotes;
       cc.cls = "string";
       return cc;

@@ -13,7 +13,6 @@ const normalizeTasksParameter = async tasks => {
   tasks = !Array.isArray(tasks) && [tasks] || tasks;
   tasks.forEach(async (task) => {
     if (typeof task.code === "string") {
-      console.log("normalizeTasksParameter() task.code=" + JSON.stringify(task.code, null, 2));
       const lang = task.lang;
       const code = task.code;
       // WARNING mutation alert!

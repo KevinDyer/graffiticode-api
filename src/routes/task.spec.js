@@ -2,7 +2,7 @@ import request from "supertest";
 import { createApp } from "../app.js";
 import { buildArtCompilerAuthApplication } from "../testing/auth.js";
 import { clearFirestore } from "../testing/firestore.js";
-import { TASK1, TASK2, TASK_ID1, TASK_ID2, TASK3, TASK3_ID } from "../testing/fixture.js";
+import { TASK1, TASK1_WITH_SRC, TASK2, TASK1_ID, TASK2_ID } from "../testing/fixture.js";
 import { createError, createErrorResponse, createSuccessResponse } from "./utils.js";
 
 describe("routes/task", () => {
@@ -29,21 +29,21 @@ describe("routes/task", () => {
     await request(app)
       .post("/task")
       .send({ task: TASK1 })
-      .expect(200, createSuccessResponse({ id: TASK_ID1 }));
+      .expect(200, createSuccessResponse({ id: TASK1_ID }));
   });
 
   it("should create a task with source code", async () => {
     await request(app)
       .post("/task")
-      .send({ task: TASK3 })
-      .expect(200, createSuccessResponse({ id: TASK3_ID }));
+      .send({ task: TASK1_WITH_SRC })
+      .expect(200, createSuccessResponse({ id: TASK1_ID }));
   });
 
   it("should create multiple tasks", async () => {
     await request(app)
       .post("/task")
       .send({ task: [TASK1, TASK2] })
-      .expect(200, createSuccessResponse({ id: [TASK_ID1, TASK_ID2] }));
+      .expect(200, createSuccessResponse({ id: [TASK1_ID, TASK2_ID] }));
   });
 
   it("should handle no task ids", async () => {

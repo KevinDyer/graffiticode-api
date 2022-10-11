@@ -11,7 +11,7 @@ export const TASK1 = {
 };
 export const TASK1_WITH_SRC = {
   lang: "0",
-  code: '"hello, world"..',
+  code: "\"hello, world\".."
 };
 export const DATA1 = "hello, world!";
 

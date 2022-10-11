@@ -15,7 +15,7 @@ if (typeof window === "undefined") {
   window = {
     gcexports: {
       coords: {},
-      errors: [],
+      errors: []
     },
     isSynthetic: true
   };
@@ -391,7 +391,6 @@ const Ast = (function () {
         pattern: Ast.intern(ctx, fn.elts[2])
       }
     };
-    const len = fn.elts[0].elts.length;
     const elts = [];
     // While there are args on the stack, pop them.
     while (argc-- > 0 && paramc-- > 0) {
@@ -556,23 +555,23 @@ const Ast = (function () {
     }
   }
 
-  function mul(ctx) {
-    let n2 = node(ctx, pop(ctx));
-    let n1 = node(ctx, pop(ctx));
-    const v2 = n2.elts[0];
-    const v1 = n1.elts[0];
-    if (n1.tag === undefined) {
-      n1 = n1.elts[0];
-    }
-    if (n2.tag === undefined) {
-      n2 = n2.elts[0];
-    }
-    if (n1.tag !== "NUM" || n2.tag !== "NUM") {
-      push(ctx, { tag: "MUL", elts: [n2, n1] });
-    } else {
-      number(ctx, +v1 * +v2);
-    }
-  }
+  // function mul(ctx) {
+  //   let n2 = node(ctx, pop(ctx));
+  //   let n1 = node(ctx, pop(ctx));
+  //   const v2 = n2.elts[0];
+  //   const v1 = n1.elts[0];
+  //   if (n1.tag === undefined) {
+  //     n1 = n1.elts[0];
+  //   }
+  //   if (n2.tag === undefined) {
+  //     n2 = n2.elts[0];
+  //   }
+  //   if (n1.tag !== "NUM" || n2.tag !== "NUM") {
+  //     push(ctx, { tag: "MUL", elts: [n2, n1] });
+  //   } else {
+  //     number(ctx, +v1 * +v2);
+  //   }
+  // }
 
   function div(ctx) {
     const n2 = node(ctx, pop(ctx));
@@ -619,27 +618,27 @@ const Ast = (function () {
   }
 
   function orelse(ctx) {
-    const v2 = +node(ctx, pop(ctx)).elts[0];
-    const v1 = +node(ctx, pop(ctx)).elts[0];
-    throw "not implemented";
+    // const v2 = +node(ctx, pop(ctx)).elts[0];
+    // const v1 = +node(ctx, pop(ctx)).elts[0];
+    throw new Error("not implemented");
   }
 
   function andalso(ctx) {
-    const v2 = +node(ctx, pop(ctx)).elts[0];
-    const v1 = +node(ctx, pop(ctx)).elts[0];
-    throw "not implemented";
+    // const v2 = +node(ctx, pop(ctx)).elts[0];
+    // const v1 = +node(ctx, pop(ctx)).elts[0];
+    throw new Error("not implemented");
   }
 
   function eq(ctx) {
     const v2 = node(ctx, pop(ctx)).elts[0];
     const v1 = node(ctx, pop(ctx)).elts[0];
-    bool(ctx, v1 == v2);
+    bool(ctx, v1 === v2);
   }
 
   function ne(ctx) {
     const v2 = +node(ctx, pop(ctx)).elts[0];
     const v1 = +node(ctx, pop(ctx)).elts[0];
-    bool(ctx, v1 != v2);
+    bool(ctx, v1 !== v2);
   }
 
   function lt(ctx) {
@@ -742,22 +741,12 @@ const Ast = (function () {
     if (inReverse) {
       for (let i = count; i > 0; i--) {
         const elt = pop(ctx);
-        let n;
-        if (false && (n = node(ctx, elt)) && n.tag === "EXPRS") {
-          elts = elts.concat(n.elts);
-        } else {
-          elts.push(elt); // Reverse order.
-        }
+        elts.push(elt); // Reverse order.
       }
     } else {
       for (let i = count; i > 0; i--) {
         const elt = pop(ctx);
-        let n;
-        if (false && (n = node(ctx, elt)) && n.tag === "EXPRS") {
-          elts = elts.concat(n.elts);
-        } else {
-          elts.push(elt); // Reverse order.
-        }
+        elts.push(elt); // Reverse order.
       }
       elts = elts.reverse();
     }
@@ -799,23 +788,24 @@ const StringStream = (function () {
 
   StringStream.prototype = {
     eol: function () { return this.pos >= this.string.length; },
-    sol: function () { return this.pos == 0; },
+    sol: function () { return this.pos === 0; },
     peek: function () { return this.string.charAt(this.pos) || undefined; },
     next: function () {
       if (this.pos < this.string.length) { return this.string.charAt(this.pos++); }
     },
     eat: function (match) {
       const ch = this.string.charAt(this.pos);
+      let ok;
       if (typeof match === "string") {
-        var ok = ch == match;
+        ok = ch === match;
       } else {
-        var ok = ch && (match.test ? match.test(ch) : match(ch));
+        ok = ch && (match.test ? match.test(ch) : match(ch));
       }
       if (ok) { ++this.pos; return ch; }
     },
     eatWhile: function (match) {
       const start = this.pos;
-      while (this.eat(match)) {}
+      while (this.eat(match));
       return this.pos > start;
     },
     eatSpace: function () {
@@ -829,12 +819,10 @@ const StringStream = (function () {
       if (found > -1) { this.pos = found; return true; }
     },
     backUp: function (n) { this.pos -= n; },
-    column: function () { return countColumn(this.string, this.start, this.tabSize); },
-    indentation: function () { return countColumn(this.string, null, this.tabSize); },
     match: function (pattern, consume, caseInsensitive) {
       if (typeof pattern === "string") {
         const cased = function (str) { return caseInsensitive ? str.toLowerCase() : str; };
-        if (cased(this.string).indexOf(cased(pattern), this.pos) == this.pos) {
+        if (cased(this.string).indexOf(cased(pattern), this.pos) === this.pos) {
           if (consume !== false) this.pos += pattern.length;
           return true;
         }
@@ -853,7 +841,7 @@ const StringStream = (function () {
 
 // env
 
-var env = (function () {
+const env = (function () {
   return {
     findWord,
     addWord,
@@ -980,7 +968,7 @@ export const parse = (function () {
   const CC_SINGLEQUOTE = 0x27;
   const CC_BACKTICK = 0x60;
   const CC_LEFTBRACE = 0x7B;
-  const CC_RIGHTBRACE = 0x7D;
+  // const CC_RIGHTBRACE = 0x7D;
 
   const TK_IDENT = 0x01;
   const TK_NUM = 0x02;
@@ -1003,7 +991,7 @@ export const parse = (function () {
   const TK_OR = 0x13;
   const TK_BOOL = 0x14;
   const TK_NULL = 0x15;
-  const TK_IN = 0x16;
+  // const TK_IN = 0x16;
 
   const TK_LEFTPAREN = 0xA1;
   const TK_RIGHTPAREN = 0xA2;
@@ -1020,8 +1008,8 @@ export const parse = (function () {
   const TK_COMMENT = 0xAD;
   const TK_LEFTANGLE = 0xAE;
   const TK_RIGHTANGLE = 0xAF;
-  const TK_DOUBLELEFTBRACE = 0xB0;
-  const TK_DOUBLERIGHTBRACE = 0xB1;
+  // const TK_DOUBLELEFTBRACE = 0xB0;
+  // const TK_DOUBLERIGHTBRACE = 0xB1;
   const TK_STRPREFIX = 0xB2;
   const TK_STRMIDDLE = 0xB3;
   const TK_STRSUFFIX = 0xB4;
@@ -1127,14 +1115,6 @@ export const parse = (function () {
     return cc;
   }
 
-  function string(ctx, cc) {
-    eat(ctx, TK_STR);
-    const coord = getCoord(ctx);
-    cc.cls = "string";
-    Ast.string(ctx, lexeme.substring(1, lexeme.length - 1), coord); // strip quotes;
-    return cc;
-  }
-
   /*
   Str :
     STR
@@ -1146,9 +1126,10 @@ export const parse = (function () {
   */
 
   function str(ctx, cc) {
+    let coord;
     if (match(ctx, TK_STR)) {
       eat(ctx, TK_STR);
-      var coord = getCoord(ctx);
+      coord = getCoord(ctx);
       Ast.string(ctx, lexeme, coord); // strip quotes;
       cc.cls = "string";
       return cc;
@@ -1156,7 +1137,7 @@ export const parse = (function () {
       ctx.state.inStr++;
       eat(ctx, TK_STRPREFIX);
       startCounter(ctx);
-      var coord = getCoord(ctx);
+      coord = getCoord(ctx);
       Ast.string(ctx, lexeme, coord); // strip quotes;
       countCounter(ctx);
       const ret = function (ctx) {
@@ -1184,19 +1165,20 @@ export const parse = (function () {
       return resume;
     }
     return strPart(ctx, function (ctx) {
+      let ret;
       if (match(ctx, TK_STRMIDDLE)) {
         // Not done yet.
         eat(ctx, TK_STRMIDDLE);
-        var coord = getCoord(ctx);
-        Ast.string(ctx, lexeme, coord) // strip quotes;
+        const coord = getCoord(ctx);
+        Ast.string(ctx, lexeme, coord); // strip quotes;
         countCounter(ctx);
-        var ret = function (ctx) {
+        ret = function (ctx) {
           return strSuffix(ctx, resume);
         };
         ret.cls = "string";
         return ret;
       }
-      var ret = function (ctx) {
+      ret = function (ctx) {
         return strSuffix(ctx, resume);
       };
       ret.cls = "string";
@@ -1204,7 +1186,7 @@ export const parse = (function () {
     });
   }
   function strPart(ctx, resume) {
-    return expr(ctx, function(ctx) {
+    return expr(ctx, function (ctx) {
       countCounter(ctx);
       return resume(ctx);
     });
@@ -1576,29 +1558,29 @@ export const parse = (function () {
     return identOrString(ctx, cc);
   }
 
-  function thenClause(ctx, cc) {
-    eat(ctx, TK_THEN);
-    const ret = function (ctx) {
-      return exprsStart(ctx, TK_ELSE, function (ctx) {
-        if (match(ctx, TK_ELSE)) {
-          return elseClause(ctx, cc);
-        } else {
-          return cc(ctx);
-        }
-      });
-    };
-    ret.cls = "keyword";
-    return ret;
-  }
+  // function thenClause(ctx, cc) {
+  //   eat(ctx, TK_THEN);
+  //   const ret = function (ctx) {
+  //     return exprsStart(ctx, TK_ELSE, function (ctx) {
+  //       if (match(ctx, TK_ELSE)) {
+  //         return elseClause(ctx, cc);
+  //       } else {
+  //         return cc(ctx);
+  //       }
+  //     });
+  //   };
+  //   ret.cls = "keyword";
+  //   return ret;
+  // }
 
-  function elseClause(ctx, cc) {
-    eat(ctx, TK_ELSE);
-    const ret = function (ctx) {
-      return exprsStart(ctx, TK_END, cc);
-    };
-    ret.cls = "keyword";
-    return ret;
-  }
+  // function elseClause(ctx, cc) {
+  //   eat(ctx, TK_ELSE);
+  //   const ret = function (ctx) {
+  //     return exprsStart(ctx, TK_END, cc);
+  //   };
+  //   ret.cls = "keyword";
+  //   return ret;
+  // }
 
   function expr(ctx, cc) {
     let ret;
@@ -1658,9 +1640,10 @@ export const parse = (function () {
     }
     return expr(ctx, function (ctx) {
       countCounter(ctx);
+      let ret;
       if (match(ctx, TK_DOT)) {
         eat(ctx, TK_DOT);
-        var ret = function (ctx) {
+        ret = function (ctx) {
           if (emptyInput(ctx) || emptyExpr(ctx)) {
             return exprsFinish(ctx, cc);
           }
@@ -1669,7 +1652,7 @@ export const parse = (function () {
         ret.cls = "punc";
         return ret;
       } else if (match(ctx, brk)) {
-        var ret = function (ctx) {
+        ret = function (ctx) {
           return exprsFinish(ctx, cc);
         };
         ret.cls = "punc";
@@ -1680,15 +1663,14 @@ export const parse = (function () {
         }
         return exprs(ctx, brk, cc);
       }
-      return exprsFinish(ctx, cc);
     });
   }
 
   function program(ctx, cc) {
     return exprsStart(ctx, TK_DOT, function (ctx) {
-      var nid;
+      let nid;
       while (Ast.peek(ctx) !== nid) {
-        var nid = Ast.pop(ctx);
+        nid = Ast.pop(ctx);
         folder.fold(ctx, nid); // fold the exprs on top
       }
       Ast.exprs(ctx, ctx.state.nodeStack.length, true);
@@ -1769,131 +1751,34 @@ export const parse = (function () {
     return ret;
   }
 
-  function param(ctx, cc) {
-    return primaryExpr(ctx, function (ctx) {
-      return cc;
-    });
-  }
-
-  // Drive the parser
-
-  function compileCode(ast, postCode) {
-    const gcexports = window.gcexports;
-    lastAST = ast;
-    ast = JSON.stringify(ast);
-    let src = gcexports.editor.getValue();
-    // HACK need general support for unicode.
-    src = src.replace(/[\u2212]/g, "-");
-    ast = ast.replace(/[\u2212]/g, "-");
-    $.ajax({
-      type: "POST",
-      url: "/code",
-      data: {
-        id: postCode ? null : gcexports.id,
-        forkID: gcexports.forkID || 0,
-        parent: postCode ? gcexports.id : null,
-        ast,
-        type: gcexports.lexiconType,
-        language: gcexports.language,
-        src,
-        jwt: localStorage.getItem("accessToken"),
-        userID: localStorage.getItem("userID")
-      },
-      dataType: "json",
-      success: function (data) {
-        const obj = data.obj;
-        gcexports.lastErrors = gcexports.errors = [];
-        // We have a good id, so use it.
-        const ids = gcexports.decodeID(data.id);
-        const codeIDs = ids.slice(0, 2);
-        const dataIDs = gcexports.decodeID(gcexports.id).slice(2);
-        const id = gcexports.encodeID(codeIDs.concat(dataIDs));
-        gcexports.id = id;
-        const location = "/" + gcexports.view + "?id=" + id;
-        window.history.pushState(id, gcexports.language, location);
-        console.log("/" + gcexports.view + "?id=" + codeIDs.concat(gcexports.encodeID(dataIDs)).join("+"));
-        const state = {};
-        state[gcexports.id] = {
-          id,
-          src,
-          ast,
-          postCode,
-          obj
-        };
-        gcexports.dispatcher.dispatch(state);
-        gcexports.forkID = data.forkID;
-        gcexports.editor.performLint();
-        gcexports.updateMarkAndLabel(gcexports.id);
-      },
-      error: function (xhr, msg, err) {
-        console.log("ERROR " + msg + " " + err);
-        const state = {};
-        state[gcexports.id] = {
-          status: xhr.status,
-          message: msg,
-          error: err
-        };
-        gcexports.dispatcher.dispatch(state);
-      }
-    });
-  }
-
-  function saveSrc() {
-    if (window.gcexports.errors.length) {
-      console.log("saveSrc() errors=" + JSON.stringify(window.gcexport.errors));
-      return;
-    }
-    // Update SRC for a given ID.
-    const id = window.gcexports.id;
-    const ids = window.gcexports.decodeID(id);
-    const codeID = ids[1];
-    const src = window.gcexports.editor.getValue();
-    $.ajax({
-      type: "PUT",
-      url: "/code",
-      data: {
-        id: codeID,
-        src
-      },
-      dataType: "json",
-      success: function (data) {
-      },
-      error: function (xhr, msg, err) {
-        console.log("ERROR " + msg + " " + err);
-      }
-    });
-  }
-
   function topEnv(ctx) {
     return ctx.state.env[ctx.state.env.length - 1];
   }
 
   window.gcexports.topEnv = topEnv;
   window.gcexports.firstTime = true;
-  let lastAST;
-  let lastTimer;
   function parse(stream, state) {
     const ctx = {
       scan: scanner(stream, state.env[0].lexicon),
       state
     };
     let cls;
+    let t0;
     try {
-      var c;
+      let c;
       while ((c = stream.peek()) && (c === " " || c === "\t")) {
         stream.next();
       }
       // if this is a blank line, treat it as a comment
       if (stream.peek() === undefined) {
-        throw "comment";
+        throw new Error("comment");
       }
       // call the continuation and store the next continuation
       if (state.cc === null) {
         next(ctx);
         return "comment";
       }
-      var t0 = new Date();
-      const lastCC = state.cc;
+      t0 = new Date();
       const cc = state.cc = state.cc(ctx, null);
       if (cc) {
         cls = cc.cls;
@@ -1905,51 +1790,23 @@ export const parse = (function () {
         } else {
           return Ast.poolToJSON(ctx);
         }
-        // } else if (state.errors.length === 0) {
-        //   window.gcexports.errors = [];
-        //   const thisAST = Ast.poolToJSON(ctx);
-        //   if (lastTimer) {
-        //     // Reset timer to wait another second pause.
-        //     window.clearTimeout(lastTimer);
-        //   }
-        //   if (JSON.stringify(lastAST) !== JSON.stringify(thisAST)) {
-        //     // Compile code if not first time (newly loaded) and no edit
-        //     // activity after 1 sec.
-        //     if (!window.gcexports.firstTime) {
-        //       lastTimer = window.setTimeout(function () {
-        //         if (gcexports.errors && gcexports.errors.length === 0) {
-        //           compileCode(thisAST, true);
-        //         }
-        //       }, 1000);
-        //     }
-        //     window.gcexports.firstTime = false;
-        //   } else {
-        //     // The AST hasn't changed, but the text has so save the code.
-        //     lastTimer = window.setTimeout(function () {
-        //       window.gcexports.errors = window.gcexports.lastErrors;
-        //       window.gcexports.editor.performLint();
-        //       saveSrc();
-        //     }, 1000);
-        //   }
-        // } else {
-        //   window.gcexports.errors = state.errors;
-        // }
       }
-      var c;
       while ((c = stream.peek()) &&
            (c === " " || c === "\t")) {
         stream.next();
       }
     } catch (x) {
+      console.log("catch() x=" + x);
       if (x instanceof Error) {
-        console.log("catch() x=" + x);
-        next(ctx);
-        addError(ctx, x.message);
-        state.cc = null; // done for now.
-        cls = "error";
-        throw new Error(window.gcexports.errors);
-      } else if (x === "comment") {
-        cls = x;
+        if (x.message === "comment") {
+          cls = x;
+        } else {
+          next(ctx);
+          addError(ctx, x.message);
+          state.cc = null; // done for now.
+          cls = "error";
+          throw new Error(window.gcexports.errors);
+        }
       } else {
         // throw x
         next(ctx);
@@ -1964,7 +1821,7 @@ export const parse = (function () {
     return cls;
   }
 
-  var lexeme = "";
+  let lexeme = "";
 
   function scanner(stream, globalLexicon) {
     return {
@@ -2045,23 +1902,21 @@ export const parse = (function () {
           case CC_SINGLEQUOTE:
           case CC_BACKTICK:
             return string(ctx, c);
-
           case 96: // backquote
           case 47: // slash
           case 92: // backslash
           case 33: // !
           case 124: // |
             comment(c);
-            throw "comment";
+            throw new Error("comment");
           case 94: // caret
-          case 44: // comma
           case 42: // asterisk
             lexeme += String.fromCharCode(c);
             return c; // char code is the token id
           default:
             if ((c >= "A".charCodeAt(0) && c <= "Z".charCodeAt(0)) ||
-            (c >= "a".charCodeAt(0) && c <= "z".charCodeAt(0)) ||
-            (c === "_".charCodeAt(0))) {
+              (c >= "a".charCodeAt(0) && c <= "z".charCodeAt(0)) ||
+              (c === "_".charCodeAt(0))) {
               return ident(c);
             } else if (isNumeric(c) || c === ".".charCodeAt(0) && isNumeric(stream.peek())) {
             // lex += String.fromCharCode(c);
@@ -2100,26 +1955,26 @@ export const parse = (function () {
     // "abc" --> "abc"
     // "a${x}c" --> concat ["a", x, "b"]
     function string(ctx, c) {
-      var quoteChar = c;
+      const quoteChar = c;
       ctx.state.quoteCharStack.push(c);
-      lexeme += String.fromCharCode(c)
+      lexeme += String.fromCharCode(c);
       c = nextCC();
-      while (c !== quoteChar && c !== 0 &&
-            (quoteChar === CC_BACKTICK || !(c === CC_DOLLAR && peekCC() === CC_LEFTBRACE))) {
+      // const inTemplateLiteral = quoteChar === CC_BACKTICK;
+      // while (c !== quoteChar && c !== 0 && (inTemplateLiteral || !(c === CC_DOLLAR && peekCC() === CC_LEFTBRACE))) {
+      while (c !== quoteChar && c !== 0) {
         lexeme += String.fromCharCode(c);
-        var s;
         c = nextCC();
       }
       if (c === CC_DOLLAR &&
           peekCC() === CC_LEFTBRACE) {
         nextCC(); // Eat CC_LEFTBRACE
-        lexeme = lexeme.substring(1);  // Strip off punct.
+        lexeme = lexeme.substring(1); // Strip off punct.
         return TK_STRPREFIX;
       } else if (c) {
-        lexeme = lexeme.substring(1);  // Strip off leading quote.
+        lexeme = lexeme.substring(1); // Strip off leading quote.
         return TK_STR;
       } else {
-        return 0
+        return 0;
       }
     }
 
@@ -2196,7 +2051,7 @@ export const parse = (function () {
 
     parse,
     program,
-    StringStream,
+    StringStream
   };
 
   window.gcexports.parse = parser.parse;
@@ -2263,7 +2118,7 @@ const folder = (function () {
 
   function visit(nid) {
     const node = nodePool[nid];
-    if (node == null) {
+    if (node === null) {
       return null;
     }
     if (node.tag === undefined) {

@@ -30,7 +30,6 @@ const buildTaskCreate = ({ objectToId, aclsById }) => async ({ task, auth }) => 
   } else {
     acls.public = true;
   }
-
   return id;
 };
 

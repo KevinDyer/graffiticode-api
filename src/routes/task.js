@@ -1,25 +1,25 @@
 import { Router } from "express";
 import { InvalidArgumentError } from "../errors/http.js";
 import { parser } from "../lang/parser.js";
+import { isNonEmptyString } from "../util.js";
 import {
   buildGetTaskDaoForRequest,
   buildHttpHandler,
   createSuccessResponse,
   parseIdsFromRequest,
-  optionsHandler
+  optionsHandler,
 } from "./utils.js";
 
 const normalizeTasksParameter = async tasks => {
   tasks = !Array.isArray(tasks) && [tasks] || tasks;
-  tasks.forEach(async (task) => {
-    if (typeof task.code === "string") {
+  tasks = await Promise.all(tasks.map(async (task) => {
+    if (isNonEmptyString(task.code)) {
       const lang = task.lang;
-      const code = task.code;
-      // WARNING mutation alert!
-      task.code = await parser.parse(lang, code);
+      const code = await parser.parse(lang, task.code);
+      task = { lang, code };
     }
-  });
-  tasks = await Promise.all(tasks);
+    return task;
+  }));
   return tasks;
 };
 

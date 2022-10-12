@@ -64,7 +64,6 @@ describe("routes/task", () => {
       .get("/task")
       .query({ id })
       .expect(200, createSuccessResponse([TASK1]));
-
   });
 
   it("should get a task that has been created from source", async () => {
@@ -75,15 +74,10 @@ describe("routes/task", () => {
     expect(res).toHaveProperty("body.status", "success");
     const id = res.body.data.id;
 
-    const res2 = await request(app)
-      .get("/task")
-      .query({ id });
-
     await request(app)
       .get("/task")
       .query({ id })
       .expect(200, createSuccessResponse([TASK1]));
-
   });
 
   it("should get a task with token that has been created with token", async () => {

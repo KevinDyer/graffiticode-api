@@ -7,7 +7,7 @@ import {
   buildHttpHandler,
   createSuccessResponse,
   parseIdsFromRequest,
-  optionsHandler,
+  optionsHandler
 } from "./utils.js";
 
 const normalizeTasksParameter = async tasks => {

@@ -23,7 +23,7 @@ const getLangIdFromRequest = (req) => {
   return id;
 };
 
-export const buildLangRouter = ({ pingLang, getAsset }) => {
+export const buildLangRouter = ({ pingLang, getLangAsset }) => {
   const router = new Router();
   router.get("/", buildHttpHandler(async (req, res) => {
     const langId = getLangIdFromRequest(req);
@@ -33,7 +33,7 @@ export const buildLangRouter = ({ pingLang, getAsset }) => {
     if (!pong) {
       res.sendStatus(404);
     } else if (isNonEmptyString(path)) {
-      const asset = await getAsset(lang, `/${path}`);
+      const asset = await getLangAsset(lang, `/${path}`);
       if (path.indexOf(".svg") > 0) {
         res.setHeader("Content-Type", "image/svg+xml");
       }

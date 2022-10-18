@@ -10,11 +10,11 @@ describe.each([
 ])("lang router: %s", (name, getPath) => {
   let app;
   let pingLang;
-  let getAsset;
+  let getLangAsset;
   beforeEach(() => {
     pingLang = jest.fn();
-    getAsset = jest.fn();
-    const langRouter = buildLangRouter({ pingLang, getAsset });
+    getLangAsset = jest.fn();
+    const langRouter = buildLangRouter({ pingLang, getLangAsset });
     app = express();
     app.use("/lang", langRouter);
     app.use("/L*", langRouter);
@@ -23,7 +23,7 @@ describe.each([
   it("should return languages asset", async () => {
     // Arrange
     pingLang.mockResolvedValue(true);
-    getAsset.mockResolvedValue("asset");
+    getLangAsset.mockResolvedValue("asset");
 
     // Act
     const res = await request(app)

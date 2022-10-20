@@ -1,29 +1,34 @@
+import { jest } from "@jest/globals";
 import express from "express";
 import request from "supertest";
-import { jest } from "@jest/globals";
 import { buildLangRouter } from "./lang.js";
+import { createApp } from "../app.js";
 
 describe.each([
-  ["path param with L", (l, p) => `/L${l}${p}`],
-  ["path param with l", (l, p) => `/l${l}${p}`],
-  ["query param", (l, p) => `/lang${p}?id=${l}`]
+  ["L<number>", (l, p) => `/L${l}${p}`],
+  ["l<number>", (l, p) => `/l${l}${p}`],
+  ["/lang?id=<number>", (l, p) => `/lang${p}?id=${l}`]
 ])("lang router: %s", (name, getPath) => {
   let app;
   let pingLang;
-  let getAsset;
+  let getLangAsset;
   beforeEach(() => {
     pingLang = jest.fn();
-    getAsset = jest.fn();
-    const langRouter = buildLangRouter({ pingLang, getAsset });
+    getLangAsset = jest.fn();
+    const langRouter = buildLangRouter({ pingLang, getLangAsset });
     app = express();
     app.use("/lang", langRouter);
     app.use("/L*", langRouter);
+    app.use((err, req, res, next) => {
+      console.log(err.stack);
+      res.sendStatus(500);
+    });
   });
 
   it("should return languages asset", async () => {
     // Arrange
     pingLang.mockResolvedValue(true);
-    getAsset.mockResolvedValue("asset");
+    getLangAsset.mockResolvedValue("asset");
 
     // Act
     const res = await request(app)

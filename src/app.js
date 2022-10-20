@@ -66,11 +66,11 @@ export const createApp = ({ authUrl } = {}) => {
   // Routes
   app.use("/", routes.root());
   app.use("/compile", routes.compile({ compile }));
-  app.use("/task", routes.task({ taskDaoFactory }));
+  app.use("/config", routes.configHandler);
   app.use("/data", routes.data({ taskDaoFactory, dataApi }));
   app.use("/lang", routes.langRouter);
-  app.use("/config", routes.configHandler);
   app.use("/L*", routes.langRouter);
+  app.use("/task", routes.task({ taskDaoFactory }));
 
   // Error handling
   app.use((err, req, res, next) => {

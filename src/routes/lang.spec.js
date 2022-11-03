@@ -2,7 +2,6 @@ import { jest } from "@jest/globals";
 import express from "express";
 import request from "supertest";
 import { buildLangRouter } from "./lang.js";
-import { createApp } from "../app.js";
 
 describe.each([
   ["L<number>", (l, p) => `/L${l}${p}`],

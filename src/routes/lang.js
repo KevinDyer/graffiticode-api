@@ -36,6 +36,8 @@ export const buildLangRouter = ({ pingLang, getLangAsset }) => {
       const asset = await getLangAsset(lang, `/${path}`);
       if (path.indexOf(".svg") > 0) {
         res.setHeader("Content-Type", "image/svg+xml");
+      } else if (path.indexOf(".js") > 0) {
+        res.setHeader("Content-Type", "application/javascript");
       }
       res.send(asset);
     } else {

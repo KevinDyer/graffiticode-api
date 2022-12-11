@@ -11,7 +11,7 @@ describe("util", () => {
       expect(getCompilerHost("L0", config)).toBe("l0.artcompiler.com");
     });
     it("should return override if hosts is set", () => {
-      const config = { useLocalCompiles: false, hosts: { L0: "mycompiler.com" } };
+      const config = { useLocalCompiles: false, hosts: { l0: "mycompiler.com" } };
       expect(getCompilerHost("L0", config)).toBe("mycompiler.com");
     });
   });
@@ -25,7 +25,7 @@ describe("util", () => {
       expect(getCompilerPort("L0", config)).toBe("443");
     });
     it("should return override if ports is set", () => {
-      const config = { useLocalCompiles: false, ports: { L0: "42" } };
+      const config = { useLocalCompiles: false, ports: { l0: "42" } };
       expect(getCompilerPort("L0", config)).toBe("42");
     });
   });

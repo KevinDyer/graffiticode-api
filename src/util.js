@@ -77,14 +77,15 @@ export function getCompilerHost(lang, config) {
   if (config.hosts && config.hosts[lang]) {
     return config.hosts[lang];
   }
-  lang = lang.indexOf("L") === 0 && lang || "L" + lang;
-  return `${lang.toLowerCase()}.artcompiler.com`;
+  lang = lang.indexOf("l") === 0 && lang || "l" + lang;
+  return `${lang}.artcompiler.com`;
 }
 
 export function getCompilerPort(lang, config) {
   config = config || global.config || {};
+  lang = lang.toLowerCase();
   if (config.useLocalCompiles) {
-    lang = lang.indexOf("L") === 0 && lang.substring(1) || lang;
+    lang = lang.indexOf("l") === 0 && lang.substring(1) || lang;
     return `5${lang}`;
   }
   if (config.ports && config.ports[lang]) {

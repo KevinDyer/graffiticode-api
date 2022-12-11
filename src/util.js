@@ -73,6 +73,7 @@ export function getCompilerHost(lang, config) {
   if (config.useLocalCompiles) {
     return "localhost";
   }
+  lang = lang.toLowerCase();
   if (config.hosts && config.hosts[lang]) {
     return config.hosts[lang];
   }

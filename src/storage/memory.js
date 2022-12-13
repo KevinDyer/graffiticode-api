@@ -1,6 +1,8 @@
 import { decodeID, encodeID } from "../id.js";
 import { NotFoundError } from "../errors/http.js";
 
+// const dumpMap = (map) => console.log(JSON.stringify(Array.from(map.entries()), null, 2));
+
 const buildObjectToId = ({ idsByObject, objectsById }) => obj => {
   if (obj === null) {
     return 0;
@@ -54,7 +56,6 @@ const buildTaskGet = ({ objectFromId, aclsById }) => {
   const checkAuth = buildCheckAuth({ aclsById });
   return async ({ id, auth }) => {
     const tasks = [];
-
     let ids = decodeID(id);
     while (ids.length > 2) {
       const [langId, codeId, ...dataIds] = ids;

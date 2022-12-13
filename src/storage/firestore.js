@@ -2,9 +2,9 @@ import { createHash } from "crypto";
 import { NotFoundError, DecodeIdError } from "../errors/http.js";
 import admin from "firebase-admin";
 
-const createCodeHash = code =>
+const createCodeHash = ({ lang, code }) =>
   createHash("sha256")
-    .update(JSON.stringify(code))
+    .update(JSON.stringify({ lang, code }))
     .digest("hex");
 
 export const encodeId = ({ taskIds }) => {
@@ -50,7 +50,7 @@ const appendIds = (id, ...otherIds) => {
 
 const buildTaskCreate = ({ db }) => async ({ task, auth }) => {
   const { lang, code } = task;
-  const codeHash = createCodeHash(code);
+  const codeHash = createCodeHash({ lang, code });
 
   const codeHashRef = db.doc(`code-hashes/${codeHash}`);
   const codeHashDoc = await codeHashRef.get();

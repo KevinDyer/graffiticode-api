@@ -40,6 +40,20 @@ describe("storage/firestore", () => {
     await expect(taskDao.get({ id: multiId })).resolves.toStrictEqual([TASK1, TASK2]);
   });
 
+  it("should get different ids for same code and different langs", async () => {
+    const id1 = await taskDao.create({ task: { lang: "0", code: TASK1.code } });
+    const id2 = await taskDao.create({ task: { lang: "1", code: TASK1.code } });
+
+    await expect(id1).not.toBe(id2);
+  });
+
+  it("should get same id for same lang and code with different extra properties", async () => {
+    const id1 = await taskDao.create({ task: { ...TASK1, foo: "bar" } });
+    const id2 = await taskDao.create({ task: { ...TASK1, foo: "baz" } });
+
+    await expect(id1).toBe(id2);
+  });
+
   it("should get appended task ids", async () => {
     const id1 = await taskDao.create({ task: TASK1 });
     const id2 = await taskDao.create({ task: TASK2 });

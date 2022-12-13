@@ -17,7 +17,6 @@
     "errorhandler": "^1.5.1",
     "express": "^4.18.1",
     "firebase-admin": "^10.3.0",
-    "firebase-tools": "^11.16.1",
     "graceful-fs": "^4.2.9",
     "hashids": "^2.2.10",
     "jest": "^27.5.1",
@@ -31,7 +30,7 @@
   "scripts": {
     "start": "node -r @graffiticode/tracing src/app.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules firebase emulators:exec --ui \"jest --runInBand\"",
-    "dev": "NODE_OPTIONS=--experimental-vm-modules firebase emulators:exec --ui \"nodemon --exec \\\"jest --runInBand && npm start\\\"\"",
+    "dev": "NODE_OPTIONS=--experimental-vm-modules firebase emulators:exec --ui \"nodemon --exec \\\"node src/app.js\\\"\"",
     "coverage": "nyc npm run test",
     "lint": "eslint src/ tools/",
     "lint:fix": "eslint --fix src/ tools/"
@@ -45,6 +44,7 @@
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.3.0",
-    "eslint-plugin-promise": "^6.0.1"
+    "eslint-plugin-promise": "^6.0.1",
+    "firebase-tools": "^11.18.0"
   }
 }

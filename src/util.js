@@ -74,10 +74,10 @@ export function getCompilerHost(lang, config) {
     return "localhost";
   }
   lang = lang.toLowerCase();
+  lang = lang.indexOf("l") === 0 && lang || "l" + lang;
   if (config.hosts && config.hosts[lang]) {
     return config.hosts[lang];
   }
-  lang = lang.indexOf("l") === 0 && lang || "l" + lang;
   return `${lang}.artcompiler.com`;
 }
 
@@ -88,6 +88,7 @@ export function getCompilerPort(lang, config) {
     lang = lang.indexOf("l") === 0 && lang.substring(1) || lang;
     return `5${lang}`;
   }
+  lang = lang.indexOf("l") === 0 && lang || "l" + lang;
   if (config.ports && config.ports[lang]) {
     return config.ports[lang];
   }

@@ -203,7 +203,6 @@ const Ast = (function () {
       obj[i] = nodeToJSON(n);
     }
     obj.root = (nodePool.length - 1);
-    obj.version = window.gcexports.version;
     return obj;
   }
 

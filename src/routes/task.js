@@ -55,18 +55,14 @@ const buildGetTaskHandler = ({ taskDaoFactory }) => {
 const buildPostTaskHandler = ({ taskDaoFactory }) => {
   const getTaskDaoForRequest = buildGetTaskDaoForRequest(taskDaoFactory);
   return buildHttpHandler(async (req, res) => {
-    console.log("postTaskHandler() header=" + req.get("x-graffiticode-storage-type"));
     const auth = req.auth.context;
     const tasks = await normalizeTasksParameter(req.body.task);
     if (tasks.length < 1) {
       throw new InvalidArgumentError("must provide at least one task");
     }
-    console.log("POST /task tasks=" + JSON.stringify(tasks, null, 2));
-
     const taskDao = getTaskDaoForRequest(req);
     const ids = await Promise.all(tasks.map(task => taskDao.create({ task, auth })));
     const id = getIdFromIds(ids);
-
     res.set("Access-Control-Allow-Origin", "*");
     res.status(200).json(createSuccessResponse({ id }));
   });

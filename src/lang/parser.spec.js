@@ -158,7 +158,6 @@ describe("lang/parser", () => {
         tag: "PROG"
       },
       root: 3,
-      version: undefined
     };
     await expect(parser.parse(lang, src)).resolves.toStrictEqual(ast);
   });

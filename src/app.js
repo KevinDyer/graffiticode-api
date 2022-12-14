@@ -31,7 +31,7 @@ const env = process.env.NODE_ENV || "development";
 
 export const createApp = ({ authUrl } = {}) => {
   const compile = buildCompile({ langCompile });
-  const taskDaoFactory = buildTaskDaoFactory({});
+  const taskDaoFactory = buildTaskDaoFactory();
   const dataApi = buildDataApi({ compile });
 
   const app = express();

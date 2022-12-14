@@ -2,6 +2,7 @@ import { buildMemoryTaskDao } from "./memory.js";
 import { buildFirestoreTaskDao, createFirestoreDb } from "./firestore.js";
 
 const buildCreate = ({ cache }) => ({ type = "memory" } = {}) => {
+  console.log("buildCreate() type=" + type);
   if (!cache.has(type)) {
     let taskDao;
     if (type === "memory") {
@@ -18,6 +19,7 @@ const buildCreate = ({ cache }) => ({ type = "memory" } = {}) => {
 };
 
 export const buildTaskDaoFactory = () => {
+  console.log("buildTaskDaoFactory()");
   const cache = new Map();
   const create = buildCreate({ cache });
   return { create };

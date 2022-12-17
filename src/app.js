@@ -26,7 +26,6 @@ EventEmitter.defaultMaxListeners = 15;
 global.config = require(process.env.CONFIG || "./../config/config.json");
 global.config.useLocalCompiles = process.env.LOCAL_COMPILES === "true";
 
-const port = global.port = process.env.PORT || 3100;
 const env = process.env.NODE_ENV || "development";
 
 export const createApp = ({ authUrl } = {}) => {
@@ -83,7 +82,10 @@ export const createApp = ({ authUrl } = {}) => {
 };
 
 const run = async () => {
-  const app = createApp();
+  const port = global.port = process.env.PORT || 3100;
+  const authUrl = process.env.AUTH_URL || "https://auth.artcompiler.com";
+
+  const app = createApp({ authUrl });
   app.listen(port, () => {
     console.log(`Listening on ${port}...`);
   });

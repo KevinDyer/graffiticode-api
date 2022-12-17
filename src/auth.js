@@ -65,4 +65,3 @@ export function postAuth(path, data, resume) {
     resume(err);
   });
 }
-  

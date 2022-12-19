@@ -32,12 +32,28 @@ describe.each(["memory", "firestore"])("/data[%s]", (storageType) => {
       .send({ task: TASK1 })
       .expect(200);
     expect(res).toHaveProperty("body.status", "success");
-    const id = res.body.data.id;
 
+    const id = res.body.data.id;
     await request(app)
       .get("/data")
       .set("x-graffiticode-storage-type", storageType)
       .query({ id })
+      .expect(200, createSuccessResponse(DATA1));
+  });
+
+  it("get single data using emphemeral flag", async () => {
+    const res = await request(app)
+      .post("/task")
+      .set("x-graffiticode-storage-type", storageType)
+      .send({ task: TASK1 })
+      .expect(200);
+    expect(res).toHaveProperty("body.status", "success");
+
+    const id = res.body.data.id;
+    const ephemeral = storageType === "memory";
+    await request(app)
+      .get("/data")
+      .query({ id, ephemeral })
       .expect(200, createSuccessResponse(DATA1));
   });
 

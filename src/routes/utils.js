@@ -56,7 +56,12 @@ export const createErrorResponse = error => ({ status: "error", error, data: nul
 
 export const createSuccessResponse = data => ({ status: "success", error: null, data });
 
-export const getStorageTypeForRequest = req => req.get("x-graffiticode-storage-type");
+export const getStorageTypeForRequest = req => {
+  return (
+    req.query.ephemeral === "true" && "memory" ||
+    req.get("x-graffiticode-storage-type")
+  );
+};
 
 export const buildGetTaskDaoForRequest = taskDaoFactory => req =>
   taskDaoFactory.create({ type: getStorageTypeForRequest(req) });

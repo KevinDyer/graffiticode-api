@@ -28,6 +28,7 @@ describe("routes/task", () => {
   it("should create a task", async () => {
     await request(app)
       .post("/task")
+      .set("x-graffiticode-storage-type", "memory")
       .send({ task: TASK1 })
       .expect(200, createSuccessResponse({ id: TASK1_ID }));
   });
@@ -35,6 +36,7 @@ describe("routes/task", () => {
   it("should create a task with source code", async () => {
     await request(app)
       .post("/task")
+      .set("x-graffiticode-storage-type", "memory")
       .send({ task: TASK1_WITH_SRC })
       .expect(200, createSuccessResponse({ id: TASK1_ID }));
   });
@@ -42,6 +44,7 @@ describe("routes/task", () => {
   it("should create multiple tasks", async () => {
     await request(app)
       .post("/task")
+      .set("x-graffiticode-storage-type", "memory")
       .send({ task: [TASK1, TASK2] })
       .expect(200, createSuccessResponse({ id: [TASK1_ID, TASK2_ID] }));
   });

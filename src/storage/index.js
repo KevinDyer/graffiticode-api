@@ -19,7 +19,6 @@ const buildCreate = ({ cache }) => ({ type = "memory" } = {}) => {
 };
 
 export const buildTaskDaoFactory = () => {
-  console.log("buildTaskDaoFactory()");
   const cache = new Map();
   const create = buildCreate({ cache });
   return { create };

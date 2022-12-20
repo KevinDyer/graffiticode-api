@@ -1,5 +1,6 @@
 import { isNonEmptyString } from "../util.js";
 import { HttpError } from "./../errors/http.js";
+import { decodeID } from "./../id.js";
 
 export const parseIdsFromRequest = req => {
   const id = req.query.id;
@@ -65,6 +66,23 @@ export const getStorageTypeForRequest = req => {
 
 export const buildGetTaskDaoForRequest = taskDaoFactory => req =>
   taskDaoFactory.create({ type: getStorageTypeForRequest(req) });
+
+export const getStorageTypeForId = id => {
+  try {
+    const ids = decodeID(id);
+    if (ids[1] === 0) {
+      // [_, 0, _] means invalid id.
+      return "firestore";
+    }
+    return "memory";
+  } catch (x) {
+    // Just in case.
+    return "firestore";
+  }
+};
+
+export const buildGetTaskDaoForId = taskDaoFactory => req =>
+  taskDaoFactory.create({ type: getStorageTypeForId(req) });
 
 export const optionsHandler = buildHttpHandler(async (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");

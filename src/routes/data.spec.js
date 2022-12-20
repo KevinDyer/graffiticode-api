@@ -36,7 +36,6 @@ describe.each(["memory", "firestore"])("/data[%s]", (storageType) => {
     const id = res.body.data.id;
     await request(app)
       .get("/data")
-      .set("x-graffiticode-storage-type", storageType)
       .query({ id })
       .expect(200, createSuccessResponse(DATA1));
   });
@@ -74,25 +73,8 @@ describe.each(["memory", "firestore"])("/data[%s]", (storageType) => {
 
     await request(app)
       .get("/data")
-      .set("x-graffiticode-storage-type", storageType)
       .query({ id: [id1, id2].join(",") })
       .expect(200, createSuccessResponse([DATA1, DATA2]));
-  });
-
-  it("get data for different storage type", async () => {
-    const createResponse = await request(app)
-      .post("/task")
-      .set("x-graffiticode-storage-type", "firestore")
-      .send({ task: TASK1 })
-      .expect(200);
-    expect(createResponse).toHaveProperty("body.status", "success");
-    const id = createResponse.body.data.id;
-
-    await request(app)
-      .get("/data")
-      .set("x-graffiticode-storage-type", "memory")
-      .query({ id })
-      .expect(404);
   });
 
   it("get data with token created with token", async () => {
@@ -110,7 +92,6 @@ describe.each(["memory", "firestore"])("/data[%s]", (storageType) => {
     await request(app)
       .get("/data")
       .set("Authorization", token)
-      .set("x-graffiticode-storage-type", storageType)
       .query({ id })
       .expect(200, createSuccessResponse(DATA1));
   });
@@ -129,7 +110,6 @@ describe.each(["memory", "firestore"])("/data[%s]", (storageType) => {
     await request(app)
       .get("/data")
       .set("Authorization", token)
-      .set("x-graffiticode-storage-type", storageType)
       .query({ id })
       .expect(200, createSuccessResponse(DATA1));
   });
@@ -148,7 +128,6 @@ describe.each(["memory", "firestore"])("/data[%s]", (storageType) => {
 
     await request(app)
       .get("/data")
-      .set("x-graffiticode-storage-type", storageType)
       .query({ id })
       .expect(404);
   });

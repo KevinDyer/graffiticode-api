@@ -59,7 +59,6 @@ export const createSuccessResponse = data => ({ status: "success", error: null, 
 
 export const getStorageTypeForRequest = req => {
   return (
-    req.query.ephemeral === "true" && "memory" ||
     req.get("x-graffiticode-storage-type")
   );
 };
@@ -72,12 +71,12 @@ export const getStorageTypeForId = id => {
     const ids = decodeID(id);
     if (ids[1] === 0) {
       // [_, 0, _] means invalid id.
-      return "firestore";
+      return "persistent";
     }
-    return "memory";
+    return "ephemeral";
   } catch (x) {
     // Just in case.
-    return "firestore";
+    return "ephemeral";
   }
 };
 

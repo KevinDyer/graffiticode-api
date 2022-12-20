@@ -28,7 +28,7 @@ describe("routes/task", () => {
   it("should create a task", async () => {
     await request(app)
       .post("/task")
-      .set("x-graffiticode-storage-type", "memory")
+      .set("x-graffiticode-storage-type", "ephemeral")
       .send({ task: TASK1 })
       .expect(200, createSuccessResponse({ id: TASK1_ID }));
   });
@@ -36,7 +36,7 @@ describe("routes/task", () => {
   it("should create a task with source code", async () => {
     await request(app)
       .post("/task")
-      .set("x-graffiticode-storage-type", "memory")
+      .set("x-graffiticode-storage-type", "ephemeral")
       .send({ task: TASK1_WITH_SRC })
       .expect(200, createSuccessResponse({ id: TASK1_ID }));
   });
@@ -44,7 +44,7 @@ describe("routes/task", () => {
   it("should create multiple tasks", async () => {
     await request(app)
       .post("/task")
-      .set("x-graffiticode-storage-type", "memory")
+      .set("x-graffiticode-storage-type", "ephemeral")
       .send({ task: [TASK1, TASK2] })
       .expect(200, createSuccessResponse({ id: [TASK1_ID, TASK2_ID] }));
   });
@@ -152,7 +152,7 @@ describe("routes/task", () => {
   it("get from same storage type", async () => {
     const createResponse = await request(app)
       .post("/task")
-      .set("x-graffiticode-storage-type", "firestore")
+      .set("x-graffiticode-storage-type", "persistent")
       .send({ task: TASK1 });
     expect(createResponse).toHaveProperty("body.status", "success");
     const id = createResponse.body.data.id;
@@ -160,14 +160,14 @@ describe("routes/task", () => {
     await request(app)
       .get("/task")
       .query({ id })
-      .set("x-graffiticode-storage-type", "firestore")
+      .set("x-graffiticode-storage-type", "persistent")
       .expect(200, createSuccessResponse([TASK1]));
   });
 
   it("get from different storage type", async () => {
     const createResponse = await request(app)
       .post("/task")
-      .set("x-graffiticode-storage-type", "firestore")
+      .set("x-graffiticode-storage-type", "persistent")
       .send({ task: TASK1 });
     expect(createResponse).toHaveProperty("body.status", "success");
     const id = createResponse.body.data.id;
@@ -175,7 +175,7 @@ describe("routes/task", () => {
     await request(app)
       .get("/task")
       .query({ id })
-      .set("x-graffiticode-storage-type", "memory")
+      .set("x-graffiticode-storage-type", "ephemeral")
       .expect(404);
   });
 });

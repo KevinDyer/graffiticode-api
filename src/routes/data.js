@@ -19,8 +19,12 @@ const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
     if (ids.length < 1) {
       throw new InvalidArgumentError("must provide at least one id");
     }
-    const taskDao = getTaskDaoForId(ids[0]);
-    const objs = await Promise.all(ids.map(id => dataApi.get({ taskDao, id, auth, authToken })));
+    const objs = await Promise.all(ids.map(id => dataApi.get({
+      taskDao: getTaskDaoForId(id),
+      id,
+      auth,
+      authToken
+    })));
     let data;
     if (objs.length > 1) {
       data = objs;

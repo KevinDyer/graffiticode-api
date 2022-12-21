@@ -76,7 +76,7 @@ export const getStorageTypeForId = id => {
     return "ephemeral";
   } catch (x) {
     // Just in case.
-    return "ephemeral";
+    return "persistent";
   }
 };
 

@@ -1,5 +1,4 @@
-default: build
-	node src/app.js
+default: build dev
 
 test:
 	npm test

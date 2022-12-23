@@ -1,9 +1,13 @@
 {
   "hosts": {
-    "l1": "l1.graffiticode.org"
+    "l1": "l1.graffiticode.org",
+    "l146": "l146.graffiticode.org",
+    "l147": "l147.graffiticode.org"
   },
   "ports": {
-    "l1": "443"
+    "l1": "443",
+    "l146": "443",
+    "l147": "443"
   },
   "protocol": "https",
   "metadata": {

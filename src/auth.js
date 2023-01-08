@@ -1,8 +1,8 @@
 import bent from "bent";
 import https from "https";
-import { UnauthenticatedError } from "./errors/http.js";
+import { NotFoundError, UnauthenticatedError } from "./errors/http.js";
 
-export const buildValidateToken = ({ authUrl = "https://auth.artcompiler.com" }) => {
+const buildArtCompilerValidateToken = ({ authUrl = "https://auth.artcompiler.com" }) => {
   // Note: The ArtCompiler application will respond with either a
   // - 401 Unauthenticated
   // - 200 OK with a body containing the user id.
@@ -25,6 +25,37 @@ export const buildValidateToken = ({ authUrl = "https://auth.artcompiler.com" })
     }
   };
 };
+
+const buildGraffiticodeValidateToken = ({ authUrl = "https://auth.artcompiler.com" }) => {
+  const postAuth = bent(authUrl, "POST", 200, 401);
+  return async token => {
+    const res = await postAuth("/validate", { token });
+    if (res.statusCode === 401) {
+      const message = await res.text();
+      throw new UnauthenticatedError(message);
+    } else if (res.statusCode === 200) {
+      const { uid } = await res.json();
+      return { uid };
+    } else {
+      const message = await res.text();
+      throw new Error(message);
+    }
+  };
+};
+
+export const buildValidateTokenFactory = ({ authUrl }) => {
+  const validateTokenProviders = new Map();
+  validateTokenProviders.set("artcompiler", buildArtCompilerValidateToken({ authUrl }));
+  validateTokenProviders.set("graffiticode", buildGraffiticodeValidateToken({ authUrl }));
+  return ({ authProvider }) => {
+    if (!validateTokenProviders.has(authProvider)) {
+      throw new NotFoundError(`Auth provider ${authProvider} does not exist`);
+    }
+    return validateTokenProviders.get(authProvider);
+  };
+};
+
+export const buildValidateToken = ({ authUrl = "https://auth.artcompiler.com", authProvider = "artcompiler" }) => buildValidateTokenFactory({ authUrl })({ authProvider });
 
 export function postAuth(path, data, resume) {
   const encodedData = JSON.stringify(data);

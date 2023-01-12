@@ -83,8 +83,8 @@ export const createApp = ({ authUrl, authProvider } = {}) => {
 
 const run = async () => {
   const port = global.port = process.env.PORT || 3100;
-  const authUrl = process.env.AUTH_URL || "https://auth.artcompiler.com";
-  const authProvider = process.env.AUTH_PROVIDER || "artcompiler";
+  const authUrl = process.env.AUTH_URL || "https://auth.graffiticode.org";
+  const authProvider = process.env.AUTH_PROVIDER || "graffiticode";
 
   const app = createApp({ authUrl, authProvider });
   app.listen(port, () => {

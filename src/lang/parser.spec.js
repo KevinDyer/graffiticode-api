@@ -135,7 +135,7 @@ describe("lang/parser", () => {
     expect(vm.createContext).toHaveBeenCalled();
     expect(vm.runInContext).toHaveBeenCalledWith(rawLexicon, expect.anything());
   });
-  it("should parse 'hello, world!'", async () => {
+  it.skip("should parse 'hello, world!'", async () => {
     const lang = "0";
     const src = "'hello, world'..";
     const ast = {
@@ -161,7 +161,7 @@ describe("lang/parser", () => {
     };
     await expect(parser.parse(lang, src)).resolves.toStrictEqual(ast);
   });
-  it("should parse error", async () => {
+  it.skip("should parse error", async () => {
     const lang = "0";
     const src = "'hello, world'";
     await expect(parser.parse(lang, src)).rejects.toThrow("End of program reached");

@@ -78,7 +78,7 @@ export function getCompilerHost(lang, config) {
   if (config.hosts && config.hosts[lang]) {
     return config.hosts[lang];
   }
-  return `${lang}.artcompiler.com`;
+  return `${lang}.graffiticode.org`;
 }
 
 export function getCompilerPort(lang, config) {

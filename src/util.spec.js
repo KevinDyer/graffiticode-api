@@ -8,7 +8,7 @@ describe("util", () => {
     });
     it("should return default if useLocalCompiles is false", () => {
       const config = { useLocalCompiles: false, hosts: {} };
-      expect(getCompilerHost("L0", config)).toBe("l0.artcompiler.com");
+      expect(getCompilerHost("L0", config)).toBe("l0.graffiticode.org");
     });
     it("should return override if hosts is set", () => {
       const config = { useLocalCompiles: false, hosts: { l0: "mycompiler.com" } };

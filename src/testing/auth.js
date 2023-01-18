@@ -28,6 +28,8 @@ export const buildArtCompilerAuthApplication = () => {
   app.use(morgan("dev"));
   app.use(express.json({}));
   app.use(express.urlencoded({ extended: true }));
+
+  // ArtCompiler Auth
   app.post("/validateSignIn", buildHttpHandler(async (req, res) => {
     if (!isNonNullObject(req.body) || !isNonEmptyString(req.body.jwt)) {
       throw new InvalidArgumentError("must provide a token");
@@ -42,6 +44,23 @@ export const buildArtCompilerAuthApplication = () => {
     }
     res.status(200).json({ id });
   }));
+
+  // Graffiticode Auth
+  app.post("/validate", buildHttpHandler(async (req, res) => {
+    if (!isNonNullObject(req.body) || !isNonEmptyString(req.body.token)) {
+      throw new InvalidArgumentError("must provide a token");
+    }
+    const token = req.body.token;
+    if (!idsByToken.has(token)) {
+      throw new UnauthenticatedError();
+    }
+    const uid = idsByToken.get(token);
+    if (uid instanceof Error) {
+      throw uid;
+    }
+    res.status(200).json({ uid });
+  }));
+
   /* eslint-disable n/handle-callback-err */
   app.use((err, req, res, next) => {
     res.sendStatus(500);

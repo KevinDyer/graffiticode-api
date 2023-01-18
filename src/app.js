@@ -26,10 +26,9 @@ EventEmitter.defaultMaxListeners = 15;
 global.config = require(process.env.CONFIG || "./../config/config.json");
 global.config.useLocalCompiles = process.env.LOCAL_COMPILES === "true";
 
-const port = global.port = process.env.PORT || 3100;
 const env = process.env.NODE_ENV || "development";
 
-export const createApp = ({ authUrl } = {}) => {
+export const createApp = ({ authUrl, authProvider } = {}) => {
   const compile = buildCompile({ langCompile });
   const taskDaoFactory = buildTaskDaoFactory();
   const dataApi = buildDataApi({ compile });
@@ -60,7 +59,7 @@ export const createApp = ({ authUrl } = {}) => {
   app.use(methodOverride());
 
   // Authentication
-  const validateToken = buildValidateToken({ authUrl });
+  const validateToken = buildValidateToken({ authUrl, authProvider });
   app.use(routes.auth({ validateToken }));
 
   // Routes
@@ -83,7 +82,11 @@ export const createApp = ({ authUrl } = {}) => {
 };
 
 const run = async () => {
-  const app = createApp();
+  const port = global.port = process.env.PORT || 3100;
+  const authUrl = process.env.AUTH_URL || "https://auth.graffiticode.org";
+  const authProvider = process.env.AUTH_PROVIDER || "graffiticode";
+
+  const app = createApp({ authUrl, authProvider });
   app.listen(port, () => {
     console.log(`Listening on ${port}...`);
   });

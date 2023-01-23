@@ -32,12 +32,12 @@ export const buildGetData = ({ getTaskDaoForId, dataApi }) =>
 
 const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
   const getTaskDaoForId = buildGetTaskDaoForId(taskDaoFactory);
-  const getData = buildGetData({getTaskDaoForId, dataApi});
+  const getData = buildGetData({ getTaskDaoForId, dataApi });
   return buildHttpHandler(async (req, res) => {
     const auth = req.auth.context;
     const authToken = parseAuthFromRequest(req);
     const ids = parseIdsFromRequest(req);
-    const data = await getData({auth, authToken, ids});
+    const data = await getData({ auth, authToken, ids });
     res.set("Access-Control-Allow-Origin", "*");
     res.status(200).json(createSuccessResponse(data));
   });

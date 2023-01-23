@@ -30,24 +30,24 @@ function getItemsFromBody(body) {
 
 const buildPostCompileHandler = ({ taskDaoFactory, dataApi, compile }) => {
   const getTaskDaoForId = buildGetTaskDaoForId(taskDaoFactory);
-  const getData = buildGetData({getTaskDaoForId, dataApi});
+  const getData = buildGetData({ getTaskDaoForId, dataApi });
   return buildHttpHandler(async (req, res) => {
-    const postTasks = buildPostTasks({taskDaoFactory, req});
+    const postTasks = buildPostTasks({ taskDaoFactory, req });
     const auth = req.auth.context;
     const authToken = parseAuthFromRequest(req);
     const items = getItemsFromBody(req.body);
     let data = await Promise.all(items.map(async item => {
-      let { id, lang, code, data, options } = item;
+      let { id, lang, code, data } = item;
       if (!id) {
-        id = await postTasks({auth, tasks: {lang, code}});
+        id = await postTasks({ auth, tasks: { lang, code } });
       }
       data = data || {};
       const dataId = await postTasks({
         auth,
-        tasks: {lang: "1", code: `${JSON.stringify(data)}..`}
+        tasks: { lang: "1", code: `${JSON.stringify(data)}..` }
       });
       const taskId = [id, dataId].join("+");
-      return await getData({auth, authToken, ids: [taskId]});
+      return await getData({ auth, authToken, ids: [taskId] });
     }));
     if (data.length === 1) {
       data = data[0];

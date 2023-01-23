@@ -10,12 +10,8 @@ import {
   optionsHandler
 } from "./utils.js";
 
-const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
-  const getTaskDaoForId = buildGetTaskDaoForId(taskDaoFactory);
-  return buildHttpHandler(async (req, res) => {
-    const auth = req.auth.context;
-    const authToken = parseAuthFromRequest(req);
-    const ids = parseIdsFromRequest(req);
+export const buildGetData = ({ getTaskDaoForId, dataApi }) =>
+  async ({ auth, authToken, ids }) => {
     if (ids.length < 1) {
       throw new InvalidArgumentError("must provide at least one id");
     }
@@ -31,6 +27,17 @@ const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
     } else {
       data = objs[0];
     }
+    return data;
+  };
+
+const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
+  const getTaskDaoForId = buildGetTaskDaoForId(taskDaoFactory);
+  const getData = buildGetData({getTaskDaoForId, dataApi});
+  return buildHttpHandler(async (req, res) => {
+    const auth = req.auth.context;
+    const authToken = parseAuthFromRequest(req);
+    const ids = parseIdsFromRequest(req);
+    const data = await getData({auth, authToken, ids});
     res.set("Access-Control-Allow-Origin", "*");
     res.status(200).json(createSuccessResponse(data));
   });

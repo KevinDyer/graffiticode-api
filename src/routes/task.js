@@ -52,17 +52,26 @@ const buildGetTaskHandler = ({ taskDaoFactory }) => {
   });
 };
 
-const buildPostTaskHandler = ({ taskDaoFactory }) => {
+export const buildPostTasks = ({ taskDaoFactory, req }) => {
   const getTaskDaoForRequest = buildGetTaskDaoForRequest(taskDaoFactory);
-  return buildHttpHandler(async (req, res) => {
-    const auth = req.auth.context;
-    const tasks = await normalizeTasksParameter(req.body.task);
+  return async ({auth, tasks}) => {
+    tasks = await normalizeTasksParameter(tasks);
     if (tasks.length < 1) {
       throw new InvalidArgumentError("must provide at least one task");
     }
     const taskDao = getTaskDaoForRequest(req);
     const ids = await Promise.all(tasks.map(task => taskDao.create({ task, auth })));
     const id = getIdFromIds(ids);
+    return id;
+  }
+};
+
+const buildPostTaskHandler = ({ taskDaoFactory }) => {
+  return buildHttpHandler(async (req, res) => {
+    const postTasks = buildPostTasks({taskDaoFactory, req});
+    const auth = req.auth.context;
+    const tasks = req.body.task;
+    const id = await postTasks({auth, tasks});
     res.set("Access-Control-Allow-Origin", "*");
     res.status(200).json(createSuccessResponse({ id }));
   });

@@ -39,7 +39,6 @@ describe("routes/data", () => {
       .send({ task: TASK2 });
     expect(res2).toHaveProperty("body.status", "success");
     const id2 = res2.body.data.id;
-
     await request(app)
       .get("/data")
       .query({ id: [id1, id2].join(",") })

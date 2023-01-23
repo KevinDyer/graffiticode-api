@@ -64,7 +64,7 @@ export const createApp = ({ authUrl, authProvider } = {}) => {
 
   // Routes
   app.use("/", routes.root());
-  app.use("/compile", routes.compile({ compile }));
+  app.use("/compile", routes.compile({ taskDaoFactory, dataApi, compile }));
   app.use("/config", routes.configHandler);
   app.use("/data", routes.data({ taskDaoFactory, dataApi }));
   app.use("/lang", routes.langRouter);

@@ -1,6 +1,6 @@
 export const TASK1_ID = "yLimC0";
 export const TASK1 = {
-  lang: "0",
+  lang: "1",
   code: {
     1: { tag: "STR", elts: ["hello, world!"] },
     2: { tag: "EXPRS", elts: [1] },
@@ -9,14 +9,14 @@ export const TASK1 = {
   }
 };
 export const TASK1_WITH_SRC = {
-  lang: "0",
+  lang: "1",
   code: "\"hello, world!\".."
 };
 export const DATA1 = "hello, world!";
 
 export const TASK2_ID = "WaiqIp";
 export const TASK2 = {
-  lang: "0",
+  lang: "1",
   code: {
     1: { tag: "STR", elts: ["goodbye, world!"] },
     2: { tag: "EXPRS", elts: [1] },

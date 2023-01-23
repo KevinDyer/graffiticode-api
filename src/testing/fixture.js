@@ -1,4 +1,4 @@
-export const TASK1_ID = "yLimC0";
+export const TASK1_ID = "WmHjCp";
 export const TASK1 = {
   lang: "1",
   code: {
@@ -14,7 +14,7 @@ export const TASK1_WITH_SRC = {
 };
 export const DATA1 = "hello, world!";
 
-export const TASK2_ID = "WaiqIp";
+export const TASK2_ID = "M4HrIp";
 export const TASK2 = {
   lang: "1",
   code: {

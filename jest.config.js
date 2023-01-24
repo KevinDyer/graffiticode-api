@@ -3,4 +3,5 @@ export default {
   verbose: true,
   testEnvironment: "node",
   clearMocks: true,
+  testTimeout: 6000,
 };

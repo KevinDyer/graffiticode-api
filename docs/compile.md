@@ -3,6 +3,7 @@
 Compiles are idempotent. That is, the same response object will always be
 returned for the same body given in the response.
 
+```
 const composeResponse = ({ item, data }) => {
   delete item.data;
   return { data: Object.assign(item, data) };
@@ -18,3 +19,4 @@ const data = await Promise.all(items.map(async item => {
   const taskId = [taskId, dataId].join("+");
   return composeResponse({ item, data: await getData({ auth, taskId }) });
 }));
+```

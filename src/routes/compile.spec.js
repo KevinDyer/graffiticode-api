@@ -1,6 +1,6 @@
 import request from "supertest";
 import { createApp } from "../app.js";
-import { TASK1, DATA1, TASK1_ID, TASK2, TASK2_ID, DATA2 } from "../testing/fixture.js";
+import { TASK1, DATA1, TASK2, DATA2 } from "../testing/fixture.js";
 import { createSuccessResponse, createErrorResponse, createError } from "./utils.js";
 
 describe("routes/compile", () => {

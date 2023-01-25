@@ -29,12 +29,7 @@ function getItemsFromRequest(req) {
   return items;
 }
 
-const composeResponse = ({ item, data }) => {
-  delete item.data;
-  return { data: Object.assign(item, data) };
-};
-
-const getTaskFromData = data => ({lang: "1", code: `${JSON.stringify(data)}..`});
+const getTaskFromData = data => ({ lang: "1", code: `${JSON.stringify(data)}..` });
 
 const buildPostCompileHandler = ({ taskDaoFactory, dataApi, compile }) => {
   const getTaskDaoForId = buildGetTaskDaoForId(taskDaoFactory);
@@ -50,7 +45,7 @@ const buildPostCompileHandler = ({ taskDaoFactory, dataApi, compile }) => {
         id = await postTasks({ auth, tasks: { lang, code } });
       }
       data = data || {};
-      const dataId = await postTasks({ auth, tasks: getTaskFromData(data),  });
+      const dataId = await postTasks({ auth, tasks: getTaskFromData(data) });
       console.log("POST /compile id=" + id + " dataId=" + dataId);
       const taskId = [id, dataId].join("+");
       return await getData({ auth, authToken, ids: [taskId] });

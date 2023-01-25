@@ -1,16 +1,20 @@
-## POST /compile
+### POST /compile [{id, data, ...}, ...]
 
-Takes a `taskId` and `data` and returns `data`.
+Compiles are idempotent. That is, the same response object will always be
+returned for the same body given in the response.
 
+const composeResponse = ({ item, data }) => {
+  delete item.data;
+  return { data: Object.assign(item, data) };
+};
 
-### POST /compile {item: {id, data, options}}
-### POST /compile {item: [{id, data, options}, ...]
-### POST /compile [{id, data, options}, ...]
+const getTaskFromData = data => {lang: "1", code: `${JSON.stringify(data)}..`};
 
-const items = normalizeReqBody(req.body);
-const data = items.map(async item => {
-  const { id, data, options } = item;
-  const dataId = await postTask({lang: "1", code: `${JSON.stringify(data)}..`});
+const items = getItemsFromRequest(req);
+const auth = getAuthFromRequest(req);
+const data = await Promise.all(items.map(async item => {
+  const { id, data } = item;
+  const dataId = postTask({ auth, task: getTaskFromData(data) });
   const taskId = [taskId, dataId].join("+");
-  return await getData(task);
-});
+  return composeResponse({ item, data: await getData({ auth, taskId }) });
+}));

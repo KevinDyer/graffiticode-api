@@ -13,7 +13,8 @@ import {
 import { isNonNullObject } from "../util.js";
 import { InvalidArgumentError } from "../errors/http.js";
 
-function getItemsFromBody(body) {
+function getItemsFromRequest(req) {
+  const { body } = req;
   let items;
   if (body.item) {
     items = [].concat(body.item);
@@ -28,6 +29,13 @@ function getItemsFromBody(body) {
   return items;
 }
 
+const composeResponse = ({ item, data }) => {
+  delete item.data;
+  return { data: Object.assign(item, data) };
+};
+
+const getTaskFromData = data => ({lang: "1", code: `${JSON.stringify(data)}..`});
+
 const buildPostCompileHandler = ({ taskDaoFactory, dataApi, compile }) => {
   const getTaskDaoForId = buildGetTaskDaoForId(taskDaoFactory);
   const getData = buildGetData({ getTaskDaoForId, dataApi });
@@ -35,20 +43,19 @@ const buildPostCompileHandler = ({ taskDaoFactory, dataApi, compile }) => {
     const postTasks = buildPostTasks({ taskDaoFactory, req });
     const auth = req.auth.context;
     const authToken = parseAuthFromRequest(req);
-    const items = getItemsFromBody(req.body);
+    const items = getItemsFromRequest(req);
     let data = await Promise.all(items.map(async item => {
       let { id, lang, code, data } = item;
       if (!id) {
         id = await postTasks({ auth, tasks: { lang, code } });
       }
       data = data || {};
-      const dataId = await postTasks({
-        auth,
-        tasks: { lang: "1", code: `${JSON.stringify(data)}..` }
-      });
+      const dataId = await postTasks({ auth, tasks: getTaskFromData(data),  });
+      console.log("POST /compile id=" + id + " dataId=" + dataId);
       const taskId = [id, dataId].join("+");
       return await getData({ auth, authToken, ids: [taskId] });
     }));
+    console.log("POST /compile data=" + JSON.stringify(data, null, 2));
     if (data.length === 1) {
       data = data[0];
     }

@@ -12,7 +12,6 @@ const buildGetData = ({ compile }) =>
           auth: authToken,
           options
         });
-        console.log("buildGetData() obj=" + JSON.stringify(obj, null, 2));
         return obj;
       },
       Promise.resolve({})

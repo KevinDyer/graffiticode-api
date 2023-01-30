@@ -35,23 +35,18 @@ const getIdFromIds = ids => {
 export const buildGetTasks = ({ taskDaoFactory, req }) => {
   const getTaskDaoForId = buildGetTaskDaoForId(taskDaoFactory);
   return async ({ auth, ids }) => {
-    try {
-      if (ids.length < 1) {
-        throw new InvalidArgumentError("must provide at least one task id");
-      }
-      const tasksForIds = await Promise.all(ids.map(id => {
-        const taskDao = getTaskDaoForId(id);
-        return taskDao.get({ id, auth });
-      }));
-      const tasks = tasksForIds.reduce((tasks, tasksForId) => {
-        tasks.push(...tasksForId);
-        return tasks;
-      }, []);
-      return tasks;
-    } catch (x) {
-      console.log("getTasks() catch x=" + x);
-      return [];
+    if (ids.length < 1) {
+      throw new InvalidArgumentError("must provide at least one task id");
     }
+    const tasksForIds = await Promise.all(ids.map(id => {
+      const taskDao = getTaskDaoForId(id);
+      return taskDao.get({ id, auth });
+    }));
+    const tasks = tasksForIds.reduce((tasks, tasksForId) => {
+      tasks.push(...tasksForId);
+      return tasks;
+    }, []);
+    return tasks;
   };
 };
 
@@ -63,7 +58,7 @@ const buildGetTaskHandler = ({ taskDaoFactory }) => {
     if (ids.length < 1) {
       throw new InvalidArgumentError("must provide at least one id");
     }
-    const tasks = getTasks({ auth, ids });
+    const tasks = await getTasks({ auth, ids });
     res.set("Access-Control-Allow-Origin", "*");
     res.status(200).json(createSuccessResponse(tasks));
   });

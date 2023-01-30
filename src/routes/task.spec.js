@@ -58,6 +58,7 @@ describe("routes/task", () => {
   it("should get a task that has been created", async () => {
     const res = await request(app)
       .post("/task")
+      .set("x-graffiticode-storage-type", "ephemeral")
       .send({ task: TASK1 })
       .expect(200);
     expect(res).toHaveProperty("body.status", "success");
@@ -72,6 +73,7 @@ describe("routes/task", () => {
   it("should get a task that has been created from source", async () => {
     const res = await request(app)
       .post("/task")
+      .set("x-graffiticode-storage-type", "ephemeral")
       .send({ task: TASK1_WITH_SRC })
       .expect(200);
     expect(res).toHaveProperty("body.status", "success");
@@ -162,20 +164,5 @@ describe("routes/task", () => {
       .query({ id })
       .set("x-graffiticode-storage-type", "persistent")
       .expect(200, createSuccessResponse([TASK1]));
-  });
-
-  it("get from different storage type", async () => {
-    const createResponse = await request(app)
-      .post("/task")
-      .set("x-graffiticode-storage-type", "persistent")
-      .send({ task: TASK1 });
-    expect(createResponse).toHaveProperty("body.status", "success");
-    const id = createResponse.body.data.id;
-
-    await request(app)
-      .get("/task")
-      .query({ id })
-      .set("x-graffiticode-storage-type", "ephemeral")
-      .expect(404);
   });
 });

@@ -15,7 +15,7 @@ const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => ({ taskDaoF
         res.sendStatus(404);
       }
       const baseUrl = getBaseUrlForLanguage(lang);
-      const data = { id, url: `http://${req.headers.host}/data?id=${id}` };
+      const data = { id, url: `https://${req.headers.host}/data?id=${id}` };
       const path = `/form?data=${JSON.stringify(data)}`;
       const url = baseUrl + path;
       res.redirect(url);

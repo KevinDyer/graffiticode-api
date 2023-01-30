@@ -69,7 +69,7 @@ export const createApp = ({ authUrl, authProvider } = {}) => {
   app.use("/data", routes.data({ taskDaoFactory, dataApi }));
   app.use("/lang", routes.langRouter);
   app.use("/L*", routes.langRouter);
-  app.use("/form", routes.formRouter);
+  app.use("/form", routes.formRouter({ taskDaoFactory }));
   app.use("/task", routes.task({ taskDaoFactory }));
 
   // Error handling

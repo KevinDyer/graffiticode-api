@@ -4,6 +4,7 @@ import { parser } from "../lang/parser.js";
 import { isNonEmptyString } from "../util.js";
 import {
   buildGetTaskDaoForRequest,
+  buildGetTaskDaoForId,
   buildHttpHandler,
   createSuccessResponse,
   parseIdsFromRequest,
@@ -31,22 +32,38 @@ const getIdFromIds = ids => {
   }
 };
 
+export const buildGetTasks = ({ taskDaoFactory, req }) => {
+  const getTaskDaoForId = buildGetTaskDaoForId(taskDaoFactory);
+  return async ({ auth, ids }) => {
+    try {
+      if (ids.length < 1) {
+        throw new InvalidArgumentError("must provide at least one task id");
+      }
+      const tasksForIds = await Promise.all(ids.map(id => {
+        const taskDao = getTaskDaoForId(id);
+        return taskDao.get({ id, auth })
+      }));
+      const tasks = tasksForIds.reduce((tasks, tasksForId) => {
+        tasks.push(...tasksForId);
+        return tasks;
+      }, []);
+      return tasks;
+    } catch (x) {
+      console.log("getTasks() catch x=" + x);
+      return [];
+    }
+  };
+};
+
 const buildGetTaskHandler = ({ taskDaoFactory }) => {
-  const getTaskDaoForRequest = buildGetTaskDaoForRequest(taskDaoFactory);
   return buildHttpHandler(async (req, res) => {
+    const getTasks = buildGetTasks({ taskDaoFactory, req });
     const auth = req.auth.context;
     const ids = parseIdsFromRequest(req);
     if (ids.length < 1) {
       throw new InvalidArgumentError("must provide at least one id");
     }
-
-    const taskDao = getTaskDaoForRequest(req);
-    const tasksForIds = await Promise.all(ids.map(async id => taskDao.get({ id, auth })));
-    const tasks = tasksForIds.reduce((tasks, tasksForId) => {
-      tasks.push(...tasksForId);
-      return tasks;
-    }, []);
-
+    const tasks = getTasks(ids);
     res.set("Access-Control-Allow-Origin", "*");
     res.status(200).json(createSuccessResponse(tasks));
   });

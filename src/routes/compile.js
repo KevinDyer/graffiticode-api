@@ -46,7 +46,6 @@ const buildPostCompileHandler = ({ taskDaoFactory, dataApi, compile }) => {
       }
       data = data || {};
       const dataId = await postTasks({ auth, tasks: getTaskFromData(data) });
-      console.log("POST /compile id=" + id + " dataId=" + dataId);
       const taskId = [id, dataId].join("+");
       return await getData({ auth, authToken, ids: [taskId] });
     }));

@@ -16,8 +16,8 @@ const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => ({ taskDaoF
       }
       const baseUrl = getBaseUrlForLanguage(lang);
       const protocol = baseUrl.indexOf("localhost") !== -1 && "http" || "https";
-      const data = { id, url: `${protocol}://${req.headers.host}/data?id=${id}` };
-//      const path = `/form?data=${JSON.stringify(data)}`;
+      //      const data = { id, url: `${protocol}://${req.headers.host}/data?id=${id}` };
+      //      const path = `/form?data=${JSON.stringify(data)}`;
       const path = `/form?id=${id}&url=${protocol}://${req.headers.host}/data?id=${id}`;
       const url = baseUrl + path;
       console.log("GET /form url=" + url);

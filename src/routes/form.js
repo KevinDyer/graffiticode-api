@@ -15,9 +15,12 @@ const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => ({ taskDaoF
         res.sendStatus(404);
       }
       const baseUrl = getBaseUrlForLanguage(lang);
-      const data = { id, url: `https://${req.headers.host}/data?id=${id}` };
-      const path = `/form?data=${JSON.stringify(data)}`;
+      const protocol = baseUrl.indexOf("localhost") !== -1 && "http" || "https";
+      const data = { id, url: `${protocol}://${req.headers.host}/data?id=${id}` };
+//      const path = `/form?data=${JSON.stringify(data)}`;
+      const path = `/form?id=${id}&url=${protocol}://${req.headers.host}/data?id=${id}`;
       const url = baseUrl + path;
+      console.log("GET /form url=" + url);
       res.redirect(url);
     } else if (isNonEmptyString(data)) {
       if (!await pingLang(lang)) {
@@ -26,6 +29,7 @@ const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => ({ taskDaoF
       const baseUrl = getBaseUrlForLanguage(lang);
       const path = `/form?data=${data}`;
       const url = baseUrl + path;
+      console.log("GET /form url=" + url);
       res.redirect(url);
     } else {
       res.sendStatus(200);

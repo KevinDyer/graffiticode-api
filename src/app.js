@@ -4,6 +4,7 @@ import express from "express";
 import methodOverride from "method-override";
 import { createRequire } from "module";
 import morgan from "morgan";
+import cors from "cors";
 import { fileURLToPath } from "url";
 import { buildValidateToken } from "./auth.js";
 import { buildCompile } from "./comp.js";
@@ -55,6 +56,7 @@ export const createApp = ({ authUrl, authProvider } = {}) => {
       skip: (req, res) => res.statusCode < 400
     }));
   }
+  app.use(cors());
   app.use(express.json({ limit: "50mb" }));
   app.use(methodOverride());
 

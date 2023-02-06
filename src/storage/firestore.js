@@ -2,6 +2,17 @@ import { createHash } from "crypto";
 import { NotFoundError, DecodeIdError } from "../errors/http.js";
 import admin from "firebase-admin";
 
+const ALLOWED_INITIALIZE_ERROR_CODES = ["app/duplicate-app"];
+
+try {
+  admin.initializeApp();
+} catch (err) {
+  if (!ALLOWED_INITIALIZE_ERROR_CODES.includes(err.code)) {
+    console.log(err.code);
+    throw err;
+  }
+}
+
 const createCodeHash = ({ lang, code }) =>
   createHash("sha256")
     .update(JSON.stringify({ lang, code }))
@@ -127,14 +138,4 @@ export const buildFirestoreTaskDao = ({ db }) => {
   return { create, get, appendIds };
 };
 
-export const buildCreateFirestoreDb = () => {
-  let db;
-  return () => {
-    if (!db) {
-      admin.initializeApp();
-      db = admin.firestore();
-    }
-    return db;
-  };
-};
-export const createFirestoreDb = buildCreateFirestoreDb();
+export const createFirestoreDb = () => admin.firestore();

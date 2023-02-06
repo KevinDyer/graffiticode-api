@@ -1,36 +1,30 @@
 import { Router } from "express";
+import { InvalidArgumentError } from "../errors/http.js";
 import { isNonEmptyString } from "../util.js";
 import { buildHttpHandler, optionsHandler } from "./utils.js";
-import { buildGetTasks } from "./task.js";
 
-const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => ({ taskDaoFactory }) => {
+const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => () => {
   return buildHttpHandler(async (req, res) => {
-    const { id, lang, data } = req.query;
+    let { id, lang, data } = req.query;
+    if (/^\d+$/.test(lang)) {
+      lang = `L${lang}`;
+    }
+    if (!/^[Ll]\d+$/.test(lang)) {
+      throw new InvalidArgumentError(`invalid lang ${lang}`);
+    }
+    if (!await pingLang(lang)) {
+      res.sendStatus(404);
+      return;
+    }
+    const baseUrl = getBaseUrlForLanguage(lang);
+
     if (isNonEmptyString(id)) {
-      const getTasks = buildGetTasks({ taskDaoFactory, req });
-      const auth = req.auth.context;
-      const tasks = await getTasks({ auth, ids: [id] });
-      const lang = tasks[0].lang;
-      if (!await pingLang(lang)) {
-        res.sendStatus(404);
-      }
-      const baseUrl = getBaseUrlForLanguage(lang);
       const protocol = baseUrl.indexOf("localhost") !== -1 && "http" || "https";
-      //      const data = { id, url: `${protocol}://${req.headers.host}/data?id=${id}` };
-      //      const path = `/form?data=${JSON.stringify(data)}`;
-      const path = `/form?id=${id}&url=${protocol}://${req.headers.host}/data?id=${id}`;
-      const url = baseUrl + path;
-      console.log("GET /form url=" + url);
-      res.redirect(url);
+      const formUrl = `${baseUrl}/form?url=${protocol}://${req.headers.host}/data?id=${id}`;
+      res.redirect(formUrl);
     } else if (isNonEmptyString(data)) {
-      if (!await pingLang(lang)) {
-        res.sendStatus(404);
-      }
-      const baseUrl = getBaseUrlForLanguage(lang);
-      const path = `/form?data=${data}`;
-      const url = baseUrl + path;
-      console.log("GET /form url=" + url);
-      res.redirect(url);
+      const formUrl = `${baseUrl}/form?data=${data}`;
+      res.redirect(formUrl);
     } else {
       res.sendStatus(200);
     }

@@ -1,4 +1,5 @@
 import { describe } from "@jest/globals";
+import { createAppWithMemoryStorage } from "@graffiticode/auth/src/app";
 import { buildValidateToken, buildValidateTokenFactory } from "./auth.js";
 import { buildArtCompilerAuthApplication } from "./testing/auth.js";
 
@@ -53,14 +54,27 @@ describe("auth", () => {
   });
 
   describe("Graffiticode", () => {
+    let gcAuth;
+    let gcAuthServer;
     let validateToken;
-    beforeEach(() => {
+    beforeEach(async () => {
+      const gcAuthDeps = createAppWithMemoryStorage();
+      gcAuth = gcAuthDeps.auth;
+
+      await new Promise(resolve => {
+        gcAuthServer = gcAuthDeps.app.listen(resolve);
+      });
+
+      authUrl = `http://localhost:${gcAuthServer.address().port}`;
       validateToken = buildValidateToken({ authUrl, authProvider: "graffiticode" });
     });
 
+    afterEach((done) => {
+      gcAuthServer.close(done);
+    });
+
     it("should return uid from auth app", async () => {
-      const token = "abc123";
-      authApp.addIdForToken(token, "1");
+      const { accessToken: token } = await gcAuth.generateTokens({ uid: "1" });
 
       await expect(validateToken(token)).resolves.toStrictEqual({ uid: "1" });
     });

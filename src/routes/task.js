@@ -59,7 +59,6 @@ const buildGetTaskHandler = ({ taskDaoFactory }) => {
       throw new InvalidArgumentError("must provide at least one id");
     }
     const tasks = await getTasks({ auth, ids });
-    res.set("Access-Control-Allow-Origin", "*");
     res.status(200).json(createSuccessResponse(tasks));
   });
 };
@@ -84,7 +83,6 @@ const buildPostTaskHandler = ({ taskDaoFactory }) => {
     const auth = req.auth.context;
     const tasks = req.body.task;
     const id = await postTasks({ auth, tasks });
-    res.set("Access-Control-Allow-Origin", "*");
     res.status(200).json(createSuccessResponse({ id }));
   });
 };

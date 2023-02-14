@@ -9,6 +9,7 @@ export default ({ validateToken }) => buildHttpHandler(async (req, res, next) =>
   let authContext = null;
   if (token) {
     authContext = await validateToken(token);
+    req.auth.uid = authContext.uid;
   }
   req.auth.context = authContext;
 

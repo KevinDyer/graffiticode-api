@@ -1,5 +1,6 @@
 import bent from "bent";
 import https from "https";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import { NotFoundError, UnauthenticatedError } from "./errors/http.js";
 
 const buildArtCompilerValidateToken = ({ authUrl = "https://auth.artcompiler.com" }) => {
@@ -26,19 +27,17 @@ const buildArtCompilerValidateToken = ({ authUrl = "https://auth.artcompiler.com
   };
 };
 
-const buildGraffiticodeValidateToken = ({ authUrl = "https://auth.artcompiler.com" }) => {
-  const postAuth = bent(authUrl, "POST", 200, 401);
+const buildGraffiticodeValidateToken = ({ authUrl = "https://auth.graffiticode.com" }) => {
+  const JWKS = createRemoteJWKSet(new URL(`${authUrl}/certs`));
   return async token => {
-    const res = await postAuth("/validate", { token });
-    if (res.statusCode === 401) {
-      const message = await res.text();
-      throw new UnauthenticatedError(message);
-    } else if (res.statusCode === 200) {
-      const { uid } = await res.json();
+    try {
+      const { payload: { sub: uid } } = await jwtVerify(token, JWKS, { issuer: "urn:graffiticode:auth" });
       return { uid };
-    } else {
-      const message = await res.text();
-      throw new Error(message);
+    } catch (err) {
+      if (["ERR_JWT_EXPIRED", "ERR_JWT_CLAIM_VALIDATION_FAILED", "ERR_JWS_SIGNATURE_VERIFICATION_FAILED"].includes(err.code)) {
+        throw new UnauthenticatedError();
+      }
+      throw new Error(`failed to verify JWT: ${err.code}`);
     }
   };
 };

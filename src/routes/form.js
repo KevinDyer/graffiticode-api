@@ -18,16 +18,23 @@ const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => () => {
     }
     const baseUrl = getBaseUrlForLanguage(lang);
 
+    const params = new URLSearchParams();
     if (isNonEmptyString(id)) {
+      const dataParams = new URLSearchParams();
+      dataParams.set("id", id);
+      if (req.auth.token) {
+        dataParams.set("access_token", req.auth.token);
+      }
       const protocol = baseUrl.indexOf("localhost") !== -1 && "http" || "https";
-      const formUrl = `${baseUrl}/form?url=${protocol}://${req.headers.host}/data?id=${id}`;
-      res.redirect(formUrl);
+      params.set("url", `${protocol}://${req.headers.host}/data?${dataParams.toString()}`);
     } else if (isNonEmptyString(data)) {
-      const formUrl = `${baseUrl}/form?data=${data}`;
-      res.redirect(formUrl);
+      params.set("data", data);
     } else {
-      res.sendStatus(200);
+      return res.sendStatus(200);
     }
+
+    const formUrl = `${baseUrl}/form?${params.toString()}`;
+    res.redirect(formUrl);
   });
 };
 

@@ -20,23 +20,30 @@ const checkLangParam = async ({ lang, pingLang }) => {
 const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => ({ taskDaoFactory }) => {
   return buildHttpHandler(async (req, res) => {
     let { id, lang, data } = req.query;
+    const params = new URLSearchParams();
+    const protocol = req.headers.host.indexOf("localhost") !== -1 && "http" || "https";
     if (isNonEmptyString(id)) {
+      const dataParams = new URLSearchParams();
+      dataParams.set("id", id);
+      if (req.auth.token) {
+        dataParams.set("access_token", req.auth.token);
+      }
       const getTasks = buildGetTasks({ taskDaoFactory, req });
       const auth = req.auth.context;
       const tasks = await getTasks({ auth, ids: [id] });
-      lang = await checkLangParam({ lang: tasks[0].lang, pingLang });
-      const baseUrl = getBaseUrlForLanguage(lang);
-      const protocol = baseUrl.indexOf("localhost") !== -1 && "http" || "https";
-      const formUrl = `${baseUrl}/form?url=${protocol}://${req.headers.host}/data?id=${id}`;
-      res.redirect(formUrl);
+      params.set("url", `${protocol}://${req.headers.host}/data?${dataParams.toString()}`);
+      lang = tasks[0].lang;
     } else if (isNonEmptyString(data)) {
-      lang = await checkLangParam({ lang, pingLang });
+      params.set("data", data);
       const baseUrl = getBaseUrlForLanguage(lang);
       const formUrl = `${baseUrl}/form?data=${data}`;
-      res.redirect(formUrl);
     } else {
       throw new InvalidArgumentError("Missing or invalid parameters");
     }
+    lang = await checkLangParam({ lang, pingLang });
+    const baseUrl = getBaseUrlForLanguage(lang);
+    const formUrl = `${baseUrl}/form?${params.toString()}`;
+    res.redirect(formUrl);
   });
 };
 

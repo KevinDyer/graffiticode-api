@@ -31,12 +31,10 @@ const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => ({ taskDaoF
       const getTasks = buildGetTasks({ taskDaoFactory, req });
       const auth = req.auth.context;
       const tasks = await getTasks({ auth, ids: [id] });
-      params.set("url", `${protocol}://${req.headers.host}/data?${dataParams.toString()}`);
       lang = tasks[0].lang;
+      params.set("url", `${protocol}://${req.headers.host}/data?${dataParams.toString()}`);
     } else if (isNonEmptyString(data)) {
       params.set("data", data);
-      const baseUrl = getBaseUrlForLanguage(lang);
-      const formUrl = `${baseUrl}/form?data=${data}`;
     } else {
       throw new InvalidArgumentError("Missing or invalid parameters");
     }

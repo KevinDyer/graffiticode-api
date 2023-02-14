@@ -2,8 +2,8 @@ import request from "supertest";
 import { createApp } from "../app.js";
 import { buildArtCompilerAuthApplication } from "../testing/auth.js";
 import { clearFirestore } from "../testing/firestore.js";
-import { TASK1, TASK1_WITH_SRC, TASK2, TASK1_ID, TASK2_ID } from "../testing/fixture.js";
-import { createError, createErrorResponse, createSuccessResponse } from "./utils.js";
+import { TASK1 } from "../testing/fixture.js";
+import { createError, createErrorResponse } from "./utils.js";
 
 describe("routes/task", () => {
   beforeEach(async () => {
@@ -44,7 +44,7 @@ describe("routes/task", () => {
       .get("/form")
       .expect(400, createErrorResponse(createError(400, "Missing or invalid parameters")));
   });
-  
+
   it("should handle bad lang param", async () => {
     await request(app)
       .get("/form?lang=xxx&data={}")
@@ -56,5 +56,4 @@ describe("routes/task", () => {
       .get("/form?lang=123456789&data={}")
       .expect(404, createErrorResponse(createError(404, "Language not found L123456789")));
   });
-
 });

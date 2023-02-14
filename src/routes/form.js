@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { InvalidArgumentError } from "../errors/http.js";
+import { InvalidArgumentError, NotFoundError } from "../errors/http.js";
 import { isNonEmptyString } from "../util.js";
 import { buildHttpHandler, optionsHandler } from "./utils.js";
 import { buildGetTasks } from "./task.js";
@@ -14,6 +14,7 @@ const checkLangParam = async ({ lang, pingLang }) => {
   if (!await pingLang(lang)) {
     throw new NotFoundError(`Language not found ${lang}`);
   }
+  return lang;
 };
 
 const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => ({ taskDaoFactory }) => {
@@ -23,14 +24,13 @@ const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => ({ taskDaoF
       const getTasks = buildGetTasks({ taskDaoFactory, req });
       const auth = req.auth.context;
       const tasks = await getTasks({ auth, ids: [id] });
-      const lang = tasks[0].lang;
-      await checkLangParam({ lang, pingLang });
+      lang = await checkLangParam({ lang: tasks[0].lang, pingLang });
       const baseUrl = getBaseUrlForLanguage(lang);
       const protocol = baseUrl.indexOf("localhost") !== -1 && "http" || "https";
       const formUrl = `${baseUrl}/form?url=${protocol}://${req.headers.host}/data?id=${id}`;
       res.redirect(formUrl);
     } else if (isNonEmptyString(data)) {
-      await checkLangParam({ lang, pingLang });
+      lang = await checkLangParam({ lang, pingLang });
       const baseUrl = getBaseUrlForLanguage(lang);
       const formUrl = `${baseUrl}/form?data=${data}`;
       res.redirect(formUrl);

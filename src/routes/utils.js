@@ -23,6 +23,10 @@ export const parseAuthFromRequest = req => {
 };
 
 export const parseAuthTokenFromRequest = req => {
+  const { access_token: queryAccessToken } = req.query;
+  if (isNonEmptyString(queryAccessToken)) {
+    return queryAccessToken;
+  }
   let headerAuthToken = req.get("Authorization");
   if (isNonEmptyString(headerAuthToken)) {
     if (headerAuthToken.startsWith("Bearer ")) {

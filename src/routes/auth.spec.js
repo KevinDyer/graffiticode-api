@@ -12,7 +12,9 @@ describe("routes/auth", () => {
 
     app = express();
     app.use(buildAuthHandler({ validateToken }));
-    app.get("/", (req, res) => res.status(200).json({ auth: req.auth }));
+    app.get("/", (req, res) => {
+      res.status(200).json({ auth: req.auth });
+    });
     app.use((err, req, res, next) => {
       console.log(err);
       res.sendStatus(500);
@@ -57,6 +59,36 @@ describe("routes/auth", () => {
     expect(res.body).toHaveProperty("auth.token", token);
     expect(res.body).toHaveProperty("auth.context", { uid: "1" });
     expect(validateToken).toHaveBeenCalledWith(token);
+  });
+
+  it("should have authContext if token in query", async () => {
+    const token = "abc123";
+    validateToken.mockResolvedValue({ uid: "1" });
+
+    const res = await request(app)
+      .get("/")
+      .query({ access_token: token })
+      .expect(200);
+
+    expect(res.body).toHaveProperty("auth.token", token);
+    expect(res.body).toHaveProperty("auth.context", { uid: "1" });
+    expect(validateToken).toHaveBeenCalledWith(token);
+  });
+
+  it("should use token from query before headers", async () => {
+    const token1 = "abc123";
+    const token2 = "def456";
+    validateToken.mockResolvedValue({ uid: "1" });
+
+    const res = await request(app)
+      .get("/")
+      .query({ access_token: token1 })
+      .set("Authorization", token2)
+      .expect(200);
+
+    expect(res.body).toHaveProperty("auth.token", token1);
+    expect(res.body).toHaveProperty("auth.context", { uid: "1" });
+    expect(validateToken).toHaveBeenCalledWith(token1);
   });
 
   it("should return 401 if invalid token", async () => {

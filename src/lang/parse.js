@@ -1795,7 +1795,7 @@ export const parse = (function () {
         stream.next();
       }
     } catch (x) {
-      console.log("catch() x=" + x);
+      // console.log("catch() x=" + x);
       if (x instanceof Error) {
         if (x.message === "comment") {
           cls = x;

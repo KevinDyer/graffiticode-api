@@ -1,6 +1,6 @@
+import { startAuthApp } from "@graffiticode/auth/src/testing/app.js";
 import request from "supertest";
 import { createApp } from "../app.js";
-import { buildArtCompilerAuthApplication } from "../testing/auth.js";
 import { clearFirestore } from "../testing/firestore.js";
 import { TASK1, TASK1_WITH_SRC, TASK2, TASK1_ID, TASK2_ID } from "../testing/fixture.js";
 import { createError, createErrorResponse, createSuccessResponse } from "./utils.js";
@@ -11,18 +11,16 @@ describe("routes/task", () => {
   });
 
   let authApp;
-  let authServer;
   let app;
   beforeEach(async () => {
-    authApp = buildArtCompilerAuthApplication();
-    await new Promise(resolve => {
-      authServer = authApp.listen(resolve);
-    });
-    app = createApp({ authUrl: `http://localhost:${authServer.address().port}` });
+    authApp = await startAuthApp();
+    app = createApp({ authUrl: authApp.url });
   });
 
-  afterEach((done) => {
-    authServer.close(done);
+  afterEach(async () => {
+    if (authApp) {
+      await authApp.cleanUp();
+    }
   });
 
   it("should create a task", async () => {
@@ -86,8 +84,7 @@ describe("routes/task", () => {
   });
 
   it("should get a task with token that has been created with token", async () => {
-    const token = "abc123";
-    authApp.addIdForToken(token, 1);
+    const { accessToken: token } = await authApp.auth.generateTokens({ uid: "1" });
     const res = await request(app)
       .post("/task")
       .set("Authorization", token)
@@ -104,8 +101,7 @@ describe("routes/task", () => {
   });
 
   it("should return not found for a task that has been created with token", async () => {
-    const token = "abc123";
-    authApp.addIdForToken(token, 1);
+    const { accessToken: token } = await authApp.auth.generateTokens({ uid: "1" });
     const res = await request(app)
       .post("/task")
       .set("Authorization", token)
@@ -121,8 +117,7 @@ describe("routes/task", () => {
   });
 
   it("should get a task with token that has been created without a token", async () => {
-    const token = "abc123";
-    authApp.addIdForToken(token, 1);
+    const { accessToken: token } = await authApp.auth.generateTokens({ uid: "1" });
     const res = await request(app)
       .post("/task")
       .send({ task: TASK1 })

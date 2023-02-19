@@ -1,6 +1,6 @@
+import { startAuthApp } from "@graffiticode/auth/src/testing/app.js";
 import request from "supertest";
 import { createApp } from "../app.js";
-import { buildArtCompilerAuthApplication } from "../testing/auth.js";
 import { clearFirestore } from "../testing/firestore.js";
 import { TASK1, DATA1, DATA2, TASK2 } from "../testing/fixture.js";
 import { createSuccessResponse } from "./utils.js";
@@ -11,18 +11,16 @@ describe("routes/data", () => {
   });
 
   let authApp;
-  let authServer;
   let app;
   beforeEach(async () => {
-    authApp = buildArtCompilerAuthApplication();
-    await new Promise(resolve => {
-      authServer = authApp.listen(resolve);
-    });
-    app = createApp({ authUrl: `http://localhost:${authServer.address().port}` });
+    authApp = await startAuthApp();
+    app = createApp({ authUrl: authApp.url });
   });
 
-  afterEach((done) => {
-    authServer.close(done);
+  afterEach(async () => {
+    if (authApp) {
+      await authApp.cleanUp();
+    }
   });
 
   it("get multiple datas from different stores", async () => {
@@ -52,18 +50,16 @@ describe.each(["ephemeral", "persistent"])("/data[%s]", (storageType) => {
   });
 
   let authApp;
-  let authServer;
   let app;
   beforeEach(async () => {
-    authApp = buildArtCompilerAuthApplication();
-    await new Promise(resolve => {
-      authServer = authApp.listen(resolve);
-    });
-    app = createApp({ authUrl: `http://localhost:${authServer.address().port}` });
+    authApp = await startAuthApp();
+    app = createApp({ authUrl: authApp.url });
   });
 
-  afterEach((done) => {
-    authServer.close(done);
+  afterEach(async () => {
+    if (authApp) {
+      await authApp.cleanUp();
+    }
   });
 
   it("get single data", async () => {
@@ -119,8 +115,7 @@ describe.each(["ephemeral", "persistent"])("/data[%s]", (storageType) => {
   });
 
   it("get data with token created with token", async () => {
-    const token = "abc123";
-    authApp.addIdForToken(token, 1);
+    const { accessToken: token } = await authApp.auth.generateTokens({ uid: "1" });
     const res = await request(app)
       .post("/task")
       .set("Authorization", token)
@@ -138,8 +133,7 @@ describe.each(["ephemeral", "persistent"])("/data[%s]", (storageType) => {
   });
 
   it("get data with token created without token", async () => {
-    const token = "abc123";
-    authApp.addIdForToken(token, 1);
+    const { accessToken: token } = await authApp.auth.generateTokens({ uid: "1" });
     const res = await request(app)
       .post("/task")
       .set("x-graffiticode-storage-type", storageType)
@@ -156,8 +150,7 @@ describe.each(["ephemeral", "persistent"])("/data[%s]", (storageType) => {
   });
 
   it("should not get data without token created with token", async () => {
-    const token = "abc123";
-    authApp.addIdForToken(token, 1);
+    const { accessToken: token } = await authApp.auth.generateTokens({ uid: "1" });
     const res = await request(app)
       .post("/task")
       .set("Authorization", token)

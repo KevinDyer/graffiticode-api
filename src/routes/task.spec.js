@@ -2,7 +2,10 @@ import request from "supertest";
 import { createApp } from "../app.js";
 import { buildArtCompilerAuthApplication } from "../testing/auth.js";
 import { clearFirestore } from "../testing/firestore.js";
-import { TASK1, TASK1_WITH_SRC, TASK2, TASK1_ID, TASK2_ID } from "../testing/fixture.js";
+import {
+  TASK1, TASK1_WITH_SRC, TASK2, TASK1_ID, TASK2_ID,
+  CODE_AS_DATA, TASK_WITH_CODE_AS_DATA
+} from "../testing/fixture.js";
 import { createError, createErrorResponse, createSuccessResponse } from "./utils.js";
 
 describe("routes/task", () => {
@@ -30,6 +33,14 @@ describe("routes/task", () => {
       .post("/task")
       .set("x-graffiticode-storage-type", "ephemeral")
       .send({ task: TASK1 })
+      .expect(200, createSuccessResponse({ id: TASK1_ID }));
+  });
+
+  it("should create a task with code as data", async () => {
+    await request(app)
+      .post("/task")
+      .set("x-graffiticode-storage-type", "ephemeral")
+      .send({ task: TASK_WITH_CODE_AS_DATA })
       .expect(200, createSuccessResponse({ id: TASK1_ID }));
   });
 
@@ -70,6 +81,21 @@ describe("routes/task", () => {
       .expect(200, createSuccessResponse([TASK1]));
   });
 
+  it("should get a task that has been created with code as data", async () => {
+    const res = await request(app)
+      .post("/task")
+      .set("x-graffiticode-storage-type", "ephemeral")
+      .send({ task: TASK_WITH_CODE_AS_DATA })
+      .expect(200);
+    expect(res).toHaveProperty("body.status", "success");
+    const id = res.body.data.id;
+    const res2 = await request(app)
+      .get("/task")
+      .query({ id })
+      .expect(200);
+    expect(res2).toHaveProperty("body.data[0].code", CODE_AS_DATA);
+  });
+
   it("should get a task that has been created from source", async () => {
     const res = await request(app)
       .post("/task")
@@ -78,7 +104,6 @@ describe("routes/task", () => {
       .expect(200);
     expect(res).toHaveProperty("body.status", "success");
     const id = res.body.data.id;
-
     await request(app)
       .get("/task")
       .query({ id })

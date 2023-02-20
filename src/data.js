@@ -5,14 +5,19 @@ const buildGetData = ({ compile }) =>
       async (dataPromise, task) => {
         const data = await dataPromise;
         const { lang, code } = task;
-        const obj = await compile({
-          lang,
-          code,
-          data,
-          auth: authToken,
-          options
-        });
-        return obj;
+        if (+lang === 1 && !Number.isInteger(+code.root)) {
+          // If lang is 1 and root is not an integer, then the code is the data.
+          return code;
+        } else {
+          const obj = await compile({
+            lang,
+            code,
+            data,
+            auth: authToken,
+            options
+          });
+          return obj;
+        }
       },
       Promise.resolve({})
     );

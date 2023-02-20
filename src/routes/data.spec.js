@@ -2,7 +2,10 @@ import request from "supertest";
 import { createApp } from "../app.js";
 import { buildArtCompilerAuthApplication } from "../testing/auth.js";
 import { clearFirestore } from "../testing/firestore.js";
-import { TASK1, DATA1, DATA2, TASK2 } from "../testing/fixture.js";
+import {
+  TASK1, DATA1, DATA2, TASK2,
+  CODE_AS_DATA, TASK_WITH_CODE_AS_DATA
+} from "../testing/fixture.js";
 import { createSuccessResponse } from "./utils.js";
 
 describe("routes/data", () => {
@@ -79,6 +82,21 @@ describe.each(["ephemeral", "persistent"])("/data[%s]", (storageType) => {
       .get("/data")
       .query({ id })
       .expect(200, createSuccessResponse(DATA1));
+  });
+
+  it("get single data from data task", async () => {
+    const res = await request(app)
+      .post("/task")
+      .set("x-graffiticode-storage-type", storageType)
+      .send({ task: TASK_WITH_CODE_AS_DATA })
+      .expect(200);
+    expect(res).toHaveProperty("body.status", "success");
+
+    const id = res.body.data.id;
+    await request(app)
+      .get("/data")
+      .query({ id })
+      .expect(200, createSuccessResponse(CODE_AS_DATA));
   });
 
   it("get single data using ephemeral flag", async () => {

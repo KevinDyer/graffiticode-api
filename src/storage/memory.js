@@ -68,7 +68,6 @@ const buildTaskGet = ({ objectFromId, aclsById }) => {
 
       const subTaskId = encodeID([langId, codeId, 0]);
       checkAuth({ id: subTaskId, auth });
-
       tasks.push({ lang, code });
 
       ids = dataIds;

@@ -16,7 +16,17 @@ const normalizeTasksParameter = async tasks => {
   tasks = await Promise.all(tasks.map(async (task) => {
     if (isNonEmptyString(task.code)) {
       const { lang } = task;
-      const code = await parser.parse(lang, task.code);
+      let code;
+      if (+lang === 1) {
+        // Try parsing code as JSON.
+        try {
+          code = JSON.parse(task.code);
+        } catch (x) {
+          code = await parser.parse(lang, task.code);
+        }
+      } else {
+        code = await parser.parse(lang, task.code);
+      }
       task = { lang, code };
     }
     return task;

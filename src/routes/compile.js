@@ -49,7 +49,6 @@ const buildPostCompileHandler = ({ taskDaoFactory, dataApi, compile }) => {
       const taskId = [id, dataId].join("+");
       return await getData({ auth, authToken, ids: [taskId] });
     }));
-    console.log("POST /compile data=" + JSON.stringify(data, null, 2));
     if (data.length === 1) {
       data = data[0];
     }

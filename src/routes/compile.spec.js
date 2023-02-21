@@ -1,12 +1,21 @@
+import { startAuthApp } from "@graffiticode/auth/src/testing/app.js";
 import request from "supertest";
 import { createApp } from "../app.js";
 import { TASK1, DATA1, TASK2, DATA2 } from "../testing/fixture.js";
 import { createSuccessResponse, createErrorResponse, createError } from "./utils.js";
 
 describe("routes/compile", () => {
+  let authApp;
   let app;
-  beforeEach(() => {
-    app = createApp();
+  beforeEach(async () => {
+    authApp = await startAuthApp();
+    app = createApp({ authUrl: authApp.url });
+  });
+
+  afterEach(async () => {
+    if (authApp) {
+      await authApp.cleanUp();
+    }
   });
 
   it("should compile source", async () => {

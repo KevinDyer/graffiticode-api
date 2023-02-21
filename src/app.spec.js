@@ -1,21 +1,19 @@
+import { startAuthApp } from "@graffiticode/auth/src/testing/app.js";
 import request from "supertest";
 import { createApp } from "./app.js";
-import { buildArtCompilerAuthApplication } from "./testing/auth.js";
 
 describe("api", () => {
   let authApp;
-  let authServer;
   let app;
   beforeEach(async () => {
-    authApp = buildArtCompilerAuthApplication();
-    await new Promise(resolve => {
-      authServer = authApp.listen(resolve);
-    });
-    app = createApp({ authUrl: `http://localhost:${authServer.address().port}` });
+    authApp = await startAuthApp();
+    app = createApp({ authUrl: authApp.url });
   });
 
-  afterEach((done) => {
-    authServer.close(done);
+  afterEach(async () => {
+    if (authApp) {
+      await authApp.cleanUp();
+    }
   });
 
   it("GET /", (done) => {
@@ -25,8 +23,7 @@ describe("api", () => {
   });
 
   it("GET / with auth token", async () => {
-    const token = "abc123";
-    authApp.addIdForToken(token, 1);
+    const { accessToken: token } = await authApp.auth.generateTokens({ uid: "1" });
 
     await request(app)
       .get("/")
@@ -35,7 +32,7 @@ describe("api", () => {
   });
 
   it("GET / with invalid auth token", async () => {
-    const token = "abc123";
+    const token = "header.payload.signature";
 
     await request(app)
       .get("/")

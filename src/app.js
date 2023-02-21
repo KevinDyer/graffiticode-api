@@ -29,7 +29,7 @@ global.config.useLocalCompiles = process.env.LOCAL_COMPILES === "true";
 
 const env = process.env.NODE_ENV || "development";
 
-export const createApp = ({ authUrl, authProvider } = {}) => {
+export const createApp = ({ authUrl } = {}) => {
   const compile = buildCompile({ langCompile });
   const taskDaoFactory = buildTaskDaoFactory();
   const dataApi = buildDataApi({ compile });
@@ -61,7 +61,7 @@ export const createApp = ({ authUrl, authProvider } = {}) => {
   app.use(methodOverride());
 
   // Authentication
-  const validateToken = buildValidateToken({ authUrl, authProvider });
+  const validateToken = buildValidateToken({ authUrl });
   app.use(routes.auth({ validateToken }));
 
   // Routes
@@ -76,7 +76,7 @@ export const createApp = ({ authUrl, authProvider } = {}) => {
 
   // Error handling
   app.use((err, req, res, next) => {
-    console.log(err.stack);
+    console.error(err);
     res.sendStatus(500);
   });
 

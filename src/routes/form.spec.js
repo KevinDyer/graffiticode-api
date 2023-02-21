@@ -1,28 +1,26 @@
+import { startAuthApp } from "@graffiticode/auth/src/testing/app.js";
 import request from "supertest";
 import { createApp } from "../app.js";
-import { buildArtCompilerAuthApplication } from "../testing/auth.js";
 import { clearFirestore } from "../testing/firestore.js";
 import { TASK1 } from "../testing/fixture.js";
 import { createError, createErrorResponse } from "./utils.js";
 
-describe("routes/task", () => {
+describe("routes/form", () => {
   beforeEach(async () => {
     await clearFirestore();
   });
 
   let authApp;
-  let authServer;
   let app;
   beforeEach(async () => {
-    authApp = buildArtCompilerAuthApplication();
-    await new Promise(resolve => {
-      authServer = authApp.listen(resolve);
-    });
-    app = createApp({ authUrl: `http://localhost:${authServer.address().port}` });
+    authApp = await startAuthApp();
+    app = createApp({ authUrl: authApp.url });
   });
 
-  afterEach((done) => {
-    authServer.close(done);
+  afterEach(async () => {
+    if (authApp) {
+      await authApp.cleanUp();
+    }
   });
 
   it("should get a form by id for a task that has been created", async () => {

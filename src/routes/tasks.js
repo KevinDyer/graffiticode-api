@@ -81,7 +81,7 @@ export const buildPostTasks = ({ taskDaoFactory, req }) => {
       throw new InvalidArgumentError("must provide at least one task");
     }
     const taskDao = getTaskDaoForRequest(req);
-    const ids = await Promise.all(tasks.map(task => taskDao.create({ task, auth })));
+    const ids = await Promise.all(tasks.map(task => taskDao.create({ auth, task })));
     const id = getIdFromIds(ids);
     return id;
   };
@@ -91,7 +91,7 @@ const buildPostTaskHandler = ({ taskDaoFactory }) => {
   return buildHttpHandler(async (req, res) => {
     const postTasks = buildPostTasks({ taskDaoFactory, req });
     const auth = req.auth.context;
-    const tasks = req.body.task;
+    const tasks = req.body.tasks || req.body.task;
     const id = await postTasks({ auth, tasks });
     res.status(200).json(createSuccessResponse({ id }));
   });

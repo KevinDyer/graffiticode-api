@@ -96,6 +96,7 @@ const buildTaskCreate = ({ db }) => async ({ task, auth }) => {
 
 const buildCheckAuth = () => ({ taskDoc, auth }) => {
   const acls = taskDoc.get("acls");
+  console.log("checkAuth() auth=" + JSON.stringify(auth) + " acls=" + JSON.stringify(acls));
   if (!acls) {
     return;
   }

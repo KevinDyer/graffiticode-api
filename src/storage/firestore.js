@@ -38,7 +38,7 @@ const decodeIdPart = id => {
 };
 
 const decodeId = id => {
-  const idParts = id.split("+");
+  const idParts = id.split(/[ +]/g);
   const taskIds = idParts.reduce(
     (taskIds, idPart) => {
       const idPartTaskIds = decodeIdPart(idPart);

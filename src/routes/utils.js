@@ -84,8 +84,8 @@ export const getStorageTypeForId = id => {
   }
 };
 
-export const buildGetTaskDaoForId = taskDaoFactory => req =>
-  taskDaoFactory.create({ type: getStorageTypeForId(req) });
+export const buildGetTaskDaoForId = taskDaoFactory => id =>
+  taskDaoFactory.create({ type: getStorageTypeForId(id) });
 
 export const optionsHandler = buildHttpHandler(async (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");

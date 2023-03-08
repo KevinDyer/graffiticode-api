@@ -21,6 +21,9 @@ const buildGetFormHandler = ({ pingLang, getBaseUrlForLanguage }) => ({ taskDaoF
   return buildHttpHandler(async (req, res) => {
     let { id, lang, data } = req.query;
     const params = new URLSearchParams();
+    if (req.auth.token) {
+      params.set("access_token", req.auth.token);
+    }
     const protocol = req.headers.host.indexOf("localhost") !== -1 && "http" || "https";
     if (isNonEmptyString(id)) {
       const dataParams = new URLSearchParams();

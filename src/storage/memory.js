@@ -22,7 +22,6 @@ const buildTaskCreate = ({ objectToId, aclsById }) => async ({ task, auth }) => 
   const langId = task.lang;
   const codeId = objectToId(task.code);
   const id = encodeID([langId, codeId, 0]);
-
   if (!aclsById.has(id)) {
     aclsById.set(id, { public: false, uids: new Set() });
   }

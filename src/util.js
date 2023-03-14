@@ -95,6 +95,22 @@ export function getCompilerPort(lang, config) {
   return "443";
 }
 
+export function getClientHost(lang, config) {
+  config = config || global.config || {};
+  if (config.useLocalCompiles) {
+    return "localhost";
+  }
+  return "console.graffiticode.com";
+}
+
+export function getClientPort(lang, config) {
+  config = config || global.config || {};
+  if (config.useLocalCompiles) {
+    return "3000";
+  }
+  return "443";
+}
+
 export function isNonEmptyString(str) {
   return (typeof (str) === "string" && str.length > 0);
 }

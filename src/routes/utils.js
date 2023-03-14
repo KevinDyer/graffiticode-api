@@ -1,6 +1,7 @@
-import { isNonEmptyString } from "../util.js";
+import { isNonEmptyString, getClientHost, getClientPort } from "../util.js";
 import { HttpError } from "./../errors/http.js";
 import { decodeID } from "./../id.js";
+import { gql, GraphQLClient } from 'graphql-request'
 
 export const parseIdsFromRequest = req => {
   const id = req.query.id;
@@ -11,7 +12,7 @@ export const parseIdsFromRequest = req => {
 };
 
 export const parseAuthFromRequest = req => {
-  const { auth: queryAuth } = req.query;
+  const { access_token: queryAuth } = req.query;
   if (isNonEmptyString(queryAuth)) {
     return queryAuth;
   }
@@ -94,3 +95,20 @@ export const optionsHandler = buildHttpHandler(async (req, res) => {
   res.set("Connection", "Keep-Alive");
   res.sendStatus(204);
 });
+
+export const buildCompileLogger = () => {
+  const protocol = "http"; // FIXME
+  const host = getClientHost();
+  const port = getClientPort();
+  const endpoint = `${protocol}://${host}:${port}/api`;
+  const headers = {};
+  const client = new GraphQLClient(endpoint, { headers })
+  return ({ token, id, status, timestamp, data }) => {
+    const query = gql`
+    mutation post ($token: String!, $id: String!, $status: String!, $timestamp: String!, $data: String!) {
+      logCompile(token: $token, id: $id, status: $status, timestamp: $timestamp, data: $data)
+    }
+  `;
+    client.request(query, { token, id, status, timestamp, data: JSON.stringify(data) }).then((data) => console.log(data))
+  };
+};

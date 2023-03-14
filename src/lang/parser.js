@@ -33,6 +33,7 @@ const main = {
       ast = next();
     }
     if (state.cc) {
+      console.log("parse() src=" + src);
       throw new Error("End of program reached.");
     }
     return ast;

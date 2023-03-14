@@ -7,8 +7,11 @@ import {
   createSuccessResponse,
   parseIdsFromRequest,
   parseAuthFromRequest,
-  optionsHandler
+  optionsHandler,
+  buildCompileLogger,
 } from "./utils.js";
+
+const logCompile = buildCompileLogger();
 
 export const buildGetData = ({ getTaskDaoForId, dataApi }) =>
   async ({ auth, authToken, ids }) => {
@@ -27,6 +30,7 @@ export const buildGetData = ({ getTaskDaoForId, dataApi }) =>
     } else {
       data = objs[0];
     }
+    logCompile({ token: authToken, id: ids.join(" "), status: "success", timestamp: "" + Date.now(), data });
     return data;
   };
 
@@ -37,9 +41,7 @@ const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
     const auth = req.auth.context;
     const authToken = parseAuthFromRequest(req);
     const ids = parseIdsFromRequest(req);
-
     const data = await getData({ auth, authToken, ids });
-
     res.status(200).json(createSuccessResponse(data));
   });
 };

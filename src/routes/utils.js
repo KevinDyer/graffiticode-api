@@ -105,6 +105,9 @@ export const buildCompileLogger = () => {
   const headers = {};
   const client = new GraphQLClient(endpoint, { headers });
   return ({ token, id, status, timestamp, data }) => {
+    if (!token) {
+      return;
+    }
     const query = gql`
     mutation post ($token: String!, $id: String!, $status: String!, $timestamp: String!, $data: String!) {
       logCompile(token: $token, id: $id, status: $status, timestamp: $timestamp, data: $data)

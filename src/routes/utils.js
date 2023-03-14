@@ -97,10 +97,11 @@ export const optionsHandler = buildHttpHandler(async (req, res) => {
 });
 
 export const buildCompileLogger = () => {
-  const protocol = "http"; // FIXME
   const host = getClientHost();
   const port = getClientPort();
+  const protocol = host.indexOf("localhost") >= 0 && "http" || "https";
   const endpoint = `${protocol}://${host}:${port}/api`;
+  console.log("buildCompileLogger() endpoint=" + endpoint);
   const headers = {};
   const client = new GraphQLClient(endpoint, { headers });
   return ({ token, id, status, timestamp, data }) => {

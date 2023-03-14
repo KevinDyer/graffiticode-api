@@ -8,7 +8,7 @@ import {
   parseIdsFromRequest,
   parseAuthFromRequest,
   optionsHandler,
-  buildCompileLogger,
+  buildCompileLogger
 } from "./utils.js";
 
 const logCompile = buildCompileLogger();

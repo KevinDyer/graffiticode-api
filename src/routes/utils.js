@@ -1,7 +1,7 @@
 import { isNonEmptyString, getClientHost, getClientPort } from "../util.js";
 import { HttpError } from "./../errors/http.js";
 import { decodeID } from "./../id.js";
-import { gql, GraphQLClient } from 'graphql-request'
+import { gql, GraphQLClient } from "graphql-request";
 
 export const parseIdsFromRequest = req => {
   const id = req.query.id;
@@ -102,13 +102,13 @@ export const buildCompileLogger = () => {
   const port = getClientPort();
   const endpoint = `${protocol}://${host}:${port}/api`;
   const headers = {};
-  const client = new GraphQLClient(endpoint, { headers })
+  const client = new GraphQLClient(endpoint, { headers });
   return ({ token, id, status, timestamp, data }) => {
     const query = gql`
     mutation post ($token: String!, $id: String!, $status: String!, $timestamp: String!, $data: String!) {
       logCompile(token: $token, id: $id, status: $status, timestamp: $timestamp, data: $data)
     }
   `;
-    client.request(query, { token, id, status, timestamp, data: JSON.stringify(data) }).then((data) => console.log(data))
+    client.request(query, { token, id, status, timestamp, data: JSON.stringify(data) }).then((data) => console.log(data));
   };
 };

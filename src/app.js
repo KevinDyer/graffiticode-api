@@ -27,7 +27,6 @@ EventEmitter.defaultMaxListeners = 15;
 global.config = require(process.env.CONFIG || "./../config/config.json");
 global.config.useLocalCompiles = process.env.LOCAL_COMPILES === "true";
 
-console.log("useLocalCompiles=" + global.config.useLocalCompiles);
 const env = process.env.NODE_ENV || "development";
 
 export const createApp = ({ authUrl } = {}) => {

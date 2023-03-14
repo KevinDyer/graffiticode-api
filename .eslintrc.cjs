@@ -20,7 +20,7 @@ module.exports = {
       'anonymous': 'always',
       'named': 'never',
     }],
-    'import/no-unresolved': 2,
+    'import/no-unresolved': 0,  // this gives a false positive with 'graphql-request'
     'import/no-commonjs': 2,
     'import/extensions': [2, 'ignorePackages'],
     'no-mixed-operators': 0,

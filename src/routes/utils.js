@@ -97,20 +97,19 @@ export const optionsHandler = buildHttpHandler(async (req, res) => {
 });
 
 export const buildCompileLogger = () => {
-  const host = "localhost"; //getClientHost();
-  const port = "3000"; //getClientPort();
+  const host = getClientHost();
+  const port = getClientPort();
   const protocol = host.indexOf("localhost") >= 0 && "http" || "https";
   const endpoint = `${protocol}://${host}:${port}/api`;
   console.log("buildCompileLogger() endpoint=" + endpoint);
-  const headers = {};
   return ({ token, id, status, timestamp, data }) => {
     if (!token) {
       return;
     }
     const client = new GraphQLClient(endpoint, {
       headers: {
-        "Authorization": token,
-      },
+        Authorization: token
+      }
     });
     const query = gql`
     mutation post ($id: String!, $status: String!, $timestamp: String!, $data: String!) {

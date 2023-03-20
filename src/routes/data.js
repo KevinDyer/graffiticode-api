@@ -30,7 +30,13 @@ export const buildGetData = ({ getTaskDaoForId, dataApi }) =>
     } else {
       data = objs[0];
     }
-    logCompile({ token: authToken, id: ids.join(" "), status: "success", timestamp: "" + Date.now(), data });
+    logCompile({
+      token: authToken,
+      id: ids.join(" "),
+      status: "success",
+      timestamp: String(Date.now()),
+      data
+    });
     return data;
   };
 

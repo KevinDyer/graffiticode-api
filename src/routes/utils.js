@@ -97,22 +97,26 @@ export const optionsHandler = buildHttpHandler(async (req, res) => {
 });
 
 export const buildCompileLogger = () => {
-  const host = getClientHost();
-  const port = getClientPort();
+  const host = "localhost"; //getClientHost();
+  const port = "3000"; //getClientPort();
   const protocol = host.indexOf("localhost") >= 0 && "http" || "https";
   const endpoint = `${protocol}://${host}:${port}/api`;
   console.log("buildCompileLogger() endpoint=" + endpoint);
   const headers = {};
-  const client = new GraphQLClient(endpoint, { headers });
   return ({ token, id, status, timestamp, data }) => {
     if (!token) {
       return;
     }
+    const client = new GraphQLClient(endpoint, {
+      headers: {
+        "Authorization": token,
+      },
+    });
     const query = gql`
-    mutation post ($token: String!, $id: String!, $status: String!, $timestamp: String!, $data: String!) {
-      logCompile(token: $token, id: $id, status: $status, timestamp: $timestamp, data: $data)
+    mutation post ($id: String!, $status: String!, $timestamp: String!, $data: String!) {
+      logCompile(id: $id, status: $status, timestamp: $timestamp, data: $data)
     }
   `;
-    client.request(query, { token, id, status, timestamp, data: JSON.stringify(data) }).then((data) => console.log(data));
+    client.request(query, { id, status, timestamp, data: JSON.stringify(data) }).then((data) => console.log(data));
   };
 };

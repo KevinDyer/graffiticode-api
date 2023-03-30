@@ -11,10 +11,9 @@ import {
   buildCompileLogger
 } from "./utils.js";
 
-const logCompile = buildCompileLogger();
-
-export const buildGetData = ({ getTaskDaoForId, dataApi }) =>
-  async ({ auth, authToken, ids }) => {
+export const buildGetData = ({ getTaskDaoForId, dataApi }) => {
+  const logCompile = buildCompileLogger();
+  return async ({ auth, authToken, ids }) => {
     if (ids.length < 1) {
       throw new InvalidArgumentError("must provide at least one id");
     }
@@ -30,6 +29,7 @@ export const buildGetData = ({ getTaskDaoForId, dataApi }) =>
     } else {
       data = objs[0];
     }
+    console.log("getData() data=" + JSON.stringify(data, null, 2));
     logCompile({
       token: authToken,
       id: ids.join(" "),
@@ -39,6 +39,7 @@ export const buildGetData = ({ getTaskDaoForId, dataApi }) =>
     });
     return data;
   };
+};
 
 const buildGetDataHandler = ({ taskDaoFactory, dataApi }) => {
   const getTaskDaoForId = buildGetTaskDaoForId(taskDaoFactory);

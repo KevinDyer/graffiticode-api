@@ -116,6 +116,7 @@ export const buildCompileLogger = () => {
       logCompile(id: $id, status: $status, timestamp: $timestamp, data: $data)
     }
   `;
+    console.log("logCompile() data=" + JSON.stringify(data, null, 2));
     client.request(query, { id, status, timestamp, data: JSON.stringify(data) }).then((data) => console.log(data));
   };
 };
